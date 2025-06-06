@@ -1,0 +1,20 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Hintergrund mit abgerundeten Ecken -->
+  <rect width="64" height="64" rx="12" fill="#4338CA"/>
+  
+  <!-- Datenbank-Symbol -->
+  <!-- Oberste Scheibe -->
+  <ellipse cx="32" cy="20" rx="16" ry="6" fill="#A5B4FC"/>
+  
+  <!-- Zylinder-Körper -->
+  <path d="M16 20 V 44 A 16 6 0 0 0 32 50 A 16 6 0 0 0 48 44 V 20 A 16 6 0 0 1 32 26 A 16 6 0 0 1 16 20 Z" fill="#818CF8"/>
+  
+  <!-- Mittlere Scheibe (sichtbarer Teil) -->
+  <ellipse cx="32" cy="32" rx="16" ry="6" fill="#A5B4FC"/>
+  
+  <!-- Unterste Scheibe (sichtbarer Teil) -->
+  <ellipse cx="32" cy="44" rx="16" ry="6" fill="#A5B4FC"/>
+  
+  <!-- Glanzlicht auf der obersten Scheibe -->
+  <path d="M22 18 C 26 16, 38 16, 42 18" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.7"/>
+</svg>
