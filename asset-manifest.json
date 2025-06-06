@@ -1,10 +1,13 @@
 {
   "files": {
-    "main.js": "/datenplaner-v2/static/js/main.5e330978.js",
+    "main.css": "/datenplaner-v2/static/css/main.a5e798f6.css",
+    "main.js": "/datenplaner-v2/static/js/main.aaa58695.js",
     "index.html": "/datenplaner-v2/index.html",
-    "main.5e330978.js.map": "/datenplaner-v2/static/js/main.5e330978.js.map"
+    "main.a5e798f6.css.map": "/datenplaner-v2/static/css/main.a5e798f6.css.map",
+    "main.aaa58695.js.map": "/datenplaner-v2/static/js/main.aaa58695.js.map"
   },
   "entrypoints": [
-    "static/js/main.5e330978.js"
+    "static/css/main.a5e798f6.css",
+    "static/js/main.aaa58695.js"
   ]
 }
