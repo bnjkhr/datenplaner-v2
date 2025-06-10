@@ -4,8 +4,27 @@ import { useData } from '../context/DataProvider';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 import { TagInput } from '../components/ui/TagInput';
 
+// --- Helper-Funktion für konsistente Tag-Farben ---
+const tagColors = [
+  '#FECACA', '#FED7AA', '#FDE68A', '#D9F99D', '#A7F3D0', '#A5F3FC', 
+  '#A5B4FC', '#C4B5FD', '#F5D0FE', '#FECDD3', '#FBCFE8', '#BFDBFE',
+  '#B4E4D6', '#FDECC8', '#E4D8F9'
+];
+
+const getSkillColor = (skillName) => {
+  let hash = 0;
+  for (let i = 0; i < skillName.length; i++) {
+    hash = skillName.charCodeAt(i) + ((hash << 5) - hash);
+    hash = hash & hash;
+  }
+  const index = Math.abs(hash % tagColors.length);
+  return tagColors[index];
+};
+
+
 const PersonFormular = ({ personToEdit, onFormClose }) => {
   const { fuegePersonHinzu, aktualisierePerson, skills: allSkills, fuegeSkillHinzu, error: globalError, setError } = useData();
+  
   const [name, setName] = useState(personToEdit?.name || '');
   const [email, setEmail] = useState(personToEdit?.email || '');
   const [skillIds, setSkillIds] = useState(personToEdit?.skillIds || []);
@@ -20,7 +39,7 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
 
   const validateForm = () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email.trim())) { setValidationError('Bitte eine gültige E-Mail-Adresse eingeben.'); return false; }
+    if (!email.trim() || !emailRegex.test(email.trim())) { setValidationError('Bitte eine gültige E-Mail-Adresse eingeben.'); return false; }
     if (name.trim().length < 2 || name.trim().length > 50) { setValidationError('Der Name muss zwischen 2 und 50 Zeichen lang sein.'); return false; }
     return true;
   };
@@ -28,30 +47,26 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
   const handleSubmit = async (event) => {
     event.preventDefault(); 
     setValidationError('');
-    setError(null); // Globalen Fehler zurücksetzen
+    setError(null);
 
     if (!validateForm()) { return; }
-
+    
     const finalMsTeamsLink = msTeamsEmail.trim() ? `msteams:/l/chat/0/0?users=${msTeamsEmail.trim()}` : '';
     const personData = { name: name.trim(), email: email.trim(), skillIds, msTeamsLink: finalMsTeamsLink };
     
-    let result = null;
-    if (personToEdit && personToEdit.id) { 
-        result = await aktualisierePerson(personToEdit.id, personData); 
-    } else { 
-        result = await fuegePersonHinzu(personData); 
+    const success = personToEdit 
+      ? await aktualisierePerson(personToEdit.id, personData) 
+      : await fuegePersonHinzu(personData);
+      
+    if (success) { 
+        onFormClose?.(); 
     }
-
-    if (result) {
-      onFormClose?.(); 
-    } 
-    // Der Fehler wird jetzt im DataProvider gesetzt und hier angezeigt.
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 p-6 bg-white rounded-lg">
       <h2 className="text-2xl font-semibold text-gray-700 mb-6">{personToEdit ? 'Person bearbeiten' : 'Neue Person hinzufügen'}</h2>
-      {(validationError || globalError) && <p className="text-sm text-red-500 mb-4">{validationError || globalError}</p>}
+      {(validationError || globalError) && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">{validationError || globalError}</div>}
       <div><label htmlFor="person-name" className="block text-sm font-medium text-gray-700">Name</label><input id="person-name" type="text" value={name} onChange={e => setName(e.target.value)} required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"/></div>
       <div><label htmlFor="person-email" className="block text-sm font-medium text-gray-700">E-Mail</label><input id="person-email" type="email" value={email} onChange={e => setEmail(e.target.value)} required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"/></div>
       <div><label htmlFor="msTeamsEmail" className="block text-sm font-medium text-gray-700">MS Teams E-Mail</label><input id="msTeamsEmail" type="email" value={msTeamsEmail} onChange={e => setMsTeamsEmail(e.target.value)} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"/><p className="mt-1 text-xs text-gray-500">Für den Chat-Link.</p></div>
