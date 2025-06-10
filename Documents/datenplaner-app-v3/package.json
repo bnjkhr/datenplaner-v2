@@ -2,7 +2,6 @@
   "name": "datenplaner-app-v3",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://bnjkhr.github.io/datenplaner-v2",
   "dependencies": {
     "firebase": "^9.6.1",
     "react": "^18.2.0",
@@ -15,9 +14,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d build -r https://github.com/bnjkhr/datenplaner-v2.git"
+    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": [
