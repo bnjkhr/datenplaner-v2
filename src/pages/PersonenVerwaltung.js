@@ -77,7 +77,8 @@ const PersonFormular = ({ personToEdit, onFormClose, allSkills }) => {
       <div><label htmlFor="msTeamsEmail" className="block text-sm font-medium text-gray-700">MS Teams E-Mail (für Chat-Link)</label><input id="msTeamsEmail" type="email" value={msTeamsEmail} onChange={e => setMsTeamsEmail(e.target.value)} placeholder="max.mustermann@firma.de" className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"/><p className="mt-1 text-xs text-gray-500">Aus dieser E-Mail wird der MS Teams Chat-Link generiert.</p></div>
       <div>
         <label className="block text-sm font-medium text-gray-700">Skills</label>
-        <TagInput tags={skills} setTags={setTags} allSkills={allSkills} placeholder="Skill hinzufügen oder auswählen..." />
+        {/* HIER IST DIE KORREKTUR: setTags={setSkills} anstatt setTags={setTags} */}
+        <TagInput tags={skills} setTags={setSkills} allSkills={allSkills} placeholder="Skill hinzufügen oder auswählen..." />
       </div>
       <div className="flex justify-end space-x-3 pt-4">{onFormClose && (<button type="button" onClick={onFormClose} className="px-4 py-2 border rounded-md text-sm">Abbrechen</button>)}<button type="submit" className="px-4 py-2 bg-indigo-600 text-white rounded-md shadow-sm hover:bg-indigo-700">{personToEdit ? 'Speichern' : 'Hinzufügen'}</button></div>
     </form>
