@@ -68,7 +68,6 @@ export const DatenproduktVerwaltung = () => {
   const getPersonName = (personId) => personen.find(p => p.id === personId)?.name || '...';
   const getRolleName = (rolleId) => rollen.find(r => r.id === rolleId)?.name || '...';
 
-  // --- NEU: Personen für die Dropdown-Auswahl alphabetisch sortieren ---
   const sortedPersonen = [...personen].sort((a, b) => a.name.localeCompare(b.name, 'de'));
 
   if (loading) return <div className="flex justify-center py-10"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div></div>;
