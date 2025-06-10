@@ -1,26 +1,26 @@
 {
-  "name": "datenprodukt-planer-app",
-  "version": "1.0.0",
-  "homepage": "https://bnjkhr.github.io/datenplaner-v2",
-  "description": "",
-  "main": "index.js",
+  "name": "datenplaner-app-v3",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "firebase": "^9.6.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "5.0.1",
+    "recharts": "^2.15.3",
+    "uuid": "^8.3.2"
+  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d build -r https://github.com/bnjkhr/datenplaner-v2.git"
+    "eject": "react-scripts eject"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "firebase": "^11.9.0",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "react-scripts": "^5.0.1",
-    "uuid": "^11.1.0"
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
   },
   "browserslist": {
     "production": [
@@ -35,6 +35,9 @@
     ]
   },
   "devDependencies": {
-    "gh-pages": "^6.3.0"
+    "autoprefixer": "^10.4.19",
+    "gh-pages": "^6.3.0",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.4"
   }
 }
