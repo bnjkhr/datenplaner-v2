@@ -17,7 +17,6 @@ import {
 export const DataContext = createContext();
 export const useData = () => useContext(DataContext);
 
-// Diese Liste dient jetzt als Vorlage für die erstmalige Befüllung der Datenbank.
 const initialRollenSeed = [
   { name: 'Datenprodukt-Owner (DPO)' },
   { name: 'Facilitator' },
@@ -48,12 +47,9 @@ export const DataProvider = ({ children }) => {
   const getZuordnungenCollectionPath = useCallback(() => `${sharedDataPath}/zuordnungen`, []);
   const getRollenCollectionPath = useCallback(() => `${sharedDataPath}/rollen`, []);
 
-  // Effekt, der die initialen Rollen in die DB schreibt, falls sie leer ist
   useEffect(() => {
     if (hasSeededRoles.current) return;
-    
     const rollenCollectionRef = collection(db, getRollenCollectionPath());
-
     const seedRoles = async () => {
       const snapshot = await getDocs(rollenCollectionRef);
       if (snapshot.empty) {
@@ -68,12 +64,9 @@ export const DataProvider = ({ children }) => {
       }
       hasSeededRoles.current = true;
     };
-
     seedRoles().catch(console.error);
   }, [getRollenCollectionPath]);
 
-
-  // Firestore Listeners
   useEffect(() => {
     setLoading(true);
     setError(null); 
@@ -91,112 +84,74 @@ export const DataProvider = ({ children }) => {
     const setupListener = (path, setter) => {
       const q = query(collection(db, path));
       const unsubscribe = onSnapshot(q, (snapshot) => {
-        setter(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        setter(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a,b) => a.name?.localeCompare(b.name)));
         checkAllLoaded();
       }, (err) => {
         console.error(`Error at ${path}:`, err);
-        setError(`Fehler beim Laden von Daten. Firestore-Regeln prüfen.`);
+        setError(`Fehler: ${err.code}. Stellen Sie sicher, dass Ihre Firestore-Regeln korrekt sind.`);
         setLoading(false);
       });
       unsubscribes.push(unsubscribe);
     };
 
-    // --- GEÄNDERT: Eigener Listener für Rollen, um die Sortierung zu garantieren ---
-    const setupRollenListener = () => {
-        const q = query(collection(db, getRollenCollectionPath()));
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            // Alphabetische Sortierung nach dem Namen
-            data.sort((a, b) => a.name.localeCompare(b.name, 'de', { sensitivity: 'base' }));
-            setRollen(data);
-            checkAllLoaded();
-        }, (err) => {
-            console.error(`Error at ${getRollenCollectionPath()}:`, err);
-            setError(`Fehler beim Laden von Daten. Firestore-Regeln prüfen.`);
-            setLoading(false);
-        });
-        unsubscribes.push(unsubscribe);
-    };
-
-
     setupListener(getPersonenCollectionPath(), setPersonen);
     setupListener(getDatenprodukteCollectionPath(), setDatenprodukte);
     setupListener(getZuordnungenCollectionPath(), setZuordnungen);
-    setupRollenListener(); // Der neue, spezielle Listener für Rollen
+    setupListener(getRollenCollectionPath(), setRollen);
 
     return () => unsubscribes.forEach(unsub => unsub());
   }, [getPersonenCollectionPath, getDatenprodukteCollectionPath, getZuordnungenCollectionPath, getRollenCollectionPath]);
 
-  // --- CRUD-Funktionen für Rollen ---
-  const fuegeRolleHinzu = async (rollenName) => {
-    if (!rollenName || !rollenName.trim()) return null;
+  // --- CRUD-Funktionen mit detailliertem Error-Handling ---
+  const fuegePersonHinzu = async (personDaten) => {
     try {
-      const docRef = await addDoc(collection(db, getRollenCollectionPath()), { name: rollenName.trim() });
+      const docRef = await addDoc(collection(db, getPersonenCollectionPath()), {
+        ...personDaten, erstelltAm: new Date().toISOString(), letzteAenderung: new Date().toISOString(),
+      });
       return docRef.id;
-    } catch (e) { console.error("Error adding role: ", e); setError("Fehler beim Hinzufügen der Rolle."); return null; }
+    } catch (e) {
+      console.error("Error adding person: ", e);
+      setError(`Speicherfehler: ${e.code || e.message}`);
+      return null;
+    }
   };
 
-  const aktualisiereRolle = async (rolleId, rollenName) => {
-    if (!rollenName || !rollenName.trim()) return false;
+  const aktualisierePerson = async (personId, neueDaten) => {
     try {
-      const rolleDocRef = doc(db, getRollenCollectionPath(), rolleId);
-      await updateDoc(rolleDocRef, { name: rollenName.trim() });
+      const personDocRef = doc(db, getPersonenCollectionPath(), personId);
+      await updateDoc(personDocRef, { ...neueDaten, letzteAenderung: new Date().toISOString() });
       return true;
-    } catch (e) { console.error("Error updating role: ", e); setError("Fehler beim Aktualisieren der Rolle."); return false; }
+    } catch (e) {
+      console.error("Error updating person: ", e);
+      setError(`Update-Fehler: ${e.code || e.message}`);
+      return false;
+    }
   };
-
+  
   const loescheRolle = async (rolleId) => {
     const isRoleInUse = zuordnungen.some(z => z.rolleId === rolleId);
     if (isRoleInUse) {
         setError("Diese Rolle wird noch verwendet und kann nicht gelöscht werden.");
-        setTimeout(() => setError(null), 3000); // Fehler nach 3s ausblenden
+        setTimeout(() => setError(null), 3000);
         return false;
     }
     try {
       await deleteDoc(doc(db, getRollenCollectionPath(), rolleId));
       return true;
-    } catch (e) { console.error("Error deleting role: ", e); setError("Fehler beim Löschen der Rolle."); return false; }
+    } catch (e) { console.error("Error deleting role: ", e); setError(`Löschfehler: ${e.code || e.message}`); return false; }
   };
-
-  // --- CRUD-Funktionen für Zuweisungen (mit besserem Error-Handling) ---
-  const weisePersonDatenproduktRolleZu = async (personId, produktId, rolleId) => {
-    setError(null); 
-    const existingAssignment = zuordnungen.find(
-        z => z.personId === personId && z.datenproduktId === produktId && z.rolleId === rolleId
-    );
-    if (existingAssignment) {
-        console.warn("Assignment already exists:", personId, produktId, rolleId);
-        setError("Diese Person hat diese Rolle in diesem Datenprodukt bereits.");
-        setTimeout(() => setError(null), 3000);
-        return null;
-    }
-    try {
-        const docRef = await addDoc(collection(db, getZuordnungenCollectionPath()), {
-            personId, datenproduktId: produktId, rolleId, erstelltAm: new Date().toISOString(),
-        });
-        return docRef.id;
-    } catch (e) { 
-        console.error("Error assigning role: ", e); 
-        setError("Fehler bei der Rollenzuweisung. Bitte die Konsole prüfen."); 
-        return null; 
-    }
-  };
-
-  const entfernePersonVonDatenproduktRolle = async (zuordnungId) => {
-    try {
-        await deleteDoc(doc(db, getZuordnungenCollectionPath(), zuordnungId));
-        return true;
-    } catch (e) { console.error("Error removing role assignment: ", e); setError("Fehler beim Entfernen der Rollenzuweisung."); return false; }
-  };
-
-  // --- Bestehende CRUD-Funktionen (bleiben unverändert) ---
-  const fuegePersonHinzu = async (personDaten) => { /* ... */ };
-  const aktualisierePerson = async (personId, neueDaten) => { /* ... */ };
-  const loeschePerson = async (personId) => { /* ... */ };
-  const erstelleDatenprodukt = async (produktDaten) => { /* ... */ };
-  const aktualisiereDatenprodukt = async (produktId, neueDaten) => { /* ... */ };
-  const loescheDatenprodukt = async (produktId) => { /* ... */ };
   
+  // ... (Die anderen CRUD-Funktionen sollten ähnlich angepasst werden, um e.code und e.message im Fehlerfall zu setzen)
+  const loeschePerson = async (personId) => { try { const assignmentsQuery = query(collection(db, getZuordnungenCollectionPath()), where("personId", "==", personId)); const assignmentSnapshot = await getDocs(assignmentsQuery); const batch = []; assignmentSnapshot.forEach(doc => { batch.push(deleteDoc(doc.ref)); }); await Promise.all(batch); await deleteDoc(doc(db, getPersonenCollectionPath(), personId)); return true; } catch (e) { console.error("Error deleting person: ", e); setError(`Löschfehler: ${e.code || e.message}`); return false; } };
+  const fuegeRolleHinzu = async (rollenName) => { if (!rollenName?.trim()) return null; try { const docRef = await addDoc(collection(db, getRollenCollectionPath()), { name: rollenName.trim() }); return docRef.id; } catch (e) { console.error("Error adding role: ", e); setError(`Speicherfehler: ${e.code || e.message}`); return null; } };
+  const aktualisiereRolle = async (rolleId, rollenName) => { if (!rollenName?.trim()) return false; try { const rolleDocRef = doc(db, getRollenCollectionPath(), rolleId); await updateDoc(rolleDocRef, { name: rollenName.trim() }); return true; } catch (e) { console.error("Error updating role: ", e); setError(`Update-Fehler: ${e.code || e.message}`); return false; } };
+  const erstelleDatenprodukt = async (produktDaten) => { try { const docRef = await addDoc(collection(db, getDatenprodukteCollectionPath()), { ...produktDaten, erstelltAm: new Date().toISOString(), letzteAenderung: new Date().toISOString(), }); return docRef.id; } catch (e) { console.error("Error adding datenprodukt: ", e); setError(`Speicherfehler: ${e.code || e.message}`); return null; } };
+  const aktualisiereDatenprodukt = async (produktId, neueDaten) => { try { const produktDocRef = doc(db, getDatenprodukteCollectionPath(), produktId); await updateDoc(produktDocRef, { ...neueDaten, letzteAenderung: new Date().toISOString(), }); return true; } catch (e) { console.error("Error updating datenprodukt: ", e); setError(`Update-Fehler: ${e.code || e.message}`); return false; } };
+  const loescheDatenprodukt = async (produktId) => { try { const assignmentsQuery = query(collection(db, getZuordnungenCollectionPath()), where("datenproduktId", "==", produktId)); const assignmentSnapshot = await getDocs(assignmentsQuery); const batch = []; assignmentSnapshot.forEach(doc => { batch.push(deleteDoc(doc.ref)); }); await Promise.all(batch); await deleteDoc(doc(db, getDatenprodukteCollectionPath(), produktId)); return true; } catch (e) { console.error("Error deleting datenprodukt: ", e); setError(`Löschfehler: ${e.code || e.message}`); return false; } };
+  const weisePersonDatenproduktRolleZu = async (personId, produktId, rolleId) => { setError(null); const existingAssignment = zuordnungen.find( z => z.personId === personId && z.datenproduktId === produktId && z.rolleId === rolleId ); if (existingAssignment) { setError("Diese Person hat diese Rolle bereits."); setTimeout(() => setError(null), 3000); return null; } try { const docRef = await addDoc(collection(db, getZuordnungenCollectionPath()), { personId, datenproduktId: produktId, rolleId, erstelltAm: new Date().toISOString(), }); return docRef.id; } catch (e) { console.error("Error assigning role: ", e); setError(`Zuweisungsfehler: ${e.code || e.message}`); return null; } };
+  const entfernePersonVonDatenproduktRolle = async (zuordnungId) => { try { await deleteDoc(doc(db, getZuordnungenCollectionPath(), zuordnungId)); return true; } catch (e) { console.error("Error removing role assignment: ", e); setError(`Löschfehler: ${e.code || e.message}`); return false; } };
+
+
   return (
     <DataContext.Provider value={{
       personen, datenprodukte, rollen, zuordnungen,
