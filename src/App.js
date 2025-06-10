@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebase/config';
 import { DataProvider } from './context/DataProvider';
-import { AuthPage } from './pages/AuthPage';
+import AuthPage from './pages/AuthPage';
 import { MainAppContent } from './MainAppContent';
 
 function App() {

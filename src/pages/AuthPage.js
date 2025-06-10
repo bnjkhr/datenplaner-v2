@@ -1,27 +1,80 @@
-// src/pages/AuthPage.js
 import React, { useState } from 'react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase/config';
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 
-export const AuthPage = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
+const AuthPage = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [resetMode, setResetMode] = useState(false);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
 
-    const handleLogin = async (e) => {
-        e.preventDefault(); setLoading(true); setError('');
-        try { await signInWithEmailAndPassword(auth, email, password); } 
-        catch (err) {
-            let userFriendlyError = "Anmeldung fehlgeschlagen. Bitte überprüfen Sie E-Mail und Passwort.";
-            if (err.code !== 'auth/user-not-found' && err.code !== 'auth/wrong-password' && err.code !== 'auth/invalid-credential') {
-                 userFriendlyError = err.message;
-            }
-            setError(userFriendlyError);
-        } finally { setLoading(false); }
-    };
+  const handleLogin = async () => {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (err) {
+      setError(err.message);
+      setMessage('');
+    }
+  };
 
-    return ( <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4"><div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md"><h1 className="text-3xl font-bold text-indigo-700 mb-6 text-center">Datenprodukt Planer</h1><h2 className="text-xl text-gray-700 mb-6 text-center">Anmelden</h2><form onSubmit={handleLogin} className="space-y-6"><div><label htmlFor="auth-email" className="block text-sm font-medium text-gray-700">E-Mail Adresse</label><input id="auth-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" placeholder="deine.email@firma.de"/></div><div><label htmlFor="auth-password" className="block text-sm font-medium text-gray-700">Passwort</label><input id="auth-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" placeholder="Passwort"/></div>{error && <p className="text-sm text-red-500 text-center">{error}</p>}<div><button type="submit" disabled={loading} className="w-full flex justify-center py-3 px-4 border rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300">{loading ? 'Bitte warten...' : 'Anmelden'}</button></div></form><p className="mt-8 text-xs text-gray-500 text-center">Benutzerkonten werden vom Administrator in der Firebase Console erstellt.</p></div></div> );
+  const handlePasswordReset = async () => {
+    try {
+      await sendPasswordResetEmail(auth, email);
+      setMessage('Passwort-Zurücksetzungs-E-Mail gesendet!');
+      setError('');
+    } catch (err) {
+      setError(err.message);
+      setMessage('');
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="w-full max-w-md p-8 bg-white rounded-2xl shadow-lg">
+        <h2 className="text-2xl font-bold mb-6 text-center">{resetMode ? 'Passwort vergessen' : 'Login'}</h2>
+
+        <input
+          type="email"
+          placeholder="E-Mail"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full mb-4 p-3 border rounded-lg"
+        />
+
+        {!resetMode && (
+          <input
+            type="password"
+            placeholder="Passwort"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full mb-4 p-3 border rounded-lg"
+          />
+        )}
+
+        <button
+          onClick={resetMode ? handlePasswordReset : handleLogin}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition"
+        >
+          {resetMode ? 'Zurücksetzen' : 'Login'}
+        </button>
+
+        <p
+          className="mt-5 text-sm text-blue-600 text-center cursor-pointer underline"
+          onClick={() => {
+            setResetMode(!resetMode);
+            setMessage('');
+            setError('');
+          }}
+        >
+          {resetMode ? 'Zurück zum Login' : 'Passwort vergessen?'}
+        </p>
+
+        {message && <p className="mt-4 text-green-600 text-center">{message}</p>}
+        {error && <p className="mt-4 text-red-600 text-center">{error}</p>}
+      </div>
+    </div>
+  );
 };
 
-// ==========================================================
+export default AuthPage;
