@@ -1,33 +1,29 @@
 // src/pages/PersonenVerwaltung.js
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useData } from '../context/DataProvider';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 import { TagInput } from '../components/ui/TagInput';
 
 // --- VERBESSERT: Helper-Funktion für konsistente Tag-Farben ---
 const tagColors = [
-  'bg-red-200 text-red-800 hover:bg-red-300', 'bg-orange-200 text-orange-800 hover:bg-orange-300',
-  'bg-amber-200 text-amber-800 hover:bg-amber-300', 'bg-yellow-200 text-yellow-800 hover:bg-yellow-300',
-  'bg-lime-200 text-lime-800 hover:bg-lime-300', 'bg-green-200 text-green-800 hover:bg-green-300',
-  'bg-emerald-200 text-emerald-800 hover:bg-emerald-300', 'bg-teal-200 text-teal-800 hover:bg-teal-300',
-  'bg-cyan-200 text-cyan-800 hover:bg-cyan-300', 'bg-sky-200 text-sky-800 hover:bg-sky-300',
-  'bg-blue-200 text-blue-800 hover:bg-blue-300', 'bg-indigo-200 text-indigo-800 hover:bg-indigo-300',
-  'bg-violet-200 text-violet-800 hover:bg-violet-300', 'bg-purple-200 text-purple-800 hover:bg-purple-300',
-  'bg-fuchsia-200 text-fuchsia-800 hover:bg-fuchsia-300', 'bg-pink-200 text-pink-800 hover:bg-pink-300',
-  'bg-rose-200 text-rose-800 hover:bg-rose-300'
+  'bg-red-200 text-red-800', 'bg-orange-200 text-orange-800', 'bg-amber-200 text-amber-800', 
+  'bg-yellow-200 text-yellow-800', 'bg-lime-200 text-lime-800', 'bg-green-200 text-green-800',
+  'bg-emerald-200 text-emerald-800', 'bg-teal-200 text-teal-800', 'bg-cyan-200 text-cyan-800', 
+  'bg-sky-200 text-sky-800', 'bg-blue-200 text-blue-800', 'bg-indigo-200 text-indigo-800',
+  'bg-violet-200 text-violet-800', 'bg-purple-200 text-purple-800', 'bg-fuchsia-200 text-fuchsia-800',
+  'bg-pink-200 text-pink-800', 'bg-rose-200 text-rose-800'
 ];
 
 const getSkillColor = (skill) => {
   let hash = 0;
   for (let i = 0; i < skill.length; i++) {
     hash = skill.charCodeAt(i) + ((hash << 5) - hash);
-    hash = hash & hash; 
+    hash = hash & hash; // Bitwise AND to keep it a 32bit integer
   }
   const index = Math.abs(hash % tagColors.length);
   return tagColors[index];
 };
 
-// --- Die Unterkomponenten bleiben hier, um die Struktur beizubehalten ---
 
 const PersonFormular = ({ personToEdit, onFormClose, allSkills }) => {
   const { fuegePersonHinzu, aktualisierePerson } = useData();
@@ -81,8 +77,7 @@ const PersonFormular = ({ personToEdit, onFormClose, allSkills }) => {
       <div><label htmlFor="msTeamsEmail" className="block text-sm font-medium text-gray-700">MS Teams E-Mail (für Chat-Link)</label><input id="msTeamsEmail" type="email" value={msTeamsEmail} onChange={e => setMsTeamsEmail(e.target.value)} placeholder="max.mustermann@firma.de" className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"/><p className="mt-1 text-xs text-gray-500">Aus dieser E-Mail wird der MS Teams Chat-Link generiert.</p></div>
       <div>
         <label className="block text-sm font-medium text-gray-700">Skills</label>
-        {/* NEU: Übergabe aller Skills für die Vorschläge */}
-        <TagInput tags={skills} setTags={setSkills} allSkills={allSkills} placeholder="Skill hinzufügen oder auswählen..." />
+        <TagInput tags={skills} setTags={setTags} allSkills={allSkills} placeholder="Skill hinzufügen oder auswählen..." />
       </div>
       <div className="flex justify-end space-x-3 pt-4">{onFormClose && (<button type="button" onClick={onFormClose} className="px-4 py-2 border rounded-md text-sm">Abbrechen</button>)}<button type="submit" className="px-4 py-2 bg-indigo-600 text-white rounded-md shadow-sm hover:bg-indigo-700">{personToEdit ? 'Speichern' : 'Hinzufügen'}</button></div>
     </form>
@@ -126,7 +121,6 @@ export const PersonenVerwaltung = () => {
   const { personen, loeschePerson } = useData(); 
   const [skillSearchTerm, setSkillSearchTerm] = useState('');
 
-  // --- NEU: Liste aller einzigartigen Skills für die Vorschläge ---
   const allUniqueSkills = [...new Set(personen.flatMap(p => p.skills || []))].sort((a,b) => a.localeCompare(b));
 
   const handleAddNewPerson = () => { setEditingPerson(null); setShowForm(true); };
@@ -154,7 +148,6 @@ export const PersonenVerwaltung = () => {
         {showForm && (
             <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-40 p-4" onClick={handleFormClose}>
                 <div className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-                    {/* NEU: Übergabe aller Skills */}
                     <PersonFormular personToEdit={editingPerson} onFormClose={handleFormClose} allSkills={allUniqueSkills} />
                 </div>
             </div>
