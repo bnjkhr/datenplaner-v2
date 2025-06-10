@@ -5,7 +5,8 @@ import { ConfirmModal } from '../components/ui/ConfirmModal';
 import { TagInput } from '../components/ui/TagInput';
 
 const PersonFormular = ({ personToEdit, onFormClose }) => {
-  const { fuegePersonHinzu, aktualisierePerson, skills: allSkills } = useData();
+  // NEU: fuegeSkillHinzu wird aus dem Context geholt
+  const { fuegePersonHinzu, aktualisierePerson, skills: allSkills, fuegeSkillHinzu } = useData();
   const [name, setName] = useState(personToEdit?.name || '');
   const [email, setEmail] = useState(personToEdit?.email || '');
   const [skillIds, setSkillIds] = useState(personToEdit?.skillIds || []);
@@ -37,7 +38,8 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
       <div><label htmlFor="msTeamsEmail" className="block text-sm font-medium text-gray-700">MS Teams E-Mail (für Chat-Link)</label><input id="msTeamsEmail" type="email" value={msTeamsEmail} onChange={e => setMsTeamsEmail(e.target.value)} className="mt-1 block w-full px-3 py-2 border rounded-md"/><p className="mt-1 text-xs text-gray-500">Aus dieser E-Mail wird der MS Teams Chat-Link generiert.</p></div>
       <div>
         <label className="block text-sm font-medium text-gray-700">Skills</label>
-        <TagInput selectedSkillIds={skillIds} setSelectedSkillIds={setSkillIds} allSkills={allSkills} />
+        {/* NEU: onCreateSkill wird an TagInput übergeben */}
+        <TagInput selectedSkillIds={skillIds} setSelectedSkillIds={setSkillIds} allSkills={allSkills} onCreateSkill={fuegeSkillHinzu} />
       </div>
       <div className="flex justify-end space-x-3 pt-4">{onFormClose && (<button type="button" onClick={onFormClose} className="px-4 py-2 border rounded-md text-sm">Abbrechen</button>)}<button type="submit" className="px-4 py-2 bg-indigo-600 text-white rounded-md shadow-sm">{personToEdit ? 'Speichern' : 'Hinzufügen'}</button></div>
     </form>
@@ -51,8 +53,8 @@ const PersonEintrag = ({ person, onEdit, onDeleteInitiation, onSkillClick }) => 
   const personAssignments = zuordnungen.filter(z => z.personId === person.id).map(assignment => {
       const produkt = datenprodukte.find(dp => dp.id === assignment.datenproduktId);
       const rolleInProdukt = rollen.find(r => r.id === assignment.rolleId);
-      return { produktName: produkt?.name || 'Unbekanntes Produkt', rolleName: rolleInProdukt?.name || 'Unbekannte Rolle', assignmentId: assignment.id, };
-  }).filter(a => a.produktName !== 'Unbekanntes Produkt');
+      return { produktName: produkt?.name || '...', rolleName: rolleInProdukt?.name || '...', assignmentId: assignment.id, };
+  }).filter(a => a.produktName !== '...');
 
   return (
     <div className="bg-white shadow-lg rounded-xl p-6 hover:shadow-2xl flex flex-col justify-between">
@@ -81,8 +83,6 @@ export const PersonenVerwaltung = () => {
   const { personen, skills, loeschePerson } = useData(); 
   const [skillSearchTerm, setSkillSearchTerm] = useState('');
 
-  const allUniqueSkillsFromPersons = [...new Set(personen.flatMap(p => p.skillIds || []))].map(id => skills.find(s => s.id === id)).filter(Boolean);
-
   const handleAddNewPerson = () => { setEditingPerson(null); setShowForm(true); };
   const handleEditPerson = (person) => { setEditingPerson(person); setShowForm(true); };
   const handleFormClose = () => { setShowForm(false); setEditingPerson(null); };
@@ -96,7 +96,7 @@ export const PersonenVerwaltung = () => {
     <div className="container mx-auto px-4 py-8">
         <div className="flex flex-wrap justify-between items-center mb-6 gap-4"><h1 className="text-3xl font-bold text-gray-800">Personenverwaltung</h1><button onClick={handleAddNewPerson} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow-md"> + Neue Person </button></div>
         <div className="mb-8 p-4 bg-white shadow rounded-lg"><label htmlFor="skill-search" className="block text-sm font-medium text-gray-700 mb-1">Nach Skill suchen:</label><div className="flex gap-2"><input id="skill-search" type="text" placeholder="z.B. Python, Tableau..." value={skillSearchTerm} onChange={e => setSkillSearchTerm(e.target.value)} className="flex-grow mt-1 block w-full px-3 py-2 border rounded-md shadow-sm"/>{skillSearchTerm && (<button onClick={() => setSkillSearchTerm('')} className="mt-1 px-4 py-2 border rounded-md text-sm">Filter löschen</button>)}</div></div>
-        {showForm && (<div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-40 p-4" onClick={handleFormClose}><div className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}><PersonFormular personToEdit={editingPerson} onFormClose={handleFormClose} allSkills={skills} /></div></div>)}
+        {showForm && (<div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-40 p-4" onClick={handleFormClose}><div className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}><PersonFormular personToEdit={editingPerson} onFormClose={handleFormClose} /></div></div>)}
         <PersonenListe personenToDisplay={filteredPersonen} onEditPerson={handleEditPerson} onDeleteInitiation={handleDeleteInitiation} onSkillClick={handleSkillClick}/><ConfirmModal isOpen={showDeleteModal} title="Person löschen" message={`Möchten Sie ${personToDelete?.name || 'diese Person'} wirklich löschen?`} onConfirm={confirmDelete} onCancel={cancelDelete}/>
     </div>
   );

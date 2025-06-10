@@ -1,7 +1,7 @@
 // src/components/ui/TagInput.js
 import React, { useState, useRef, useEffect } from 'react';
 
-export const TagInput = ({ selectedSkillIds, setSelectedSkillIds, allSkills = [], placeholder = "Skill auswählen" }) => {
+export const TagInput = ({ selectedSkillIds, setSelectedSkillIds, allSkills = [], placeholder = "Skill auswählen", onCreateSkill }) => {
   const [inputValue, setInputValue] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const wrapperRef = useRef(null);
@@ -13,16 +13,14 @@ export const TagInput = ({ selectedSkillIds, setSelectedSkillIds, allSkills = []
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [wrapperRef]);
 
   const filteredSuggestions = allSkills
     .filter(skill => !selectedSkillIds.includes(skill.id))
     .filter(skill => skill.name.toLowerCase().includes(inputValue.toLowerCase()));
 
-  const addSkill = (skillId) => {
+  const addSkillById = (skillId) => {
     if (skillId && !selectedSkillIds.includes(skillId)) {
       setSelectedSkillIds([...selectedSkillIds, skillId]);
     }
@@ -34,14 +32,23 @@ export const TagInput = ({ selectedSkillIds, setSelectedSkillIds, allSkills = []
     setSelectedSkillIds(selectedSkillIds.filter(id => id !== skillIdToRemove));
   };
   
-  const handleKeyDown = (e) => {
+  const handleKeyDown = async (e) => {
     if (e.key === 'Enter' && inputValue.trim() !== '') {
-        e.preventDefault();
-        // Optional: Neuen Skill on-the-fly erstellen (aktuell nicht implementiert)
-        // Stattdessen könnte man den ersten Vorschlag auswählen
-        if (filteredSuggestions.length > 0) {
-            addSkill(filteredSuggestions[0].id);
+      e.preventDefault();
+      const newSkillName = inputValue.trim();
+      const existingSuggestion = filteredSuggestions.find(s => s.name.toLowerCase() === newSkillName.toLowerCase());
+
+      if (existingSuggestion) {
+        addSkillById(existingSuggestion.id);
+      } else {
+        // Skill existiert nicht, also neu anlegen
+        if (onCreateSkill) {
+          const newSkillId = await onCreateSkill(newSkillName); // Ruft fuegeSkillHinzu auf
+          if (newSkillId) {
+            addSkillById(newSkillId);
+          }
         }
+      }
     } else if (e.key === 'Backspace' && inputValue === '' && selectedSkillIds.length > 0) {
         removeSkill(selectedSkillIds[selectedSkillIds.length - 1]);
     }
@@ -73,17 +80,17 @@ export const TagInput = ({ selectedSkillIds, setSelectedSkillIds, allSkills = []
           className="flex-grow p-1 outline-none text-sm bg-transparent"
         />
       </div>
-      {showSuggestions && filteredSuggestions.length > 0 && (
+      {showSuggestions && (
         <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-md mt-1 max-h-40 overflow-y-auto shadow-lg">
-          {filteredSuggestions.map(suggestion => (
-            <li
-              key={suggestion.id}
-              onMouseDown={() => addSkill(suggestion.id)} // onMouseDown, damit es vor dem onBlur des Inputs feuert
-              className="px-3 py-2 cursor-pointer hover:bg-indigo-100 text-sm"
-            >
-              {suggestion.name}
-            </li>
-          ))}
+          {filteredSuggestions.length > 0 ? (
+            filteredSuggestions.map(suggestion => (
+              <li key={suggestion.id} onMouseDown={() => addSkillById(suggestion.id)} className="px-3 py-2 cursor-pointer hover:bg-indigo-100 text-sm">
+                {suggestion.name}
+              </li>
+            ))
+          ) : (
+            <li className="px-3 py-2 text-sm text-gray-500">Keine Vorschläge. Drücke Enter, um "{inputValue}" zu erstellen.</li>
+          )}
         </ul>
       )}
     </div>
