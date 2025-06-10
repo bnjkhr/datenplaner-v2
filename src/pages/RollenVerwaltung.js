@@ -1,8 +1,3 @@
-
-
-// ==========================================================
-
-// src/pages/RollenVerwaltung.js (AKTUALISIERT)
 import React, { useState } from 'react';
 import { useData } from '../context/DataProvider';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
@@ -44,15 +39,13 @@ export const RollenVerwaltung = () => {
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                         {rollen.map(rolle => {
-                            // KORRIGIERTE LOGIK: Holt nur noch einzigartige Personen
                             const assignedPersonIds = [...new Set(zuordnungen.filter(z => z.rolleId === rolle.id).map(z => z.personId))];
                             const assignedPeople = assignedPersonIds.map(id => personen.find(p => p.id === id)).filter(Boolean);
-
                             return (
                                 <tr key={rolle.id}>
                                     <td className="px-6 py-4 whitespace-nowrap">{editingRolle?.id === rolle.id ? (<input type="text" value={editingRolle.name} onChange={(e) => setEditingRolle({...editingRolle, name: e.target.value})} className="block w-full px-2 py-1 border border-indigo-300 rounded-md" autoFocus />) : (<div className="text-sm text-gray-900">{rolle.name}</div>)}</td>
                                     <td className="px-6 py-4"><div className="flex flex-wrap gap-1">{assignedPeople.length > 0 ? (assignedPeople.map(p => (<span key={p.id} className="text-xs bg-gray-200 text-gray-800 px-2 py-1 rounded-full">{p.name}</span>))) : (<span className="text-xs text-gray-400 italic">Nicht zugewiesen</span>)}</div></td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">{editingRolle?.id === rolle.id ? (<> <button onClick={handleUpdateRolle} className="text-green-600 hover:text-green-900 mr-4">Speichern</button><button onClick={() => setEditingRolle(null)} className="text-gray-600 hover:text-gray-900">Abbrechen</button> </> ) : (<> <button onClick={() => setEditingRolle({ ...rolle })} className="text-indigo-600 hover:text-indigo-900 mr-4">Bearbeiten</button><button onClick={() => handleDeleteInitiation(rolle)} className="text-red-600 hover:text-red-900">Löschen</button> </>)}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">{editingRolle?.id === rolle.id ? (<> <button onClick={handleUpdateRolle} className="text-green-600 hover:text-green-900 mr-4">Speichern</button><button onClick={() => setEditingRolle(null)} className="text-gray-600 hover:text-gray-900">Abbrechen</button> </> ) : (<> <button onClick={() => setEditingRolle({ ...rolle })} className="text-indigo-600 hover:text-indigo-900 mr-4">Bearbeiten</button><button onClick={() => handleDeleteInitiation(rolle)} className="text-red-600 hover:text-red-900">Löschen</button> </> )}</td>
                                 </tr>
                             )
                         })}
@@ -63,14 +56,3 @@ export const RollenVerwaltung = () => {
         </div>
     );
 };
-
-
-// ==========================================================
-
-// src/pages/Auswertungen.js
-// ... (Dieser Teil bleibt unverändert) ...
-export const Auswertungen = () => {
-    // ...
-    return <div>Auswertungen</div>;
-};
-
