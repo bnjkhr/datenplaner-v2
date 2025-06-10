@@ -4,29 +4,8 @@ import { useData } from '../context/DataProvider';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 import { TagInput } from '../components/ui/TagInput';
 
-// --- Helper-Funktion für konsistente Tag-Farben ---
-const tagColors = [
-  'bg-red-200 text-red-800', 'bg-orange-200 text-orange-800', 'bg-amber-200 text-amber-800', 
-  'bg-yellow-200 text-yellow-800', 'bg-lime-200 text-lime-800', 'bg-green-200 text-green-800',
-  'bg-emerald-200 text-emerald-800', 'bg-teal-200 text-teal-800', 'bg-cyan-200 text-cyan-800', 
-  'bg-sky-200 text-sky-800', 'bg-blue-200 text-blue-800', 'bg-indigo-200 text-indigo-800',
-  'bg-violet-200 text-violet-800', 'bg-purple-200 text-purple-800', 'bg-fuchsia-200 text-fuchsia-800',
-  'bg-pink-200 text-pink-800', 'bg-rose-200 text-rose-800'
-];
-
-const getSkillColor = (skill) => {
-  let hash = 0;
-  for (let i = 0; i < skill.length; i++) {
-    hash = skill.charCodeAt(i) + ((hash << 5) - hash);
-    hash = hash & hash;
-  }
-  const index = Math.abs(hash % tagColors.length);
-  return tagColors[index];
-};
-
 const PersonFormular = ({ personToEdit, onFormClose }) => {
-  // NEU: error aus dem Context holen
-  const { fuegePersonHinzu, aktualisierePerson, skills: allSkills, fuegeSkillHinzu, error: globalError } = useData();
+  const { fuegePersonHinzu, aktualisierePerson, skills: allSkills, fuegeSkillHinzu, error: globalError, setError } = useData();
   const [name, setName] = useState(personToEdit?.name || '');
   const [email, setEmail] = useState(personToEdit?.email || '');
   const [skillIds, setSkillIds] = useState(personToEdit?.skillIds || []);
@@ -37,8 +16,6 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
     }
     return personToEdit?.email || '';
   });
-  
-  // Lokaler Form-Fehler für Validierung, globaler Fehler für Firebase
   const [validationError, setValidationError] = useState('');
 
   const validateForm = () => {
@@ -51,30 +28,33 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
   const handleSubmit = async (event) => {
     event.preventDefault(); 
     setValidationError('');
+    setError(null); // Globalen Fehler zurücksetzen
+
     if (!validateForm()) { return; }
-    
+
     const finalMsTeamsLink = msTeamsEmail.trim() ? `msteams:/l/chat/0/0?users=${msTeamsEmail.trim()}` : '';
     const personData = { name: name.trim(), email: email.trim(), skillIds, msTeamsLink: finalMsTeamsLink };
     
-    const success = personToEdit 
-      ? await aktualisierePerson(personToEdit.id, personData) 
-      : await fuegePersonHinzu(personData);
-      
-    if (success) { 
-        onFormClose?.(); 
+    let result = null;
+    if (personToEdit && personToEdit.id) { 
+        result = await aktualisierePerson(personToEdit.id, personData); 
+    } else { 
+        result = await fuegePersonHinzu(personData); 
+    }
+
+    if (result) {
+      onFormClose?.(); 
     } 
-    // Der globale Fehler aus dem DataProvider wird jetzt direkt angezeigt.
+    // Der Fehler wird jetzt im DataProvider gesetzt und hier angezeigt.
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 p-6 bg-white rounded-lg">
       <h2 className="text-2xl font-semibold text-gray-700 mb-6">{personToEdit ? 'Person bearbeiten' : 'Neue Person hinzufügen'}</h2>
-      {/* NEU: Zeigt jetzt den detaillierten Fehler an */}
       {(validationError || globalError) && <p className="text-sm text-red-500 mb-4">{validationError || globalError}</p>}
-      
-      <div><label htmlFor="person-name" className="block text-sm font-medium text-gray-700">Name</label><input id="person-name" type="text" value={name} onChange={e => setName(e.target.value)} required className="mt-1 block w-full px-3 py-2 border rounded-md"/></div>
-      <div><label htmlFor="person-email" className="block text-sm font-medium text-gray-700">E-Mail</label><input id="person-email" type="email" value={email} onChange={e => setEmail(e.target.value)} required className="mt-1 block w-full px-3 py-2 border rounded-md"/></div>
-      <div><label htmlFor="msTeamsEmail" className="block text-sm font-medium text-gray-700">MS Teams E-Mail</label><input id="msTeamsEmail" type="email" value={msTeamsEmail} onChange={e => setMsTeamsEmail(e.target.value)} className="mt-1 block w-full px-3 py-2 border rounded-md"/><p className="mt-1 text-xs text-gray-500">Für den Chat-Link.</p></div>
+      <div><label htmlFor="person-name" className="block text-sm font-medium text-gray-700">Name</label><input id="person-name" type="text" value={name} onChange={e => setName(e.target.value)} required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"/></div>
+      <div><label htmlFor="person-email" className="block text-sm font-medium text-gray-700">E-Mail</label><input id="person-email" type="email" value={email} onChange={e => setEmail(e.target.value)} required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"/></div>
+      <div><label htmlFor="msTeamsEmail" className="block text-sm font-medium text-gray-700">MS Teams E-Mail</label><input id="msTeamsEmail" type="email" value={msTeamsEmail} onChange={e => setMsTeamsEmail(e.target.value)} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"/><p className="mt-1 text-xs text-gray-500">Für den Chat-Link.</p></div>
       <div>
         <label className="block text-sm font-medium text-gray-700">Skills</label>
         <TagInput selectedSkillIds={skillIds} setSelectedSkillIds={setSkillIds} allSkills={allSkills} onCreateSkill={fuegeSkillHinzu} />
@@ -87,6 +67,7 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
 const PersonEintrag = ({ person, onEdit, onDeleteInitiation, onSkillClick }) => {
   const { name, email, skillIds, msTeamsLink } = person; 
   const { datenprodukte, zuordnungen, rollen, skills: allSkills } = useData();
+
   const personAssignments = zuordnungen.filter(z => z.personId === person.id).map(assignment => {
       const produkt = datenprodukte.find(dp => dp.id === assignment.datenproduktId);
       const rolleInProdukt = rollen.find(r => r.id === assignment.rolleId);
@@ -112,7 +93,7 @@ const PersonenListe = ({ personenToDisplay, onEditPerson, onDeleteInitiation, on
   );
 };
 
-export const PersonenVerwaltung = () => {
+const PersonenVerwaltung = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingPerson, setEditingPerson] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);

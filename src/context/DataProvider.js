@@ -1,13 +1,39 @@
-// src/context/DataProvider.js
 import React, { useState, createContext, useContext, useEffect, useCallback } from 'react';
 import { db, appId } from '../firebase/config';
-import { collection, doc, addDoc, getDocs, updateDoc, deleteDoc, onSnapshot, query, where, writeBatch } from 'firebase/firestore';
+import {
+  collection,
+  doc,
+  addDoc,
+  getDocs,
+  updateDoc,
+  deleteDoc,
+  onSnapshot,
+  query,
+  where,
+  writeBatch
+} from 'firebase/firestore';
 
 export const DataContext = createContext();
 export const useData = () => useContext(DataContext);
 
-// Farbpalette für neue Skills
-const tagColors = [ '#FECACA', '#FED7AA', '#FDE68A', '#D9F99D', '#A7F3D0', '#A5F3FC', '#A5B4FC', '#C4B5FD', '#F5D0FE', '#FECDD3' ];
+const initialRollenSeed = [
+  { name: 'Datenprodukt-Owner (DPO)' },
+  { name: 'Facilitator' },
+  { name: 'Transparenzmeister:in' },
+  { name: 'Link Domäne Gremien' },
+  { name: 'Link Medienforschung (Optional)' },
+  { name: 'Datenprodukt-Engineer (Data-Engineer)' },
+  { name: 'Daten-Analyst' },
+  { name: 'Link M13-Data-Plattform' },
+  { name: 'Data-Contract Expert:in' },
+  { name: 'Projektmanager:in' },
+  { name: 'Pate M13-Kernteam' }
+];
+
+const tagColors = [
+    '#FECACA', '#FED7AA', '#FDE68A', '#D9F99D', '#A7F3D0', '#A5F3FC', 
+    '#A5B4FC', '#C4B5FD', '#F5D0FE', '#FECDD3'
+];
 const getRandomColor = () => tagColors[Math.floor(Math.random() * tagColors.length)];
 
 export const DataProvider = ({ children }) => {
@@ -19,76 +45,95 @@ export const DataProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const getPersonenCollectionPath = useCallback(() => `/artifacts/${appId}/public/data/personen`, []);
-  const getDatenprodukteCollectionPath = useCallback(() => `/artifacts/${appId}/public/data/datenprodukte`, []);
-  const getZuordnungenCollectionPath = useCallback(() => `/artifacts/${appId}/public/data/zuordnungen`, []);
-  const getRollenCollectionPath = useCallback(() => `/artifacts/${appId}/public/data/rollen`, []);
-  const getSkillsCollectionPath = useCallback(() => `/artifacts/${appId}/public/data/skills`, []);
+  const sharedDataPath = `/artifacts/${appId}/public/data`;
+  const getCollectionPath = (name) => `${sharedDataPath}/${name}`;
 
   useEffect(() => {
-    setLoading(true); setError(null);
-    const unsubscribes = [];
-    let loadedCount = 0;
-    const totalCollections = 5;
+    const collections = [
+      { path: getCollectionPath('personen'), setter: setPersonen },
+      { path: getCollectionPath('datenprodukte'), setter: setDatenprodukte },
+      { path: getCollectionPath('zuordnungen'), setter: setZuordnungen },
+      { path: getCollectionPath('rollen'), setter: setRollen },
+      { path: getCollectionPath('skills'), setter: setSkills }
+    ];
 
-    const checkAllLoaded = () => { if (++loadedCount >= totalCollections) setLoading(false); };
+    const unsubscribes = collections.map(({ path, setter }) => {
+      const q = query(collection(db, path));
+      return onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        if (!path.includes('zuordnungen')) {
+          data.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'de'));
+        }
+        setter(data);
+      }, (err) => {
+        console.error(`Error at ${path}:`, err);
+        setError(`Fehler beim Laden von Daten: ${err.message}`);
+      });
+    });
     
-    const setupListener = (path, setter) => {
-        const q = query(collection(db, path));
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            if (!path.includes('zuordnungen')) { data.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'de')); }
-            setter(data);
-            checkAllLoaded();
-        }, (err) => {
-            console.error(`Error at ${path}:`, err); setError(`Fehler beim Laden von Daten.`); setLoading(false);
-        });
-        unsubscribes.push(unsubscribe);
-    };
-
-    setupListener(getPersonenCollectionPath(), setPersonen);
-    setupListener(getDatenprodukteCollectionPath(), setDatenprodukte);
-    setupListener(getZuordnungenCollectionPath(), setZuordnungen);
-    setupListener(getRollenCollectionPath(), setRollen);
-    setupListener(getSkillsCollectionPath(), setSkills);
+    // Initial data seeding and loading management
+    const checkInitialData = async () => {
+        const rollenSnapshot = await getDocs(collection(db, getCollectionPath('rollen')));
+        if (rollenSnapshot.empty) {
+            console.log("Seeding initial roles...");
+            const batch = writeBatch(db);
+            initialRollenSeed.forEach(role => {
+                const docRef = doc(collection(db, getCollectionPath('rollen')));
+                batch.set(docRef, role);
+            });
+            await batch.commit();
+        }
+        setLoading(false);
+    }
+    checkInitialData();
 
     return () => unsubscribes.forEach(unsub => unsub());
-  }, [getPersonenCollectionPath, getDatenprodukteCollectionPath, getZuordnungenCollectionPath, getRollenCollectionPath, getSkillsCollectionPath]);
+  }, []);
 
-  // --- CRUD-Funktionen für Skills (angepasst) ---
+  const fuegePersonHinzu = async (personDaten) => {
+    try {
+      const docRef = await addDoc(collection(db, getCollectionPath('personen')), { ...personDaten, erstelltAm: new Date().toISOString(), letzteAenderung: new Date().toISOString() });
+      return docRef;
+    } catch (e) { console.error("Error adding person:", e); setError(`Fehler beim Speichern: ${e.code}`); return null; }
+  };
+
+  const aktualisierePerson = async (personId, neueDaten) => {
+    try {
+      await updateDoc(doc(db, getCollectionPath('personen'), personId), { ...neueDaten, letzteAenderung: new Date().toISOString() });
+      return true;
+    } catch (e) { console.error("Error updating person:", e); setError(`Update-Fehler: ${e.code}`); return false; }
+  };
+
+  const loeschePerson = async (personId) => {
+    try {
+        const batch = writeBatch(db);
+        const assignmentsQuery = query(collection(db, getCollectionPath('zuordnungen')), where("personId", "==", personId));
+        const assignmentSnapshot = await getDocs(assignmentsQuery);
+        assignmentSnapshot.forEach(doc => batch.delete(doc.ref));
+        batch.delete(doc(db, getCollectionPath('personen'), personId));
+        await batch.commit();
+        return true;
+    } catch (e) { console.error("Error deleting person:", e); setError(`Löschfehler: ${e.code}`); return false; }
+  };
+  
   const fuegeSkillHinzu = async (skillName, color) => {
     if (!skillName?.trim()) return null;
     const colorToUse = color || getRandomColor();
     try {
-      const docRef = await addDoc(collection(db, getSkillsCollectionPath()), { name: skillName.trim(), color: colorToUse });
+      const docRef = await addDoc(collection(db, getCollectionPath('skills')), { name: skillName.trim(), color: colorToUse });
       return docRef.id;
     } catch (e) { console.error("Error adding skill:", e); setError("Fehler beim Hinzufügen des Skills."); return null; }
   };
-  const aktualisiereSkill = async (skillId, skillName, color) => { /* ... */ };
-  const loescheSkill = async (skillId) => { /* ... */ };
   
-  // (Restliche CRUD-Funktionen bleiben gleich)
-  const fuegePersonHinzu = async (personDaten) => { /* ... */ };
-  const aktualisierePerson = async (personId, neueDaten) => { /* ... */ };
-  const loeschePerson = async (personId) => { /* ... */ };
-  const erstelleDatenprodukt = async (produktDaten) => { /* ... */ };
-  const aktualisiereDatenprodukt = async (produktId, neueDaten) => { /* ... */ };
-  const loescheDatenprodukt = async (produktId) => { /* ... */ };
-  const weisePersonDatenproduktRolleZu = async (personId, produktId, rolleId) => { /* ... */ };
-  const entfernePersonVonDatenproduktRolle = async (zuordnungId) => { /* ... */ };
-  const fuegeRolleHinzu = async (rollenName) => { /* ... */ };
-  const aktualisiereRolle = async (rolleId, rollenName) => { /* ... */ };
-  const loescheRolle = async (rolleId) => { /* ... */ };
+  // (andere CRUD Funktionen...)
 
   return (
     <DataContext.Provider value={{
       personen, datenprodukte, rollen, skills, zuordnungen,
       fuegePersonHinzu, aktualisierePerson, loeschePerson,
-      erstelleDatenprodukt, aktualisiereDatenprodukt, loescheDatenprodukt,
-      weisePersonDatenproduktRolleZu, entfernePersonVonDatenproduktRolle,
-      fuegeRolleHinzu, aktualisiereRolle, loescheRolle,
-      fuegeSkillHinzu, aktualisiereSkill, loescheSkill,
-      loading, error,
+      fuegeSkillHinzu,
+      // ...alle anderen CRUD-Funktionen
+      loading, error, setError
     }}>
       {children}
     </DataContext.Provider>
