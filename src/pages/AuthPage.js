@@ -40,6 +40,8 @@ const AuthPage = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className="w-full mb-4 p-3 border rounded-lg"
+          onKeyDown={(e) => e.key === 'Enter' && (resetMode ? handlePasswordReset() : handleLogin())}
+
         />
 
         {!resetMode && (
@@ -49,6 +51,8 @@ const AuthPage = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full mb-4 p-3 border rounded-lg"
+            onKeyDown={(e) => e.key === 'Enter' && (resetMode ? handlePasswordReset() : handleLogin())}
+
           />
         )}
 
