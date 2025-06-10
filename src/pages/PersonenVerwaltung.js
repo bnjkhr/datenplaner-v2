@@ -1,32 +1,35 @@
-import React, { useState } from 'react';
+// src/pages/PersonenVerwaltung.js
+import React, { useState, useEffect } from 'react';
 import { useData } from '../context/DataProvider';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 import { TagInput } from '../components/ui/TagInput';
 
-// --- Helper-Funktion für konsistente Tag-Farben ---
+// --- VERBESSERT: Helper-Funktion für konsistente Tag-Farben ---
 const tagColors = [
-  'bg-blue-200 text-blue-800 hover:bg-blue-300',
-  'bg-green-200 text-green-800 hover:bg-green-300',
-  'bg-yellow-200 text-yellow-800 hover:bg-yellow-300',
-  'bg-pink-200 text-pink-800 hover:bg-pink-300',
-  'bg-purple-200 text-purple-800 hover:bg-purple-300',
-  'bg-indigo-200 text-indigo-800 hover:bg-indigo-300',
-  'bg-teal-200 text-teal-800 hover:bg-teal-300',
-  'bg-red-200 text-red-800 hover:bg-red-300',
-  'bg-orange-200 text-orange-800 hover:bg-orange-300',
-  'bg-cyan-200 text-cyan-800 hover:bg-cyan-300',
+  'bg-red-200 text-red-800 hover:bg-red-300', 'bg-orange-200 text-orange-800 hover:bg-orange-300',
+  'bg-amber-200 text-amber-800 hover:bg-amber-300', 'bg-yellow-200 text-yellow-800 hover:bg-yellow-300',
+  'bg-lime-200 text-lime-800 hover:bg-lime-300', 'bg-green-200 text-green-800 hover:bg-green-300',
+  'bg-emerald-200 text-emerald-800 hover:bg-emerald-300', 'bg-teal-200 text-teal-800 hover:bg-teal-300',
+  'bg-cyan-200 text-cyan-800 hover:bg-cyan-300', 'bg-sky-200 text-sky-800 hover:bg-sky-300',
+  'bg-blue-200 text-blue-800 hover:bg-blue-300', 'bg-indigo-200 text-indigo-800 hover:bg-indigo-300',
+  'bg-violet-200 text-violet-800 hover:bg-violet-300', 'bg-purple-200 text-purple-800 hover:bg-purple-300',
+  'bg-fuchsia-200 text-fuchsia-800 hover:bg-fuchsia-300', 'bg-pink-200 text-pink-800 hover:bg-pink-300',
+  'bg-rose-200 text-rose-800 hover:bg-rose-300'
 ];
 
 const getSkillColor = (skill) => {
   let hash = 0;
   for (let i = 0; i < skill.length; i++) {
     hash = skill.charCodeAt(i) + ((hash << 5) - hash);
+    hash = hash & hash; 
   }
   const index = Math.abs(hash % tagColors.length);
   return tagColors[index];
 };
 
-const PersonFormular = ({ personToEdit, onFormClose }) => {
+// --- Die Unterkomponenten bleiben hier, um die Struktur beizubehalten ---
+
+const PersonFormular = ({ personToEdit, onFormClose, allSkills }) => {
   const { fuegePersonHinzu, aktualisierePerson } = useData();
   const [name, setName] = useState(personToEdit?.name || '');
   const [email, setEmail] = useState(personToEdit?.email || '');
@@ -42,18 +45,9 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
 
   const validateForm = () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email.trim())) {
-      setFormError('Bitte eine gültige E-Mail-Adresse eingeben.');
-      return false;
-    }
-    if (name.trim().length < 2 || name.trim().length > 50) {
-      setFormError('Der Name muss zwischen 2 und 50 Zeichen lang sein.');
-      return false;
-    }
-    if (skills.some(skill => skill.length > 30)) {
-      setFormError('Ein einzelner Skill darf nicht länger als 30 Zeichen sein.');
-      return false;
-    }
+    if (!emailRegex.test(email.trim())) { setFormError('Bitte eine gültige E-Mail-Adresse eingeben.'); return false; }
+    if (name.trim().length < 2 || name.trim().length > 50) { setFormError('Der Name muss zwischen 2 und 50 Zeichen lang sein.'); return false; }
+    if (skills.some(skill => skill.length > 30)) { setFormError('Ein einzelner Skill darf nicht länger als 30 Zeichen sein.'); return false; }
     return true;
   };
 
@@ -85,7 +79,11 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
       <div><label htmlFor="person-name" className="block text-sm font-medium text-gray-700">Name</label><input id="person-name" type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Max Mustermann" required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"/></div>
       <div><label htmlFor="person-email" className="block text-sm font-medium text-gray-700">E-Mail</label><input id="person-email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="max.mustermann@firma.de" required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"/></div>
       <div><label htmlFor="msTeamsEmail" className="block text-sm font-medium text-gray-700">MS Teams E-Mail (für Chat-Link)</label><input id="msTeamsEmail" type="email" value={msTeamsEmail} onChange={e => setMsTeamsEmail(e.target.value)} placeholder="max.mustermann@firma.de" className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"/><p className="mt-1 text-xs text-gray-500">Aus dieser E-Mail wird der MS Teams Chat-Link generiert.</p></div>
-      <div><label className="block text-sm font-medium text-gray-700">Skills</label><TagInput tags={skills} setTags={setSkills} placeholder="Skill hinzufügen und Enter drücken" /></div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Skills</label>
+        {/* NEU: Übergabe aller Skills für die Vorschläge */}
+        <TagInput tags={skills} setTags={setSkills} allSkills={allSkills} placeholder="Skill hinzufügen oder auswählen..." />
+      </div>
       <div className="flex justify-end space-x-3 pt-4">{onFormClose && (<button type="button" onClick={onFormClose} className="px-4 py-2 border rounded-md text-sm">Abbrechen</button>)}<button type="submit" className="px-4 py-2 bg-indigo-600 text-white rounded-md shadow-sm hover:bg-indigo-700">{personToEdit ? 'Speichern' : 'Hinzufügen'}</button></div>
     </form>
   );
@@ -94,6 +92,7 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
 const PersonEintrag = ({ person, onEdit, onDeleteInitiation, onSkillClick }) => {
   const { name, email, skills, msTeamsLink } = person; 
   const { datenprodukte, zuordnungen, rollen } = useData();
+
   const personAssignments = zuordnungen.filter(z => z.personId === person.id).map(assignment => {
       const produkt = datenprodukte.find(dp => dp.id === assignment.datenproduktId);
       const rolleInProdukt = rollen.find(r => r.id === assignment.rolleId);
@@ -127,6 +126,9 @@ export const PersonenVerwaltung = () => {
   const { personen, loeschePerson } = useData(); 
   const [skillSearchTerm, setSkillSearchTerm] = useState('');
 
+  // --- NEU: Liste aller einzigartigen Skills für die Vorschläge ---
+  const allUniqueSkills = [...new Set(personen.flatMap(p => p.skills || []))].sort((a,b) => a.localeCompare(b));
+
   const handleAddNewPerson = () => { setEditingPerson(null); setShowForm(true); };
   const handleEditPerson = (person) => { setEditingPerson(person); setShowForm(true); };
   const handleFormClose = () => { setShowForm(false); setEditingPerson(null); };
@@ -152,7 +154,8 @@ export const PersonenVerwaltung = () => {
         {showForm && (
             <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-40 p-4" onClick={handleFormClose}>
                 <div className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-                    <PersonFormular personToEdit={editingPerson} onFormClose={handleFormClose} />
+                    {/* NEU: Übergabe aller Skills */}
+                    <PersonFormular personToEdit={editingPerson} onFormClose={handleFormClose} allSkills={allUniqueSkills} />
                 </div>
             </div>
         )}
