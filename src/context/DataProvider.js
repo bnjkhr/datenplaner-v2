@@ -34,35 +34,27 @@ export const DataProvider = ({ children }) => {
   const getSkillsCollectionPath = useCallback(() => `${sharedDataPath}/skills`, []); // NEU
 
   useEffect(() => {
-    setLoading(true);
-    setError(null); 
+    setLoading(true); setError(null);
     const unsubscribes = [];
     let loadedCount = 0;
     const totalCollections = 5; // Jetzt 5: personen, datenprodukte, rollen, zuordnungen, skills
 
-    const checkAllLoaded = () => {
-      loadedCount++;
-      if (loadedCount >= totalCollections) {
-        setLoading(false);
-      }
-    };
-
+    const checkAllLoaded = () => { if (++loadedCount === totalCollections) setLoading(false); };
     const setupListener = (path, setter) => {
-      const q = query(collection(db, path));
-      const unsubscribe = onSnapshot(q, (snapshot) => {
-        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        // Alphabetische Sortierung für alles außer Zuordnungen
-        if (!path.includes('zuordnungen')) {
-            data.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'de', { sensitivity: 'base' }));
-        }
-        setter(data);
-        checkAllLoaded();
-      }, (err) => {
-        console.error(`Error at ${path}:`, err);
-        setError(`Fehler beim Laden von Daten.`);
-        setLoading(false);
-      });
-      unsubscribes.push(unsubscribe);
+        const q = query(collection(db, path));
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            if (!path.includes('zuordnungen')) {
+                data.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'de'));
+            }
+            setter(data);
+            checkAllLoaded();
+        }, (err) => {
+            console.error(`Error at ${path}:`, err);
+            setError(`Fehler beim Laden von Daten.`);
+            setLoading(false);
+        });
+        unsubscribes.push(unsubscribe);
     };
 
     setupListener(getPersonenCollectionPath(), setPersonen);
@@ -74,7 +66,7 @@ export const DataProvider = ({ children }) => {
     return () => unsubscribes.forEach(unsub => unsub());
   }, [getPersonenCollectionPath, getDatenprodukteCollectionPath, getZuordnungenCollectionPath, getRollenCollectionPath, getSkillsCollectionPath]);
 
-  // --- CRUD-Funktionen für Skills (NEU) ---
+  // --- CRUD-Funktionen für Skills ---
   const fuegeSkillHinzu = async (skillName, color) => {
     if (!skillName?.trim()) return null;
     try {
@@ -82,7 +74,6 @@ export const DataProvider = ({ children }) => {
       return docRef.id;
     } catch (e) { console.error("Error adding skill:", e); setError("Fehler beim Hinzufügen des Skills."); return null; }
   };
-
   const aktualisiereSkill = async (skillId, skillName, color) => {
     if (!skillName?.trim()) return false;
     try {
@@ -91,43 +82,24 @@ export const DataProvider = ({ children }) => {
       return true;
     } catch (e) { console.error("Error updating skill:", e); setError("Fehler beim Aktualisieren des Skills."); return false; }
   };
-
   const loescheSkill = async (skillId) => {
       try {
           const batch = writeBatch(db);
           batch.delete(doc(db, getSkillsCollectionPath(), skillId));
-          
           personen.forEach(person => {
               if (person.skillIds && person.skillIds.includes(skillId)) {
                   const updatedSkills = person.skillIds.filter(id => id !== skillId);
                   batch.update(doc(db, getPersonenCollectionPath(), person.id), { skillIds: updatedSkills });
               }
           });
-          
           await batch.commit();
           return true;
       } catch (e) { console.error("Error deleting skill:", e); setError("Fehler beim Löschen des Skills."); return false; }
   };
   
-  // --- CRUD-Funktionen für Personen (angepasst für skillIds) ---
-  const fuegePersonHinzu = async (personDaten) => {
-    try {
-      const docRef = await addDoc(collection(db, getPersonenCollectionPath()), {
-        ...personDaten, erstelltAm: new Date().toISOString(), letzteAenderung: new Date().toISOString(),
-      });
-      return docRef.id;
-    } catch (e) { console.error("Error adding person:", e); setError("Fehler beim Hinzufügen der Person."); return null; }
-  };
-
-  const aktualisierePerson = async (personId, neueDaten) => {
-    try {
-      const personDocRef = doc(db, getPersonenCollectionPath(), personId);
-      await updateDoc(personDocRef, { ...neueDaten, letzteAenderung: new Date().toISOString() });
-      return true;
-    } catch (e) { console.error("Error updating person:", e); setError("Fehler beim Aktualisieren der Person."); return false; }
-  };
-
-  //... (Restliche CRUD-Funktionen bleiben gleich)
+  // (Restliche CRUD-Funktionen bleiben gleich)
+  const fuegePersonHinzu = async (personDaten) => { try { const docRef = await addDoc(collection(db, getPersonenCollectionPath()), { ...personDaten, erstelltAm: new Date().toISOString(), letzteAenderung: new Date().toISOString(), }); return docRef.id; } catch (e) { console.error("Error adding person:", e); setError("Fehler beim Hinzufügen der Person."); return null; } };
+  const aktualisierePerson = async (personId, neueDaten) => { try { const personDocRef = doc(db, getPersonenCollectionPath(), personId); await updateDoc(personDocRef, { ...neueDaten, letzteAenderung: new Date().toISOString() }); return true; } catch (e) { console.error("Error updating person:", e); setError("Fehler beim Aktualisieren der Person."); return false; } };
   const loeschePerson = async (personId) => { try { const assignmentsQuery = query(collection(db, getZuordnungenCollectionPath()), where("personId", "==", personId)); const assignmentSnapshot = await getDocs(assignmentsQuery); const batch = []; assignmentSnapshot.forEach(doc => { batch.push(deleteDoc(doc.ref)); }); await Promise.all(batch); await deleteDoc(doc(db, getPersonenCollectionPath(), personId)); return true; } catch (e) { console.error("Error deleting person: ", e); setError("Fehler beim Löschen der Person."); return false; } };
   const erstelleDatenprodukt = async (produktDaten) => { try { const docRef = await addDoc(collection(db, getDatenprodukteCollectionPath()), { ...produktDaten, erstelltAm: new Date().toISOString(), letzteAenderung: new Date().toISOString(), }); return docRef.id; } catch (e) { console.error("Error adding datenprodukt: ", e); setError("Fehler beim Erstellen des Datenprodukts."); return null; } };
   const aktualisiereDatenprodukt = async (produktId, neueDaten) => { try { const produktDocRef = doc(db, getDatenprodukteCollectionPath(), produktId); await updateDoc(produktDocRef, { ...neueDaten, letzteAenderung: new Date().toISOString(), }); return true; } catch (e) { console.error("Error updating datenprodukt: ", e); setError("Fehler beim Aktualisieren des Datenprodukts."); return false; } };
