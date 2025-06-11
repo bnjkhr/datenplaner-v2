@@ -72,7 +72,7 @@ export const ExcelUploadModal = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-50 p-4" onClick={onClose}>
-        <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col p-6" onClick={e => e.stopPropagation()}>
+        <div className="bg-white rounded-lg shadow-xl w-full sm:max-w-2xl max-h-[90vh] flex flex-col p-6" onClick={e => e.stopPropagation()}>
             <h2 className="text-2xl font-semibold text-gray-800 mb-4">Personen per Excel importieren</h2>
             
             <div className="bg-blue-50 border border-blue-200 p-4 rounded-md mb-6 text-sm text-blue-800">
