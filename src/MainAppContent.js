@@ -34,12 +34,12 @@ export const MainAppContent = ({ user }) => {
       <header className="bg-white shadow-md sticky top-0 z-30">
         <nav className="container mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
           <div className="text-xl sm:text-2xl font-bold text-indigo-700">Datenprodukt Planer</div>
-          <div className="flex items-center space-x-2 sm:space-x-3">
-            <NavLink pageName="personen">Personen</NavLink>
-            <NavLink pageName="datenprodukte">Datenprodukte</NavLink>
-            <NavLink pageName="rollen">Rollen</NavLink>
-            <NavLink pageName="skills">Skills</NavLink> {/* NEU */}
-            <NavLink pageName="auswertungen">Auswertungen</NavLink>
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <NavLink pageName="personen">Personen</NavLink>
+              <NavLink pageName="datenprodukte">Datenprodukte</NavLink>
+              <NavLink pageName="rollen">Rollen</NavLink>
+              <NavLink pageName="skills">Skills</NavLink> {/* NEU */}
+              <NavLink pageName="auswertungen">Auswertungen</NavLink>
             <button onClick={() => setShowChangePasswordModal(true)} className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100" title="Passwort ändern">Passwort ändern</button>
             <button onClick={handleLogout} className="px-3 py-2 rounded-md text-sm font-medium text-red-600 hover:bg-red-100" title="Abmelden">Logout</button>
           </div>
