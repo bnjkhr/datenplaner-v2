@@ -1,5 +1,6 @@
 import React, { useState, createContext, useContext, useEffect, useCallback } from 'react';
 import { db, appId } from '../firebase/config';
+import { ErrorOverlay } from '../components/ui/ErrorOverlay';
 import {
   collection,
   doc,
@@ -89,6 +90,7 @@ export const DataProvider = ({ children, isReadOnly }) => {
       loading, error, setError
     }}>
       {children}
+      <ErrorOverlay message={error} onClose={() => setError(null)} />
     </DataContext.Provider>
   );
 };
