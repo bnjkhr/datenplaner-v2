@@ -3,15 +3,15 @@ import React, { useState } from 'react';
 import { useData } from '../context/DataProvider';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 import { TagInput } from '../components/ui/TagInput';
+import { ExcelUploadModal } from '../components/ExcelUploadModal';
 
-// --- Helper-Funktion für konsistente Tag-Farben ---
 const tagColors = [
   '#FECACA', '#FED7AA', '#FDE68A', '#D9F99D', '#A7F3D0', '#A5F3FC', 
   '#A5B4FC', '#C4B5FD', '#F5D0FE', '#FECDD3', '#FBCFE8', '#BFDBFE',
   '#B4E4D6', '#FDECC8', '#E4D8F9'
 ];
 
-const getSkillColor = (skillName) => {
+const getSkillColor = (skillName = '') => {
   let hash = 0;
   for (let i = 0; i < skillName.length; i++) {
     hash = skillName.charCodeAt(i) + ((hash << 5) - hash);
@@ -24,7 +24,6 @@ const getSkillColor = (skillName) => {
 
 const PersonFormular = ({ personToEdit, onFormClose }) => {
   const { fuegePersonHinzu, aktualisierePerson, skills: allSkills, fuegeSkillHinzu, error: globalError, setError } = useData();
-  
   const [name, setName] = useState(personToEdit?.name || '');
   const [email, setEmail] = useState(personToEdit?.email || '');
   const [skillIds, setSkillIds] = useState(personToEdit?.skillIds || []);
@@ -46,9 +45,7 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
 
   const handleSubmit = async (event) => {
     event.preventDefault(); 
-    setValidationError('');
-    setError(null);
-
+    setValidationError(''); setError(null);
     if (!validateForm()) { return; }
     
     const finalMsTeamsLink = msTeamsEmail.trim() ? `msteams:/l/chat/0/0?users=${msTeamsEmail.trim()}` : '';
@@ -58,9 +55,7 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
       ? await aktualisierePerson(personToEdit.id, personData) 
       : await fuegePersonHinzu(personData);
       
-    if (success) { 
-        onFormClose?.(); 
-    }
+    if (success) { onFormClose?.(); } 
   };
 
   return (
@@ -82,7 +77,6 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
 const PersonEintrag = ({ person, onEdit, onDeleteInitiation, onSkillClick }) => {
   const { name, email, skillIds, msTeamsLink } = person; 
   const { datenprodukte, zuordnungen, rollen, skills: allSkills } = useData();
-
   const personAssignments = zuordnungen.filter(z => z.personId === person.id).map(assignment => {
       const produkt = datenprodukte.find(dp => dp.id === assignment.datenproduktId);
       const rolleInProdukt = rollen.find(r => r.id === assignment.rolleId);
@@ -90,7 +84,7 @@ const PersonEintrag = ({ person, onEdit, onDeleteInitiation, onSkillClick }) => 
   }).filter(a => a.produktName !== '...');
 
   return (
-    <div className="bg-white shadow-lg rounded-xl p-6 hover:shadow-2xl flex flex-col justify-between">
+    <div className="bg-white shadow-lg rounded-xl p-6 hover:shadow-2xl flex flex-col justify-between min-h-[280px]">
         <div><div className="flex justify-between items-start mb-2"><h3 className="text-xl font-bold text-indigo-700 break-words mr-2">{name}</h3>{msTeamsLink && (<a href={msTeamsLink} target="_blank" rel="noopener noreferrer" className="text-2xl" title="Chat in MS Teams starten">💬</a>)}</div>{email && (<div className="mb-3"><a href={`mailto:${email}`} className="text-sm text-gray-500 hover:text-indigo-600 break-all">{email}</a></div>)}{skillIds && skillIds.length > 0 && (<div className="mb-4"><p className="text-sm font-medium text-gray-600 mb-1">Skills:</p><div className="flex flex-wrap gap-2">{skillIds.map(id => { const skill = allSkills.find(s => s.id === id); if (!skill) return null; return ( <button key={id} onClick={() => onSkillClick(skill.name)} className="px-3 py-1 rounded-full text-xs font-semibold" style={{backgroundColor: skill.color, color: '#1f2937'}} title={`Nach Skill "${skill.name}" filtern`}>{skill.name}</button> );})}</div></div>)}{personAssignments.length > 0 && (<div className="mb-4"><p className="text-sm font-medium text-gray-600 mb-1">Arbeitet an:</p><ul className="list-none space-y-1">{personAssignments.map(a => (<li key={a.assignmentId} className="text-xs text-gray-700 bg-indigo-50 p-2 rounded-md"><strong>{a.produktName}</strong> ({a.rolleName})</li>))}</ul></div>)}</div><div className="mt-auto pt-4 flex justify-end space-x-3 border-t"><button onClick={() => onEdit(person)} className="text-sm text-indigo-600 hover:text-indigo-800 font-medium">Bearbeiten</button><button onClick={() => onDeleteInitiation(person)} className="text-sm text-red-500 hover:text-red-700 font-medium">Löschen</button></div>
     </div>
   );
@@ -108,13 +102,14 @@ const PersonenListe = ({ personenToDisplay, onEditPerson, onDeleteInitiation, on
   );
 };
 
-const PersonenVerwaltung = () => {
+export const PersonenVerwaltung = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingPerson, setEditingPerson] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [personToDelete, setPersonToDelete] = useState(null);
   const { personen, skills, loeschePerson } = useData(); 
   const [skillSearchTerm, setSkillSearchTerm] = useState('');
+  const [showUploadModal, setShowUploadModal] = useState(false);
 
   const handleAddNewPerson = () => { setEditingPerson(null); setShowForm(true); };
   const handleEditPerson = (person) => { setEditingPerson(person); setShowForm(true); };
@@ -127,10 +122,18 @@ const PersonenVerwaltung = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-wrap justify-between items-center mb-6 gap-4"><h1 className="text-3xl font-bold text-gray-800">Personenverwaltung</h1><button onClick={handleAddNewPerson} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow-md"> + Neue Person </button></div>
+        <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
+            <h1 className="text-3xl font-bold text-gray-800">Personenverwaltung</h1>
+            <div className="flex gap-2">
+                <button onClick={() => setShowUploadModal(true)} className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md">Excel-Import</button>
+                <button onClick={handleAddNewPerson} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow-md"> + Neue Person </button>
+            </div>
+        </div>
         <div className="mb-8 p-4 bg-white shadow rounded-lg"><label htmlFor="skill-search" className="block text-sm font-medium text-gray-700 mb-1">Nach Skill suchen:</label><div className="flex gap-2"><input id="skill-search" type="text" placeholder="z.B. Python, Tableau..." value={skillSearchTerm} onChange={e => setSkillSearchTerm(e.target.value)} className="flex-grow mt-1 block w-full px-3 py-2 border rounded-md shadow-sm"/>{skillSearchTerm && (<button onClick={() => setSkillSearchTerm('')} className="mt-1 px-4 py-2 border rounded-md text-sm">Filter löschen</button>)}</div></div>
         {showForm && (<div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-40 p-4" onClick={handleFormClose}><div className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}><PersonFormular personToEdit={editingPerson} onFormClose={handleFormClose} /></div></div>)}
-        <PersonenListe personenToDisplay={filteredPersonen} onEditPerson={handleEditPerson} onDeleteInitiation={handleDeleteInitiation} onSkillClick={handleSkillClick}/><ConfirmModal isOpen={showDeleteModal} title="Person löschen" message={`Möchten Sie ${personToDelete?.name || 'diese Person'} wirklich löschen?`} onConfirm={confirmDelete} onCancel={cancelDelete}/>
+        <PersonenListe personenToDisplay={filteredPersonen} onEditPerson={handleEditPerson} onDeleteInitiation={handleDeleteInitiation} onSkillClick={handleSkillClick}/>
+        <ConfirmModal isOpen={showDeleteModal} title="Person löschen" message={`Möchten Sie ${personToDelete?.name || 'diese Person'} wirklich löschen?`} onConfirm={confirmDelete} onCancel={cancelDelete}/>
+        <ExcelUploadModal isOpen={showUploadModal} onClose={() => setShowUploadModal(false)} />
     </div>
   );
 };
