@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { updatePassword } from 'firebase/auth';
 import { auth } from '../../firebase/config';
+import { ErrorOverlay } from '../ui/ErrorOverlay';
 
 export const ChangePasswordModal = ({ isOpen, onClose }) => {
     const [newPassword, setNewPassword] = useState('');
@@ -44,7 +45,6 @@ export const ChangePasswordModal = ({ isOpen, onClose }) => {
                         <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700">Neues Passwort bestätigen</label>
                         <input id="confirm-password" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"/>
                     </div>
-                    {error && <p className="text-sm text-red-500">{error}</p>}
                     {success && <p className="text-sm text-green-600">{success}</p>}
                     <div className="flex justify-end space-x-3 pt-4">
                         <button type="button" onClick={onClose} disabled={loading} className="px-4 py-2 border rounded-md text-sm">Abbrechen</button>
@@ -52,6 +52,7 @@ export const ChangePasswordModal = ({ isOpen, onClose }) => {
                     </div>
                 </form>
             </div>
+            <ErrorOverlay message={error} onClose={() => setError('')} />
         </div>
     );
 };

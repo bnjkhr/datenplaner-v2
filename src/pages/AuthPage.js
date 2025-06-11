@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { auth } from '../firebase/config';
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
+import { ErrorOverlay } from '../components/ui/ErrorOverlay';
 
 const AuthPage = () => {
   const [email, setEmail] = useState('');
@@ -75,7 +76,7 @@ const AuthPage = () => {
         </p>
 
         {message && <p className="mt-4 text-green-600 text-center">{message}</p>}
-        {error && <p className="mt-4 text-red-600 text-center">{error}</p>}
+        <ErrorOverlay message={error} onClose={() => setError('')} />
       </div>
     </div>
   );
