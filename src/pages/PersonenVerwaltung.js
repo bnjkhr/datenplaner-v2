@@ -130,7 +130,7 @@ const PersonenVerwaltung = () => {
   return (
     
     <div className="container mx-auto px-4 py-8">
-       <div className="flex justify-between items-center mb-6"><h1 className="text-3xl font-bold text-gray-800">Personenverwaltung</h1><div className="flex gap-2"><button onClick={handleAddNewPerson} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow-md"> + Neue Person </button>
+       <div className="flex justify-between items-center mb-6"><h1 className="text-3xl font-bold text-gray-800">Personenverwaltung</h1><div className="flex flex-col sm:flex-row sm:justify-end gap-2 w-full sm:w-auto"><button onClick={handleAddNewPerson} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow-md"> + Neue Person </button>
         <button
   onClick={
     () => setShowExcelModal(true)}
