@@ -1,22 +1,6 @@
 import React, { useState, createContext, useContext, useEffect, useCallback } from 'react';
 import { db, appId } from '../firebase/config';
-<<<<<<< HEAD
-import { ErrorOverlay } from '../components/ui/ErrorOverlay';
-import {
-  collection,
-  doc,
-  addDoc,
-  getDocs,
-  updateDoc,
-  deleteDoc,
-  onSnapshot,
-  query,
-  where,
-  writeBatch
-} from 'firebase/firestore';
-=======
 import { collection, doc, addDoc, getDocs, updateDoc, deleteDoc, onSnapshot, query, where, writeBatch } from 'firebase/firestore';
->>>>>>> 7c73999 (Excel Upload)
 
 export const DataContext = createContext();
 export const useData = () => useContext(DataContext);
@@ -96,7 +80,6 @@ export const DataProvider = ({ children, isReadOnly }) => {
   return (
     <DataContext.Provider value={{ personen, datenprodukte, rollen, skills, zuordnungen, fuegePersonHinzu, aktualisierePerson, loeschePerson, fuegePersonenImBatchHinzu, erstelleDatenprodukt, aktualisiereDatenprodukt, loescheDatenprodukt, weisePersonDatenproduktRolleZu, entfernePersonVonDatenproduktRolle, fuegeRolleHinzu, aktualisiereRolle, loescheRolle, fuegeSkillHinzu, aktualisiereSkill, loescheSkill, loading, error, setError }}>
       {children}
-      <ErrorOverlay message={error} onClose={() => setError(null)} />
     </DataContext.Provider>
   );
 };
