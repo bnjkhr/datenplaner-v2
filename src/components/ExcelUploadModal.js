@@ -118,27 +118,8 @@ alert("Fehler beim Parsen:\n" + err.message);
 
   return (
     <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-50 p-4" onClick={onClose}>
-<<<<<<< HEAD
-        <div className="bg-white rounded-lg shadow-xl w-full sm:max-w-2xl max-h-[90vh] flex flex-col p-6" onClick={e => e.stopPropagation()}>
-            <h2 className="text-2xl font-semibold text-gray-800 mb-4">Personen per Excel importieren</h2>
-            
-            <div className="bg-blue-50 border border-blue-200 p-4 rounded-md mb-6 text-sm text-blue-800">
-                <h3 className="font-bold mb-2">Anleitung & Format</h3>
-                <p>Laden Sie eine Excel-Datei (.xlsx) hoch. Die erste Zeile muss die Spaltenüberschriften enthalten. Erforderliche Spalten:</p>
-                <ul className="list-disc list-inside mt-2 font-mono text-xs">
-                    <li>Name</li>
-                    <li>Email</li>
-                </ul>
-                <p className="mt-2">Optionale Spalten:</p>
-                 <ul className="list-disc list-inside mt-2 font-mono text-xs">
-                    <li>MS Teams Email</li>
-                    <li>Skills (kommagetrennt)</li>
-                </ul>
-            </div>
-=======
       <div className="bg-white rounded-lg shadow-xl w-full sm:max-w-2xl max-h-[90vh] flex flex-col p-6" onClick={e => e.stopPropagation()}>
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">Personen per Excel importieren</h2>
->>>>>>> 7c73999 (Excel Upload)
 
         <div className="bg-blue-50 border border-blue-200 p-4 rounded-md mb-6 text-sm text-blue-800">
           <h3 className="font-bold mb-2">Anleitung & Format</h3>
