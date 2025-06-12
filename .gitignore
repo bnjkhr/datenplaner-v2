@@ -18,3 +18,4 @@ yarn-error.log*
 .env.development.local
 .env.test.local
 .env.production.local
+datenprodukt-planer-app-firebase-adminsdk-*.json

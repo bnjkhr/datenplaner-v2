@@ -34,7 +34,11 @@ export const ChangePasswordModal = ({ isOpen, onClose }) => {
 
     return (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50 p-4" onClick={onClose}>
+<<<<<<< HEAD
             <div className="bg-white p-6 rounded-lg shadow-xl w-full sm:max-w-md" onClick={e => e.stopPropagation()}>
+=======
+           <div className="bg-white p-6 rounded-lg shadow-xl w-full sm:max-w-md" onClick={e => e.stopPropagation()}>
+>>>>>>> 7c73999 (Excel Upload)
                 <h2 className="text-2xl font-semibold text-gray-700 mb-6">Passwort ändern</h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
