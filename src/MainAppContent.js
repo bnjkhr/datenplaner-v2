@@ -8,14 +8,31 @@ import { DatenproduktVerwaltung } from './pages/DatenproduktVerwaltung';
 import { Auswertungen } from './pages/Auswertungen';
 import { RollenVerwaltung } from './pages/RollenVerwaltung';
 import { SkillsVerwaltung } from './pages/SkillsVerwaltung'; // NEU
+import { useData } from './context/DataProvider';
 
 
-const AppFooter = ({ user }) => (
+const AppFooter = ({ user }) => {
+  const { lastChange } = useData();
+  return (
     <footer className="bg-white shadow-inner mt-auto py-4 text-center">
-      {user && ( <div className="mb-2 text-sm text-gray-600">Angemeldet als: <span className="font-semibold">{user.email}</span></div> )}
-      <p className="text-sm text-gray-500">&copy; {new Date().getFullYear()} Dein Datenprodukt Planungs-Tool</p>
+      {user && (
+        <div className="mb-2 text-sm text-gray-600">
+          Angemeldet als: <span className="font-semibold">{user.email}</span>
+        </div>
+      )}
+      {lastChange && (
+        <div className="mb-2 text-sm text-gray-600">
+          Letzte Änderung: {lastChange.description} am{' '}
+          {new Date(lastChange.timestamp).toLocaleString('de-DE')} von{' '}
+          <span className="font-semibold">{lastChange.userEmail}</span>
+        </div>
+      )}
+      <p className="text-sm text-gray-500">
+        &copy; {new Date().getFullYear()} Dein Datenprodukt Planungs-Tool
+      </p>
     </footer>
 );
+};
 
 export const MainAppContent = ({ user }) => {
   const [currentPage, setCurrentPage] = useState('personen'); 

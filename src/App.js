@@ -31,7 +31,7 @@ function App() {
         {!user ? (
             <AuthPage />
         ) : (
-            <DataProvider>
+            <DataProvider user={user}>
                 <MainAppContent user={user} />
             </DataProvider>
         )}
