@@ -1,6 +1,6 @@
 import React, { useState, createContext, useContext, useEffect, useCallback } from 'react';
 import { db, appId } from '../firebase/config';
-import { collection, doc, addDoc, getDocs, updateDoc, deleteDoc, onSnapshot, query, where, writeBatch } from 'firebase/firestore';
+import { collection, doc, addDoc, getDocs, updateDoc, deleteDoc, onSnapshot, query, where, writeBatch, setDoc } from 'firebase/firestore';
 
 export const DataContext = createContext();
 export const useData = () => useContext(DataContext);
@@ -17,16 +17,39 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastChange, setLastChange] = useState(null);
+  const lastChangeRef = doc(db, `artifacts/${appId}/public/meta`);
 
-  const recordLastChange = (description) => {
-    setLastChange({
+
+  const recordLastChange = async (description) => {
+    const change = {
       description,
       userEmail: user?.email || 'Unbekannt',
-      timestamp: new Date().toISOString(),
-    });
+      timestamp: new Date(),
+    };
+    setLastChange(change);
+    try {
+      await setDoc(lastChangeRef, { lastChange: change }, { merge: true });
+    } catch (e) {
+      console.error('Error updating last change:', e);
+    }
+    setLastChange(change);
+    try {
+      await setDoc(lastChangeRef, { lastChange: change }, { merge: true });
+    } catch (e) {
+      console.error('Error updating last change:', e);
+    }
   };
 
   const getCollectionPath = useCallback((name) => `/artifacts/${appId}/public/data/${name}`, []);
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(lastChangeRef, (snapshot) => {
+      if (snapshot.exists()) {
+        setLastChange(snapshot.data().lastChange || null);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     setLoading(true); setError(null);
@@ -37,7 +60,7 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
     ];
     let loadedCount = 0;
     const checkAllLoaded = () => { if (++loadedCount >= collections.length) setLoading(false); };
-    
+
     const unsubscribes = collections.map(({ path, setter }) => {
         const q = query(collection(db, path));
         return onSnapshot(q, (snapshot) => {
@@ -50,11 +73,20 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
     return () => unsubscribes.forEach(unsub => unsub());
   }, [getCollectionPath]);
 
+  useEffect(() => {
+    const unsubscribe = onSnapshot(lastChangeRef, (snapshot) => {
+      if (snapshot.exists()) {
+        setLastChange(snapshot.data().lastChange || null);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
   const preventWriteActions = (func) => async (...args) => {
     if (isReadOnly) { setError("Diese Aktion ist im Nur-Lese-Modus nicht verfügbar."); setTimeout(() => setError(null), 3000); return null; }
     setError(null); return func(...args);
   };
-  
+
   const fuegePersonHinzu = preventWriteActions(async (personDaten) => {
     try {
       const docRef = await addDoc(collection(db, getCollectionPath('personen')), {
@@ -70,7 +102,7 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
       return null;
     }
   });
-  
+
   const fuegePersonenImBatchHinzu = preventWriteActions(async (personenArray) => {
     if (!personenArray || personenArray.length === 0) {
       setError("Keine Personen zum Hinzufügen vorhanden.");
@@ -230,7 +262,7 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
       return null;
     }
   });
-  
+
   // HIER WAR DER FEHLER: `preventInDemo` wurde zu `preventWriteActions` korrigiert
   const aktualisiereRolle = preventWriteActions(async (rolleId, rollenName) => {
     if (!rollenName?.trim()) return false;
@@ -263,7 +295,7 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
       return false;
     }
   });
-  
+
   const fuegeSkillHinzu = preventWriteActions(async (skillName, color) => {
     if (!skillName?.trim()) return null;
     const colorToUse = color || getRandomColor();
@@ -319,4 +351,3 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
     </DataContext.Provider>
   );
 };
-

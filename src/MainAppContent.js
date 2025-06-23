@@ -13,6 +13,11 @@ import { useData } from './context/DataProvider';
 
 const AppFooter = ({ user }) => {
   const { lastChange } = useData();
+  const formatTimestamp = (ts) => {
+    if (!ts) return '';
+    const dateObj = ts.toDate ? ts.toDate() : new Date(ts);
+    return dateObj.toLocaleString('de-DE');
+  };
   return (
     <footer className="bg-white shadow-inner mt-auto py-4 text-center">
       {user && (
@@ -23,7 +28,7 @@ const AppFooter = ({ user }) => {
       {lastChange && (
         <div className="mb-2 text-sm text-gray-600">
           Letzte Änderung: {lastChange.description} am{' '}
-          {new Date(lastChange.timestamp).toLocaleString('de-DE')} von{' '}
+          {formatTimestamp(lastChange.timestamp)} von{' '}
           <span className="font-semibold">{lastChange.userEmail}</span>
         </div>
       )}
@@ -31,7 +36,8 @@ const AppFooter = ({ user }) => {
         &copy; {new Date().getFullYear()} Dein Datenprodukt Planungs-Tool
       </p>
     </footer>
-);
+  );
+
 };
 
 export const MainAppContent = ({ user }) => {
