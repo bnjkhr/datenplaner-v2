@@ -11,6 +11,9 @@ const firebaseConfig = {
   appId: process.env.REACT_APP_FIREBASE_APP_ID
 };
 
+// URL zum Abonnieren des Confluence-Kalenders
+export const confluenceCalendarUrl = process.env.REACT_APP_CONFLUENCE_CALENDAR_URL;
+
 
 // --- App ID for Firestore paths ---
 export const appId = 'datenplaner-app-v3';

@@ -1,5 +1,6 @@
 import React, { useState, createContext, useContext, useEffect, useCallback } from 'react';
-import { db, appId } from '../firebase/config';
+import { db, appId, confluenceCalendarUrl } from '../firebase/config';
+import { fetchCalendarEvents } from '../utils/calendar';
 import { collection, doc, addDoc, getDocs, updateDoc, deleteDoc, onSnapshot, query, where, writeBatch, setDoc } from 'firebase/firestore';
 
 export const DataContext = createContext();
@@ -14,9 +15,11 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
   const [rollen, setRollen] = useState([]);
   const [skills, setSkills] = useState([]);
   const [zuordnungen, setZuordnungen] = useState([]);
+  const [urlaube, setUrlaube] = useState([]); // neu: Urlaubs-Daten
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastChange, setLastChange] = useState(null);
+  const [vacations, setVacations] = useState({});
   const lastChangeRef = doc(db, `artifacts/${appId}/public/meta`);
 
 
@@ -26,12 +29,6 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
       userEmail: user?.email || 'Unbekannt',
       timestamp: new Date(),
     };
-    setLastChange(change);
-    try {
-      await setDoc(lastChangeRef, { lastChange: change }, { merge: true });
-    } catch (e) {
-      console.error('Error updating last change:', e);
-    }
     setLastChange(change);
     try {
       await setDoc(lastChangeRef, { lastChange: change }, { merge: true });
@@ -52,11 +49,31 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
   }, []);
 
   useEffect(() => {
+    const loadVacations = async () => {
+      if (!confluenceCalendarUrl) return;
+      const events = await fetchCalendarEvents(confluenceCalendarUrl);
+      const mapping = {};
+      events.forEach((ev) => {
+        (ev.attendees || []).forEach((mail) => {
+          if (!mapping[mail]) mapping[mail] = [];
+          mapping[mail].push({ start: ev.start, end: ev.end, summary: ev.summary });
+        });
+      });
+      setVacations(mapping);
+    };
+    loadVacations();
+  }, [confluenceCalendarUrl]);
+
+
+  useEffect(() => {
     setLoading(true); setError(null);
     const collections = [
-      { path: getCollectionPath('personen'), setter: setPersonen }, { path: getCollectionPath('datenprodukte'), setter: setDatenprodukte },
-      { path: getCollectionPath('zuordnungen'), setter: setZuordnungen }, { path: getCollectionPath('rollen'), setter: setRollen },
-      { path: getCollectionPath('skills'), setter: setSkills }
+      { path: getCollectionPath('personen'), setter: setPersonen },
+      { path: getCollectionPath('datenprodukte'), setter: setDatenprodukte },
+      { path: getCollectionPath('zuordnungen'), setter: setZuordnungen },
+      { path: getCollectionPath('rollen'), setter: setRollen },
+      { path: getCollectionPath('skills'), setter: setSkills },
+      { path: getCollectionPath('urlaube'), setter: setUrlaube }, // neu
     ];
     let loadedCount = 0;
     const checkAllLoaded = () => { if (++loadedCount >= collections.length) setLoading(false); };
@@ -73,14 +90,7 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
     return () => unsubscribes.forEach(unsub => unsub());
   }, [getCollectionPath]);
 
-  useEffect(() => {
-    const unsubscribe = onSnapshot(lastChangeRef, (snapshot) => {
-      if (snapshot.exists()) {
-        setLastChange(snapshot.data().lastChange || null);
-      }
-    });
-    return () => unsubscribe();
-  }, []);
+  
 
   const preventWriteActions = (func) => async (...args) => {
     if (isReadOnly) { setError("Diese Aktion ist im Nur-Lese-Modus nicht verfügbar."); setTimeout(() => setError(null), 3000); return null; }
@@ -263,7 +273,6 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
     }
   });
 
-  // HIER WAR DER FEHLER: `preventInDemo` wurde zu `preventWriteActions` korrigiert
   const aktualisiereRolle = preventWriteActions(async (rolleId, rollenName) => {
     if (!rollenName?.trim()) return false;
     try {
@@ -346,8 +355,7 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
   });
 
   return (
-    <DataContext.Provider value={{ personen, datenprodukte, rollen, skills, zuordnungen, fuegePersonHinzu, aktualisierePerson, loeschePerson, fuegePersonenImBatchHinzu, erstelleDatenprodukt, aktualisiereDatenprodukt, loescheDatenprodukt, weisePersonDatenproduktRolleZu, entfernePersonVonDatenproduktRolle, fuegeRolleHinzu, aktualisiereRolle, loescheRolle, fuegeSkillHinzu, aktualisiereSkill, loescheSkill, loading, error, setError, lastChange }}>
-      {children}
-    </DataContext.Provider>
+<DataContext.Provider value={{ personen, datenprodukte, rollen, skills, zuordnungen, urlaube, fuegePersonHinzu, aktualisierePerson, loeschePerson, fuegePersonenImBatchHinzu, erstelleDatenprodukt, aktualisiereDatenprodukt, loescheDatenprodukt, weisePersonDatenproduktRolleZu, entfernePersonVonDatenproduktRolle, fuegeRolleHinzu, aktualisiereRolle, loescheRolle, fuegeSkillHinzu, aktualisiereSkill, loescheSkill, loading, error, setError, lastChange }}>
+      {children}    </DataContext.Provider>
   );
 };

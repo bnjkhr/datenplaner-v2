@@ -81,10 +81,12 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
 };
 
 const PersonEintrag = ({ person, onEdit, onDeleteInitiation, onSkillClick }) => {
-  const { name, email, skillIds, msTeamsLink } = person; 
-  const { datenprodukte, zuordnungen, rollen, skills: allSkills } = useData();
+  const { name, email, skillIds, msTeamsLink } = person;
+  const { datenprodukte, zuordnungen, rollen, skills: allSkills, vacations } = useData();
 
-  const personAssignments = zuordnungen.filter(z => z.personId === person.id).map(assignment => {
+  const personAssignments = zuordnungen
+    .filter(z => z.personId === person.id)
+    .map(assignment => {
       const produkt = datenprodukte.find(dp => dp.id === assignment.datenproduktId);
       const rolleInProdukt = rollen.find(r => r.id === assignment.rolleId);
       return { produktName: produkt?.name || '...', rolleName: rolleInProdukt?.name || '...', assignmentId: assignment.id, };
