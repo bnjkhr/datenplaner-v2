@@ -1,12 +1,22 @@
 const express = require('express');
 const dotenv = require('dotenv');
+const cors = require('cors');
+
 
 // Load environment variables from .env if available
 dotenv.config();
 
 const app = express();
+const allowedOrigin = process.env.CORS_ORIGIN;
+
 const PORT = process.env.CALENDAR_PROXY_PORT || 3001;
 const sourceUrl = process.env.CALENDAR_PROXY_SOURCE_URL;
+
+if (allowedOrigin) {
+  app.use(cors({ origin: allowedOrigin }));
+} else {
+  app.use(cors());
+}
 
 if (!sourceUrl) {
   console.error('Missing CALENDAR_PROXY_SOURCE_URL environment variable');
