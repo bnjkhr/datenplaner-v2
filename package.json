@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
     "express": "^5.1.0",
     "firebase": "^9.6.1",
     "firebase-admin": "^13.4.0",
@@ -13,9 +15,7 @@
     "react-scripts": "5.0.1",
     "recharts": "^2.15.3",
     "uuid": "^8.3.2",
-    "xlsx": "^0.18.5",
-    "dotenv": "^10.0.0",
-    "cors": "^2.8.5"
+    "xlsx": "^0.18.5"
   },
   "scripts": {
     "start": "react-scripts start",
