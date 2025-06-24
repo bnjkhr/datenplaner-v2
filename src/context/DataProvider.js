@@ -53,6 +53,7 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
       const url = calendarProxyUrl || confluenceCalendarUrl;
       if (!url) return;
       const events = await fetchCalendarEvents(url);
+      console.log('Geladene Events', events);
       const upcoming = events.filter((ev) => new Date(ev.end) >= new Date());
 
       const mapping = {};
