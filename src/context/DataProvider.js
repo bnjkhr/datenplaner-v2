@@ -56,9 +56,10 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
 
       const mapping = {};
       upcoming.forEach((ev) => {
-        (ev.attendees || []).forEach((mail) => {
-          if (!mapping[mail]) mapping[mail] = [];
-          mapping[mail].push({ start: ev.start, end: ev.end, summary: ev.summary });
+        (ev.attendees || []).forEach((name) => {
+          const key = name.toLowerCase();
+          if (!mapping[key]) mapping[key] = [];
+          mapping[key].push({ start: ev.start, end: ev.end, summary: ev.summary });
         });
       });
       setVacations(mapping);
@@ -357,6 +358,6 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
   });
 
   return (
-<DataContext.Provider value={{ personen, datenprodukte, rollen, skills, zuordnungen, urlaube, vacations, fuegePersonHinzu, aktualisierePerson, loeschePerson, fuegePersonenImBatchHinzu, erstelleDatenprodukt, aktualisiereDatenprodukt, loescheDatenprodukt, weisePersonDatenproduktRolleZu, entfernePersonVonDatenproduktRolle, fuegeRolleHinzu, aktualisiereRolle, loescheRolle, fuegeSkillHinzu, aktualisiereSkill, loescheSkill, loading, error, setError, lastChange }}>      {children}    </DataContext.Provider>
+<DataContext.Provider value={{ personen, datenprodukte, rollen, skills, zuordnungen, urlaube, vacations, fuegePersonHinzu, aktualisierePerson, loeschePerson, fuegePersonenImBatchHinzu, erstelleDatenprodukt, aktualisiereDatenprodukt, loescheDatenprodukt, weisePersonDatenproduktRolleZu, entfernePersonVonDatenproduktRolle, fuegeRolleHinzu, aktualisiereRolle, loescheRolle, fuegeSkillHinzu, aktualisiereSkill, loescheSkill, loading, error, setError, lastChange }}>       {children}    </DataContext.Provider>
   );
 };

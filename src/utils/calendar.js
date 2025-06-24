@@ -12,9 +12,14 @@ export async function fetchCalendarEvents(url) {
       const event = new ICAL.Event(evComp);
       const attendeeProps = evComp.getAllProperties('attendee') || [];
       const attendees = attendeeProps.map((p) => {
+        const cn = p.getParameter('CN');
         const paramEmail = p.getParameter('EMAIL');
-        const value = paramEmail ? paramEmail : String(p.getFirstValue());
-        return value.replace(/^mailto:/i, '').toLowerCase();
+        const value = String(p.getFirstValue() || '');
+        const email = paramEmail ? paramEmail : value;
+
+        if (cn) return cn.trim();
+        if (email) return email.replace(/^mailto:/i, '').trim();
+        return (event.summary || '').trim();
       });
       return {
         summary: event.summary,
