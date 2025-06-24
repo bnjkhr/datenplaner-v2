@@ -1,5 +1,9 @@
 import ICAL from 'ical.js';
 
+function cleanName(name) {
+  return name.replace(/\s*\(.*?\)\s*$/, '').trim();
+}
+
 export async function fetchCalendarEvents(url) {
   if (!url) return [];
   try {
@@ -17,9 +21,9 @@ export async function fetchCalendarEvents(url) {
         const value = String(p.getFirstValue() || '');
         const email = paramEmail ? paramEmail : value;
 
-        if (cn) return cn.trim();
-        if (email) return email.replace(/^mailto:/i, '').trim();
-        return (event.summary || '').trim();
+        if (cn) return cleanName(cn.trim());
+        if (email) return cleanName(email.replace(/^mailto:/i, '').trim());
+        return cleanName((event.summary || '').trim());
       });
       return {
         summary: event.summary,
