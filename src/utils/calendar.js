@@ -25,6 +25,7 @@ export async function fetchCalendarEvents(url) {
         if (email) return cleanName(email.replace(/^mailto:/i, '').trim());
         return cleanName((event.summary || '').trim());
       });
+      console.log('Attendees:', attendees);
       return {
         summary: event.summary,
         start: event.startDate.toJSDate(),
