@@ -52,8 +52,10 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
     const loadVacations = async () => {
       if (!confluenceCalendarUrl) return;
       const events = await fetchCalendarEvents(confluenceCalendarUrl);
+      const upcoming = events.filter((ev) => new Date(ev.end) >= new Date());
+
       const mapping = {};
-      events.forEach((ev) => {
+      upcoming.forEach((ev) => {
         (ev.attendees || []).forEach((mail) => {
           if (!mapping[mail]) mapping[mail] = [];
           mapping[mail].push({ start: ev.start, end: ev.end, summary: ev.summary });
@@ -355,7 +357,6 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
   });
 
   return (
-<DataContext.Provider value={{ personen, datenprodukte, rollen, skills, zuordnungen, urlaube, fuegePersonHinzu, aktualisierePerson, loeschePerson, fuegePersonenImBatchHinzu, erstelleDatenprodukt, aktualisiereDatenprodukt, loescheDatenprodukt, weisePersonDatenproduktRolleZu, entfernePersonVonDatenproduktRolle, fuegeRolleHinzu, aktualisiereRolle, loescheRolle, fuegeSkillHinzu, aktualisiereSkill, loescheSkill, loading, error, setError, lastChange }}>
-      {children}    </DataContext.Provider>
+<DataContext.Provider value={{ personen, datenprodukte, rollen, skills, zuordnungen, urlaube, vacations, fuegePersonHinzu, aktualisierePerson, loeschePerson, fuegePersonenImBatchHinzu, erstelleDatenprodukt, aktualisiereDatenprodukt, loescheDatenprodukt, weisePersonDatenproduktRolleZu, entfernePersonVonDatenproduktRolle, fuegeRolleHinzu, aktualisiereRolle, loescheRolle, fuegeSkillHinzu, aktualisiereSkill, loescheSkill, loading, error, setError, lastChange }}>      {children}    </DataContext.Provider>
   );
 };
