@@ -27,7 +27,7 @@ npm run proxy
 Die `.env` muss dafuer beispielsweise diese Eintraege enthalten:
 
 ```
-REACT_APP_CALENDAR_PROXY_URL=https://datenplaner-v2.vercel.app/calendar
+REACT_APP_CALENDAR_PROXY_URL=https://datenplaner-v2.vercel.app/api/calendar
 CALENDAR_PROXY_SOURCE_URL=<iCal-URL aus Confluence>
 ```
 
