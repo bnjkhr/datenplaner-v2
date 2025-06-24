@@ -15,3 +15,20 @@ REACT_APP_CONFLUENCE_CALENDAR_URL=<iCal-URL aus Confluence>
 Die Variable `REACT_APP_CONFLUENCE_CALENDAR_URL` zeigt auf den iCalendar-Feed Ihres Confluence Kalenders. Die Anwendung lädt darüber Urlaubszeiten und ordnet sie den Personen anhand ihrer Namen zu.
 
 Starten Sie die Entwicklungsumgebung wie gewohnt mit `npm start`.
+
+## Kalender-Proxy
+
+Fuer den Kalender-Proxy wird Node 18 oder neuer benoetigt, da `fetch` dort bereits integriert ist (alternativ `node-fetch` installieren). Starten Sie den Proxy mit
+
+```
+npm run proxy
+```
+
+Die `.env` muss dafuer beispielsweise diese Eintraege enthalten:
+
+```
+REACT_APP_CALENDAR_PROXY_URL=https://datenplaner-v2.vercel.app/calendar
+CALENDAR_PROXY_SOURCE_URL=<iCal-URL aus Confluence>
+```
+
+Ist `REACT_APP_CALENDAR_PROXY_URL` gesetzt, laedt das Frontend den Kalender ueber diesen Proxy.
