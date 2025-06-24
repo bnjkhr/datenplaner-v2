@@ -1,31 +1,31 @@
-// proxy-server.js
-const express = require("express");
-const fetch = require("node-fetch");
-const cors = require("cors");
+const express = require('express');
+const dotenv = require('dotenv');
+
+// Load environment variables from .env if available
+dotenv.config();
 
 const app = express();
-const PORT = 4000;
+const PORT = process.env.CALENDAR_PROXY_PORT || 3001;
+const sourceUrl = process.env.CALENDAR_PROXY_SOURCE_URL;
 
-app.use(cors());
+if (!sourceUrl) {
+  console.error('Missing CALENDAR_PROXY_SOURCE_URL environment variable');
+  process.exit(1);
+}
 
-app.get("/calendar", async (req, res) => {
+app.get('/calendar', async (_req, res) => {
   try {
-    const calendarUrl = "https://confluence.ard.de/rest/calendar-services/1.0/calendar/export/subcalendar/private/68490163a561512e0772ceaa1719605de6dce90e.ics";
-    const response = await fetch(calendarUrl);
-
-    if (!response.ok) {
-      return res.status(response.status).send("Fehler beim Abrufen der ICS-Datei.");
-    }
-
+    const response = await fetch(sourceUrl);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.text();
-    res.setHeader("Content-Type", "text/calendar");
+    res.header('Content-Type', 'text/calendar');
     res.send(data);
-  } catch (error) {
-    console.error("Fehler beim Abrufen:", error);
-    res.status(500).send("Interner Serverfehler");
+  } catch (err) {
+    console.error('Error fetching calendar:', err);
+    res.status(500).send('Error fetching calendar');
   }
 });
 
 app.listen(PORT, () => {
-  console.log(`Proxy läuft auf http://localhost:${PORT}`);
+  console.log(`Calendar proxy running on port ${PORT}`);
 });

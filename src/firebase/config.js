@@ -13,6 +13,8 @@ const firebaseConfig = {
 
 // URL zum Abonnieren des Confluence-Kalenders
 export const confluenceCalendarUrl = process.env.REACT_APP_CONFLUENCE_CALENDAR_URL;
+export const calendarProxyUrl = process.env.REACT_APP_CALENDAR_PROXY_URL;
+
 
 
 // --- App ID for Firestore paths ---
