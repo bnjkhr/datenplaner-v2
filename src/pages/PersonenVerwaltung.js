@@ -226,7 +226,7 @@ const PersonEintrag = ({
   return (
     <div className="bg-white shadow-lg rounded-xl p-6 hover:shadow-2xl flex flex-col justify-between">
       <div>
-        <div className="flex justify-between items-start mb-2">
+        <div className="flex justify-between items-start">
           <h3 className="text-xl font-bold text-indigo-700 break-words mr-2">
             {name}
           </h3>
