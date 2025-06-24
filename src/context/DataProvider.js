@@ -62,6 +62,7 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
           mapping[key].push({ start: ev.start, end: ev.end, summary: ev.summary });
         });
       });
+      console.log('Vacation mapping keys:', Object.keys(mapping));
       setVacations(mapping);
     };
     loadVacations();
