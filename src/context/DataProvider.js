@@ -1,6 +1,6 @@
 import React, { useState, createContext, useContext, useEffect, useCallback } from 'react';
 import { db, appId, confluenceCalendarUrl, calendarProxyUrl } from '../firebase/config';
-import { fetchCalendarEvents } from '../../api/calendar';
+import { fetchCalendarEvents } from '../api/calendar';
 import { collection, doc, addDoc, getDocs, updateDoc, deleteDoc, onSnapshot, query, where, writeBatch, setDoc } from 'firebase/firestore';
 
 export const DataContext = createContext();
