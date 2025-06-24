@@ -12,6 +12,6 @@ REACT_APP_FIREBASE_APP_ID=<Ihre App ID>
 REACT_APP_CONFLUENCE_CALENDAR_URL=<iCal-URL aus Confluence>
 ```
 
-Die Variable `REACT_APP_CONFLUENCE_CALENDAR_URL` zeigt auf den iCalendar-Feed Ihres Confluence Kalenders. Die Anwendung lädt darüber Urlaubszeiten und ordnet sie den Personen anhand ihrer E-Mail-Adresse zu.
+Die Variable `REACT_APP_CONFLUENCE_CALENDAR_URL` zeigt auf den iCalendar-Feed Ihres Confluence Kalenders. Die Anwendung lädt darüber Urlaubszeiten und ordnet sie den Personen anhand ihrer Namen zu.
 
 Starten Sie die Entwicklungsumgebung wie gewohnt mit `npm start`.

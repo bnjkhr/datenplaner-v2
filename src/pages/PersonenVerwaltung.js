@@ -83,7 +83,7 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
 const PersonEintrag = ({ person, onEdit, onDeleteInitiation, onSkillClick }) => {
   const { name, email, skillIds, msTeamsLink } = person;
   const { datenprodukte, zuordnungen, rollen, skills: allSkills, vacations } = useData();
-  const upcomingVacations = (vacations[email.toLowerCase()] || []).filter(
+  const upcomingVacations = (vacations[person.name.toLowerCase()] || []).filter(
     v => new Date(v.end) >= new Date()
   );
 
