@@ -1,5 +1,5 @@
 import React, { useState, createContext, useContext, useEffect, useCallback } from 'react';
-import { db, appId, confluenceCalendarUrl } from '../firebase/config';
+import { db, appId, confluenceCalendarUrl, calendarProxyUrl } from '../firebase/config';
 import { fetchCalendarEvents } from '../utils/calendar';
 import { collection, doc, addDoc, getDocs, updateDoc, deleteDoc, onSnapshot, query, where, writeBatch, setDoc } from 'firebase/firestore';
 
@@ -50,8 +50,9 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
 
   useEffect(() => {
     const loadVacations = async () => {
-      if (!confluenceCalendarUrl) return;
-      const events = await fetchCalendarEvents(confluenceCalendarUrl);
+      const url = calendarProxyUrl || confluenceCalendarUrl;
+      if (!url) return;
+      const events = await fetchCalendarEvents(url);
       const upcoming = events.filter((ev) => new Date(ev.end) >= new Date());
 
       const mapping = {};
@@ -66,7 +67,7 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
       setVacations(mapping);
     };
     loadVacations();
-  }, [confluenceCalendarUrl]);
+  }, [calendarProxyUrl, confluenceCalendarUrl]);
 
 
   useEffect(() => {
