@@ -1,5 +1,10 @@
+Version 1.1.0 - 24.6.2025
+-------------------------
+* Notizen zu Datenprodukten hinzufügen
+* Letzte Änderung im Footer sichtbar
+
 Version 1.2.0 - 25.6.2025
------------------------
+-------------------------
 * Neues Menü "Was ist neu?" mit aktuellen Infos
 * Verbesserte Performance beim Laden von Daten
 * Kleinere Fehlerbehebungen
