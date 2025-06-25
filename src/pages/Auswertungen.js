@@ -12,6 +12,7 @@ import {
   Cell,
 } from "recharts";
 import * as XLSX from "xlsx"; // Import der xlsx-Bibliothek
+import { CollapsibleSection } from "../components/ui/CollapsibleSection";
 
 export const Auswertungen = () => {
   const {
@@ -167,10 +168,7 @@ export const Auswertungen = () => {
       </div>
 
       {/* Tabellarische Übersicht */}
-      <div className="p-6 bg-white shadow-lg rounded-xl">
-        <h2 className="text-xl font-semibold text-gray-700 mb-4">
-          Tabellarische Übersicht der Auslastung
-        </h2>
+      <CollapsibleSection title="Tabellarische Übersicht der Auslastung">
         {tableData.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -238,13 +236,10 @@ export const Auswertungen = () => {
             Keine Daten vorhanden.
           </p>
         )}
-      </div>
+      </CollapsibleSection>
 
       {/* Grafische Auswertungen */}
-      <div className="p-6 bg-white shadow-lg rounded-xl">
-        <h2 className="text-xl font-semibold text-gray-700 mb-4">
-          Grafische Auswertungen
-        </h2>
+      <CollapsibleSection title="Grafische Auswertungen">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           <div>
             <h3 className="text-lg font-medium text-gray-600 mb-4">
@@ -314,13 +309,10 @@ export const Auswertungen = () => {
             )}
           </div>
         </div>
-      </div>
+      </CollapsibleSection>
 
       {/* Skill-Analyse */}
-      <div className="p-6 bg-white shadow-lg rounded-xl">
-        <h2 className="text-xl font-semibold text-gray-700 mb-4">
-          Skill-Analyse
-        </h2>
+      <CollapsibleSection title="Skill-Analyse">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
             <h3 className="text-lg font-medium text-gray-600 mb-2">
@@ -371,7 +363,7 @@ export const Auswertungen = () => {
             )}
           </div>
         </div>
-      </div>
+      </CollapsibleSection>
     </div>
   );
 };

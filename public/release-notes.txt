@@ -12,3 +12,4 @@ Version 1.2.0 - 25.6.2025
 Version 1.3.0 - 25.6.2025
 -------------------------
 * Grafische Auswertung von Personen überarbeitet
+* Grafische Auswertungen lassen sich jetzt einklappen 
