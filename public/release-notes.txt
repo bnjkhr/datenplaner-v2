@@ -8,3 +8,7 @@ Version 1.2.0 - 25.6.2025
 * Neues Menü "Was ist neu?" mit aktuellen Infos
 * Verbesserte Performance beim Laden von Daten
 * Kleinere Fehlerbehebungen
+
+Version 1.3.0 - 25.6.2025
+-------------------------
+* Grafische Auswertung von Personen überarbeitet
