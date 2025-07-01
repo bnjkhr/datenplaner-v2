@@ -19,3 +19,4 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 datenprodukt-planer-app-firebase-adminsdk-*.json
+.vercel

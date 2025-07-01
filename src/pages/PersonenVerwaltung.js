@@ -1,87 +1,9 @@
-// src/pages/PersonenVerwaltung.js - Mit Debug-Komponente
+// src/pages/PersonenVerwaltung.js - Production Version
 import React, { useState } from "react";
 import { useData } from "../context/DataProvider";
 import { ConfirmModal } from "../components/ui/ConfirmModal";
 import { TagInput } from "../components/ui/TagInput";
 import { ExcelUploadModal } from "../components/ExcelUploadModal";
-
-// === DEBUG-KOMPONENTE (temporär) ===
-const CalendarDebugComponent = () => {
-  const { vacations, personen } = useData();
-
-  React.useEffect(() => {
-    console.log("=== KALENDER DEBUG ===");
-    console.log("Vacations Objekt:", vacations);
-    console.log("Anzahl Vacation Keys:", Object.keys(vacations).length);
-    console.log("Vacation Keys:", Object.keys(vacations));
-
-    // Zeige Details für jeden Vacation-Key
-    Object.entries(vacations).forEach(([key, events]) => {
-      console.log(`Key "${key}": ${events.length} Events`);
-      events.forEach((event, index) => {
-        console.log(`  Event ${index}:`, {
-          summary: event.summary,
-          start: event.start,
-          end: event.end,
-          isPast: new Date(event.end) < new Date(),
-        });
-      });
-    });
-
-    // Zeige Personen-Namen für Matching
-    console.log("Personen in der App:");
-    personen.forEach((person) => {
-      console.log(
-        `  "${person.name}" -> Keys zu testen:`,
-        [
-          person.name.toLowerCase(),
-          person.name.toLowerCase().replace(/\s+/g, ""),
-          person.email?.toLowerCase(),
-          person.email?.split("@")[0]?.toLowerCase(),
-        ].filter(Boolean)
-      );
-    });
-  }, [vacations, personen]);
-
-  if (Object.keys(vacations).length === 0) {
-    return (
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 m-4">
-        <h3 className="font-semibold text-yellow-800">🔍 Kalender-Debug</h3>
-        <p className="text-yellow-700">
-          Keine Kalenderdaten geladen. Mögliche Probleme:
-        </p>
-        <ul className="list-disc list-inside text-sm text-yellow-600 mt-2">
-          <li>Kalender-URL nicht erreichbar</li>
-          <li>CORS-Problem</li>
-          <li>Kalenderdaten-Format unverständlich</li>
-          <li>Netzwerk-Fehler</li>
-        </ul>
-        <p className="text-xs text-yellow-500 mt-2">
-          Prüfe die Browser-Konsole (F12) für detaillierte Logs
-        </p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 m-4">
-      <h3 className="font-semibold text-blue-800">✅ Kalender-Debug</h3>
-      <p className="text-blue-700">Kalenderdaten erfolgreich geladen!</p>
-      <div className="text-sm text-blue-600 mt-2">
-        <p>
-          <strong>Gefundene Kalender-Keys:</strong>{" "}
-          {Object.keys(vacations).length}
-        </p>
-        <p>
-          <strong>Keys:</strong> {Object.keys(vacations).join(", ")}
-        </p>
-        <p className="text-xs text-blue-500 mt-2">
-          Detaillierte Logs in der Browser-Konsole (F12)
-        </p>
-      </div>
-    </div>
-  );
-};
 
 // --- Helper-Funktion für konsistente Tag-Farben ---
 const tagColors = [
@@ -112,7 +34,6 @@ const getSkillColor = (skillName) => {
   return tagColors[index];
 };
 
-// === VERBESSERTE PERSON-EINTRAG KOMPONENTE ===
 const PersonEintrag = ({
   person,
   onEdit,
@@ -343,9 +264,7 @@ const PersonEintrag = ({
   );
 };
 
-// === REST BLEIBT GLEICH ===
 const PersonFormular = ({ personToEdit, onFormClose }) => {
-  // ... (bleibt unverändert)
   const {
     fuegePersonHinzu,
     aktualisierePerson,
@@ -605,9 +524,6 @@ const PersonenVerwaltung = () => {
           </button>
         </div>
       </div>
-
-      {/* ===== DEBUG-KOMPONENTE HIER EINGEFÜGT ===== */}
-      <CalendarDebugComponent />
 
       <div className="mb-8 p-4 bg-white shadow rounded-lg">
         <label
