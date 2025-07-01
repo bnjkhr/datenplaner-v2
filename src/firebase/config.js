@@ -11,12 +11,37 @@ const firebaseConfig = {
   appId: process.env.REACT_APP_FIREBASE_APP_ID,
 };
 
+// Automatische URL-Erkennung basierend auf Umgebung
+const getBaseUrl = () => {
+  // Development
+  if (process.env.NODE_ENV === "development") {
+    return "http://localhost:3000";
+  }
+
+  // Vercel Production/Preview
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+
+  // Custom Domain oder Fallback
+  if (typeof window !== "undefined") {
+    return window.location.origin;
+  }
+
+  // Fallback
+  return "https://your-app.vercel.app";
+};
+
 // URL zum Abonnieren des Confluence-Kalenders
 export const confluenceCalendarUrl =
   process.env.REACT_APP_CONFLUENCE_CALENDAR_URL;
-export const calendarProxyUrl = process.env.REACT_APP_CALENDAR_PROXY_URL;
 
-export const logServerUrl = process.env.REACT_APP_LOG_SERVER_URL;
+// Kalender-Proxy-URL - automatisch je nach Umgebung
+export const calendarProxyUrl =
+  process.env.REACT_APP_CALENDAR_PROXY_URL || `${getBaseUrl()}/api/calendar`;
+
+export const logServerUrl =
+  process.env.REACT_APP_LOG_SERVER_URL || `${getBaseUrl()}/api/log`;
 
 // --- App ID for Firestore paths ---
 export const appId = "datenplaner-app-v3";
