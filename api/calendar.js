@@ -20,7 +20,14 @@ export default async function handler(req, res) {
     
     if (!calendarUrl) {
       console.error('❌ REACT_APP_CONFLUENCE_CALENDAR_URL not configured');
-      return res.status(500).json({ error: 'Calendar URL not configured' });
+      return res.status(500).json({ 
+        error: 'Calendar URL not configured',
+        debug: {
+          nodeEnv: process.env.NODE_ENV,
+          allEnvVars: Object.keys(process.env).filter(key => key.startsWith('REACT_APP')),
+          calendarUrl: process.env.REACT_APP_CONFLUENCE_CALENDAR_URL ? 'SET' : 'MISSING'
+        }
+      });
     }
 
     console.log('📅 Fetching from Confluence:', calendarUrl);
