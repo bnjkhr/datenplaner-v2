@@ -95,25 +95,43 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
   useEffect(() => {
     const loadVacations = async () => {
       const url = calendarProxyUrl || confluenceCalendarUrl;
-      if (!url) return;
-      const events = await fetchCalendarEvents(url);
+      console.log('🔍 Calendar URL:', url);
+      console.log('🔍 calendarProxyUrl:', calendarProxyUrl);
+      console.log('🔍 confluenceCalendarUrl:', confluenceCalendarUrl);
+      
+      if (!url) {
+        console.log('❌ No calendar URL configured');
+        return;
+      }
+      
+      try {
+        console.log('📅 Fetching calendar from:', url);
+        const events = await fetchCalendarEvents(url);
+        console.log('📊 Events received:', events.length, events);
+        
+        const upcoming = events.filter((ev) => new Date(ev.end) >= new Date());
+        console.log('📅 Upcoming events:', upcoming.length);
 
-      const upcoming = events.filter((ev) => new Date(ev.end) >= new Date());
-
-      const mapping = {};
-      upcoming.forEach((ev) => {
-        (ev.attendees || []).forEach((name) => {
-          const key = name.toLowerCase();
-          if (!mapping[key]) mapping[key] = [];
-          mapping[key].push({
-            start: ev.start,
-            end: ev.end,
-            summary: ev.summary,
+        const mapping = {};
+        upcoming.forEach((ev) => {
+          (ev.attendees || []).forEach((name) => {
+            const key = name.toLowerCase();
+            if (!mapping[key]) mapping[key] = [];
+            mapping[key].push({
+              start: ev.start,
+              end: ev.end,
+              summary: ev.summary,
+            });
           });
         });
-      });
-
-      setVacations(mapping);
+        
+        console.log('🗂️ Final mapping:', mapping);
+        console.log('🗂️ Mapping keys:', Object.keys(mapping));
+        setVacations(mapping);
+      } catch (error) {
+        console.error('❌ Calendar loading error:', error);
+        setVacations({});
+      }
     };
     loadVacations();
   }, [calendarProxyUrl, confluenceCalendarUrl]);
