@@ -1,19 +1,7 @@
 {
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/$1"
+  "functions": {
+    "api/calendar.js": {
+      "maxDuration": 30
     }
-  ],
-  "headers": [
-    {
-      "source": "/api/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "s-maxage=300, stale-while-revalidate=600"
-        }
-      ]
-    }
-  ]
+  }
 }
