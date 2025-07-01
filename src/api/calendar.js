@@ -5,11 +5,34 @@ function cleanName(name) {
 }
 
 export async function fetchCalendarEvents(url) {
-  if (!url) return [];
+  console.log('🚀 fetchCalendarEvents called with URL:', url);
+  
+  if (!url) {
+    console.log('❌ No URL provided to fetchCalendarEvents');
+    return [];
+  }
+  
   try {
+    console.log('🌐 Starting fetch request...');
     const response = await fetch(url);
-    if (!response.ok) throw new Error('Network response was not ok');
+    console.log('📊 Fetch response status:', response.status, response.ok);
+    
+    if (!response.ok) {
+      console.error('❌ Fetch failed:', response.status, response.statusText);
+      throw new Error('Network response was not ok');
+    }
+    
     const icsText = await response.text();
+    console.log('📜 ICS text length:', icsText.length);
+    console.log('📜 ICS text start:', icsText.substring(0, 100));
+    console.log('📜 Contains VCALENDAR:', icsText.includes('BEGIN:VCALENDAR'));
+    
+    if (!icsText || icsText.trim().length === 0) {
+      console.log('❌ Empty ICS text received');
+      return [];
+    }
+    
+    console.log('🛠️ Parsing ICAL data...');
     const jcalData = ICAL.parse(icsText);
     const comp = new ICAL.Component(jcalData);
     const events = comp.getAllSubcomponents('vevent').map((evComp) => {
@@ -33,9 +56,13 @@ export async function fetchCalendarEvents(url) {
         attendees,
       };
     });
+    
+    console.log('✅ Parsed events successfully:', events.length);
+    console.log('📅 Sample events:', events.slice(0, 2));
     return events;
   } catch (err) {
-    console.error('Error fetching calendar events:', err);
+    console.error('❌ Error fetching calendar events:', err);
+    console.error('❌ Error details:', err.message, err.stack);
     return [];
   }
 }
