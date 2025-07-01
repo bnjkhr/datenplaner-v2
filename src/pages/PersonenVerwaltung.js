@@ -1,9 +1,87 @@
-// src/pages/PersonenVerwaltung.js
+// src/pages/PersonenVerwaltung.js - Mit Debug-Komponente
 import React, { useState } from "react";
 import { useData } from "../context/DataProvider";
 import { ConfirmModal } from "../components/ui/ConfirmModal";
 import { TagInput } from "../components/ui/TagInput";
 import { ExcelUploadModal } from "../components/ExcelUploadModal";
+
+// === DEBUG-KOMPONENTE (temporär) ===
+const CalendarDebugComponent = () => {
+  const { vacations, personen } = useData();
+
+  React.useEffect(() => {
+    console.log("=== KALENDER DEBUG ===");
+    console.log("Vacations Objekt:", vacations);
+    console.log("Anzahl Vacation Keys:", Object.keys(vacations).length);
+    console.log("Vacation Keys:", Object.keys(vacations));
+
+    // Zeige Details für jeden Vacation-Key
+    Object.entries(vacations).forEach(([key, events]) => {
+      console.log(`Key "${key}": ${events.length} Events`);
+      events.forEach((event, index) => {
+        console.log(`  Event ${index}:`, {
+          summary: event.summary,
+          start: event.start,
+          end: event.end,
+          isPast: new Date(event.end) < new Date(),
+        });
+      });
+    });
+
+    // Zeige Personen-Namen für Matching
+    console.log("Personen in der App:");
+    personen.forEach((person) => {
+      console.log(
+        `  "${person.name}" -> Keys zu testen:`,
+        [
+          person.name.toLowerCase(),
+          person.name.toLowerCase().replace(/\s+/g, ""),
+          person.email?.toLowerCase(),
+          person.email?.split("@")[0]?.toLowerCase(),
+        ].filter(Boolean)
+      );
+    });
+  }, [vacations, personen]);
+
+  if (Object.keys(vacations).length === 0) {
+    return (
+      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 m-4">
+        <h3 className="font-semibold text-yellow-800">🔍 Kalender-Debug</h3>
+        <p className="text-yellow-700">
+          Keine Kalenderdaten geladen. Mögliche Probleme:
+        </p>
+        <ul className="list-disc list-inside text-sm text-yellow-600 mt-2">
+          <li>Kalender-URL nicht erreichbar</li>
+          <li>CORS-Problem</li>
+          <li>Kalenderdaten-Format unverständlich</li>
+          <li>Netzwerk-Fehler</li>
+        </ul>
+        <p className="text-xs text-yellow-500 mt-2">
+          Prüfe die Browser-Konsole (F12) für detaillierte Logs
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 m-4">
+      <h3 className="font-semibold text-blue-800">✅ Kalender-Debug</h3>
+      <p className="text-blue-700">Kalenderdaten erfolgreich geladen!</p>
+      <div className="text-sm text-blue-600 mt-2">
+        <p>
+          <strong>Gefundene Kalender-Keys:</strong>{" "}
+          {Object.keys(vacations).length}
+        </p>
+        <p>
+          <strong>Keys:</strong> {Object.keys(vacations).join(", ")}
+        </p>
+        <p className="text-xs text-blue-500 mt-2">
+          Detaillierte Logs in der Browser-Konsole (F12)
+        </p>
+      </div>
+    </div>
+  );
+};
 
 // --- Helper-Funktion für konsistente Tag-Farben ---
 const tagColors = [
@@ -34,7 +112,240 @@ const getSkillColor = (skillName) => {
   return tagColors[index];
 };
 
+// === VERBESSERTE PERSON-EINTRAG KOMPONENTE ===
+const PersonEintrag = ({
+  person,
+  onEdit,
+  onDeleteInitiation,
+  onSkillClick,
+}) => {
+  const { name, email, skillIds, msTeamsLink } = person;
+  const {
+    datenprodukte,
+    zuordnungen,
+    rollen,
+    skills: allSkills,
+    vacations,
+  } = useData();
+
+  // Verbesserte Abwesenheits-Logik mit mehreren Matching-Strategien
+  const getPersonVacations = () => {
+    const today = new Date();
+    const searchKeys = [
+      name.toLowerCase(),
+      name.toLowerCase().replace(/\s+/g, ""),
+      email?.toLowerCase(),
+      email?.split("@")[0]?.toLowerCase(),
+    ].filter(Boolean);
+
+    let personVacations = [];
+
+    // Durchsuche alle möglichen Schlüssel
+    for (const key of searchKeys) {
+      if (vacations[key]) {
+        personVacations = [...personVacations, ...vacations[key]];
+      }
+    }
+
+    // Entferne Duplikate und filtere zukünftige/aktuelle Abwesenheiten
+    const uniqueVacations = personVacations.filter((vacation, index, self) => {
+      const vacationEnd = new Date(vacation.end);
+      const isUnique =
+        self.findIndex(
+          (v) => v.start === vacation.start && v.end === vacation.end
+        ) === index;
+
+      return isUnique && vacationEnd >= today;
+    });
+
+    return uniqueVacations.sort(
+      (a, b) => new Date(a.start) - new Date(b.start)
+    );
+  };
+
+  const upcomingVacations = getPersonVacations();
+
+  // Formatiere Datum für Anzeige
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("de-DE", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "2-digit",
+    });
+  };
+
+  // Prüfe ob Person aktuell abwesend ist
+  const isCurrentlyAbsent = () => {
+    const now = new Date();
+    return upcomingVacations.some((vacation) => {
+      const start = new Date(vacation.start);
+      const end = new Date(vacation.end);
+      return now >= start && now <= end;
+    });
+  };
+
+  const personAssignments = zuordnungen
+    .filter((z) => z.personId === person.id)
+    .map((assignment) => {
+      const produkt = datenprodukte.find(
+        (dp) => dp.id === assignment.datenproduktId
+      );
+      const rolleInProdukt = rollen.find((r) => r.id === assignment.rolleId);
+      return {
+        produktName: produkt?.name || "...",
+        rolleName: rolleInProdukt?.name || "...",
+        assignmentId: assignment.id,
+      };
+    })
+    .filter((a) => a.produktName !== "...");
+
+  return (
+    <div
+      className={`bg-white shadow-lg rounded-xl p-6 hover:shadow-2xl flex flex-col justify-between border-l-4 ${
+        isCurrentlyAbsent() ? "border-red-400 bg-red-50" : "border-indigo-400"
+      }`}
+    >
+      <div>
+        <div className="flex justify-between items-start">
+          <div className="flex items-center gap-2">
+            <h3 className="text-xl font-bold text-indigo-700 break-words">
+              {name}
+            </h3>
+            {isCurrentlyAbsent() && (
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                Abwesend
+              </span>
+            )}
+          </div>
+          {msTeamsLink && (
+            <a
+              href={msTeamsLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-2xl"
+              title="Chat in MS Teams starten"
+            >
+              💬
+            </a>
+          )}
+        </div>
+
+        {email && (
+          <div className="mb-3">
+            <a
+              href={`mailto:${email}`}
+              className="text-sm text-gray-500 hover:text-indigo-600 break-all"
+            >
+              {email}
+            </a>
+          </div>
+        )}
+
+        {/* Abwesenheiten anzeigen */}
+        {upcomingVacations.length > 0 && (
+          <div className="mb-4">
+            <p className="text-sm font-medium text-gray-600 mb-2 flex items-center gap-1">
+              <span>🏖️</span>
+              Anstehende Abwesenheiten:
+            </p>
+            <div className="space-y-1">
+              {upcomingVacations.slice(0, 3).map((vacation, index) => {
+                const start = new Date(vacation.start);
+                const end = new Date(vacation.end);
+                const isCurrentVacation =
+                  new Date() >= start && new Date() <= end;
+
+                return (
+                  <div
+                    key={index}
+                    className={`text-xs p-2 rounded-md ${
+                      isCurrentVacation
+                        ? "bg-red-100 text-red-800 border border-red-200"
+                        : "bg-yellow-50 text-yellow-800 border border-yellow-200"
+                    }`}
+                  >
+                    <div className="font-medium">
+                      {vacation.summary || "Abwesenheit"}
+                    </div>
+                    <div className="text-xs opacity-80">
+                      {formatDate(vacation.start)} - {formatDate(vacation.end)}
+                    </div>
+                  </div>
+                );
+              })}
+              {upcomingVacations.length > 3 && (
+                <div className="text-xs text-gray-500 italic">
+                  +{upcomingVacations.length - 3} weitere Abwesenheiten
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {skillIds && skillIds.length > 0 && (
+          <div className="mb-4">
+            <p className="text-sm font-medium text-gray-600 mb-1">Skills:</p>
+            <div className="flex flex-wrap gap-2">
+              {skillIds.map((id) => {
+                const skill = allSkills.find((s) => s.id === id);
+                if (!skill) return null;
+                return (
+                  <button
+                    key={id}
+                    onClick={() => onSkillClick(skill.name)}
+                    className="px-3 py-1 rounded-full text-xs font-semibold hover:opacity-80 transition-opacity"
+                    style={{ backgroundColor: skill.color, color: "#1f2937" }}
+                    title={`Nach Skill "${skill.name}" filtern`}
+                  >
+                    {skill.name}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {personAssignments.length > 0 && (
+          <div className="mb-4">
+            <p className="text-sm font-medium text-gray-600 mb-1">
+              Arbeitet an:
+            </p>
+            <ul className="list-none space-y-1">
+              {personAssignments.map((a) => (
+                <li
+                  key={a.assignmentId}
+                  className="text-xs text-gray-700 bg-indigo-50 p-2 rounded-md"
+                >
+                  <strong>{a.produktName}</strong> ({a.rolleName})
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+
+      <div className="mt-auto pt-4 flex justify-end space-x-3 border-t">
+        <button
+          onClick={() => onEdit(person)}
+          className="text-sm text-indigo-600 hover:text-indigo-800 font-medium"
+        >
+          Bearbeiten
+        </button>
+        <button
+          onClick={() => onDeleteInitiation(person)}
+          className="text-sm text-red-500 hover:text-red-700 font-medium"
+        >
+          Löschen
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// === REST BLEIBT GLEICH ===
 const PersonFormular = ({ personToEdit, onFormClose }) => {
+  // ... (bleibt unverändert)
   const {
     fuegePersonHinzu,
     aktualisierePerson,
@@ -190,126 +501,6 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
   );
 };
 
-const PersonEintrag = ({
-  person,
-  onEdit,
-  onDeleteInitiation,
-  onSkillClick,
-}) => {
-  const { name, email, skillIds, msTeamsLink } = person;
-  const {
-    datenprodukte,
-    zuordnungen,
-    rollen,
-    skills: allSkills,
-    vacations,
-  } = useData();
-  const upcomingVacations = (vacations[person.name.toLowerCase()] || []).filter(
-    (v) => new Date(v.end) >= new Date()
-  );
-
-  const personAssignments = zuordnungen
-    .filter((z) => z.personId === person.id)
-    .map((assignment) => {
-      const produkt = datenprodukte.find(
-        (dp) => dp.id === assignment.datenproduktId
-      );
-      const rolleInProdukt = rollen.find((r) => r.id === assignment.rolleId);
-      return {
-        produktName: produkt?.name || "...",
-        rolleName: rolleInProdukt?.name || "...",
-        assignmentId: assignment.id,
-      };
-    })
-    .filter((a) => a.produktName !== "...");
-
-  return (
-    <div className="bg-white shadow-lg rounded-xl p-6 hover:shadow-2xl flex flex-col justify-between">
-      <div>
-        <div className="flex justify-between items-start">
-          <h3 className="text-xl font-bold text-indigo-700 break-words mr-2">
-            {name}
-          </h3>
-          {msTeamsLink && (
-            <a
-              href={msTeamsLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-2xl"
-              title="Chat in MS Teams starten"
-            >
-              💬
-            </a>
-          )}
-        </div>
-        {email && (
-          <div className="mb-3">
-            <a
-              href={`mailto:${email}`}
-              className="text-sm text-gray-500 hover:text-indigo-600 break-all"
-            >
-              {email}
-            </a>
-          </div>
-        )}
-        {skillIds && skillIds.length > 0 && (
-          <div className="mb-4">
-            <p className="text-sm font-medium text-gray-600 mb-1">Skills:</p>
-            <div className="flex flex-wrap gap-2">
-              {skillIds.map((id) => {
-                const skill = allSkills.find((s) => s.id === id);
-                if (!skill) return null;
-                return (
-                  <button
-                    key={id}
-                    onClick={() => onSkillClick(skill.name)}
-                    className="px-3 py-1 rounded-full text-xs font-semibold"
-                    style={{ backgroundColor: skill.color, color: "#1f2937" }}
-                    title={`Nach Skill "${skill.name}" filtern`}
-                  >
-                    {skill.name}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-        {personAssignments.length > 0 && (
-          <div className="mb-4">
-            <p className="text-sm font-medium text-gray-600 mb-1">
-              Arbeitet an:
-            </p>
-            <ul className="list-none space-y-1">
-              {personAssignments.map((a) => (
-                <li
-                  key={a.assignmentId}
-                  className="text-xs text-gray-700 bg-indigo-50 p-2 rounded-md"
-                >
-                  <strong>{a.produktName}</strong> ({a.rolleName})
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </div>
-      <div className="mt-auto pt-4 flex justify-end space-x-3 border-t">
-        <button
-          onClick={() => onEdit(person)}
-          className="text-sm text-indigo-600 hover:text-indigo-800 font-medium"
-        >
-          Bearbeiten
-        </button>
-        <button
-          onClick={() => onDeleteInitiation(person)}
-          className="text-sm text-red-500 hover:text-red-700 font-medium"
-        >
-          Löschen
-        </button>
-      </div>{" "}
-    </div>
-  );
-};
-
 const PersonenListe = ({
   personenToDisplay,
   onEditPerson,
@@ -404,8 +595,7 @@ const PersonenVerwaltung = () => {
             onClick={handleAddNewPerson}
             className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow-md"
           >
-            {" "}
-            + Neue Person{" "}
+            + Neue Person
           </button>
           <button
             onClick={() => setShowExcelModal(true)}
@@ -415,6 +605,9 @@ const PersonenVerwaltung = () => {
           </button>
         </div>
       </div>
+
+      {/* ===== DEBUG-KOMPONENTE HIER EINGEFÜGT ===== */}
+      <CalendarDebugComponent />
 
       <div className="mb-8 p-4 bg-white shadow rounded-lg">
         <label
@@ -442,6 +635,7 @@ const PersonenVerwaltung = () => {
           )}
         </div>
       </div>
+
       {showForm && (
         <div
           className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-40 p-4"
