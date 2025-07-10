@@ -135,7 +135,7 @@ const GlobalSearch = ({ searchTerm, setSearchTerm, suggestions, onSuggestionClic
 };
 
 const WorkloadIndicator = ({ person, zuordnungen }) => {
-  const verfügbareStunden = person.wochenstunden || 40;
+  const verfügbareStunden = person.wochenstunden || 35;
   const gebuchteStunden = zuordnungen
     .filter(z => z.personId === person.id)
     .reduce((sum, z) => sum + (z.stunden || 0), 0);
@@ -460,7 +460,7 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
   const [name, setName] = useState(personToEdit?.name || "");
   const [email, setEmail] = useState(personToEdit?.email || "");
   const [skillIds, setSkillIds] = useState(personToEdit?.skillIds || []);
-  const [wochenstunden, setWochenstunden] = useState(personToEdit?.wochenstunden || 40);
+  const [wochenstunden, setWochenstunden] = useState(personToEdit?.wochenstunden || 35);
   const [msTeamsEmail, setMsTeamsEmail] = useState(() => {
     if (personToEdit?.msTeamsLink) {
       const emailMatch = personToEdit.msTeamsLink.match(/users=([^&]+)/);
