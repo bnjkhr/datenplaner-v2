@@ -668,7 +668,7 @@ const PersonenVerwaltung = () => {
   const [editingPerson, setEditingPerson] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [personToDelete, setPersonToDelete] = useState(null);
-  const { personen, skills, datenprodukte, zuordnungen, rollen, loeschePerson } = useData();
+  const { personen, skills, datenprodukte, zuordnungen, rollen, loeschePerson, vacations } = useData();
   const [searchTerm, setSearchTerm] = useState("");
   const [showExcelModal, setShowExcelModal] = useState(false);
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
@@ -826,6 +826,49 @@ const PersonenVerwaltung = () => {
 
   const filteredPersonen = getFilteredPersonen();
 
+  // Function to get currently absent people
+  const getCurrentlyAbsentPeople = () => {
+    const today = new Date();
+    
+    return personen.filter(person => {
+      const searchKeys = [
+        person.name.toLowerCase(),
+        person.name.toLowerCase().replace(/\s+/g, ""),
+        person.email?.toLowerCase(),
+        person.email?.split("@")[0]?.toLowerCase(),
+      ].filter(Boolean);
+
+      let personVacations = [];
+
+      // Search through all possible keys
+      for (const key of searchKeys) {
+        if (vacations[key]) {
+          personVacations = [...personVacations, ...vacations[key]];
+        }
+      }
+
+      // Remove duplicates and check if currently absent
+      const uniqueVacations = personVacations.filter((vacation, index, self) => {
+        const vacationEnd = new Date(vacation.end);
+        const isUnique =
+          self.findIndex(
+            (v) => v.start === vacation.start && v.end === vacation.end
+          ) === index;
+
+        return isUnique && vacationEnd >= today;
+      });
+
+      // Check if person is currently absent
+      return uniqueVacations.some((vacation) => {
+        const start = new Date(vacation.start);
+        const end = new Date(vacation.end);
+        return today >= start && today <= end;
+      });
+    });
+  };
+
+  const currentlyAbsentPeople = getCurrentlyAbsentPeople();
+
   const handleSuggestionClick = (suggestion) => {
     setSearchTerm(suggestion.name);
   };
@@ -869,6 +912,21 @@ const PersonenVerwaltung = () => {
             <div>
               <h1 className="text-4xl font-bold text-gray-900 mb-2">Personenverwaltung</h1>
               <p className="text-gray-600">Verwalte dein Team und überwache die Arbeitsauslastung</p>
+              {currentlyAbsentPeople.length > 0 && (
+                <div className="mt-3 flex items-center gap-2 flex-wrap">
+                  <span className="text-sm text-gray-600">Aktuell abwesend:</span>
+                  {currentlyAbsentPeople.map((person, index) => (
+                    <span key={person.id} className="inline-flex items-center gap-1">
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700 border border-red-200">
+                        {person.name}
+                      </span>
+                      {index < currentlyAbsentPeople.length - 1 && (
+                        <span className="text-gray-400">,</span>
+                      )}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
             
             <div className="flex flex-col sm:flex-row gap-3 lg:flex-1 lg:max-w-2xl lg:ml-8">
