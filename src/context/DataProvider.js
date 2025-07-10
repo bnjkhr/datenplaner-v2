@@ -197,6 +197,7 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
         collection(db, getCollectionPath("personen")),
         {
           ...personDaten,
+          wochenstunden: personDaten.wochenstunden || 40, // Standard: 40 Stunden
           erstelltAm: new Date().toISOString(),
           letzteAenderung: new Date().toISOString(),
         }
@@ -227,6 +228,7 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
         const newPersonRef = doc(collection(db, getCollectionPath("personen")));
         batch.set(newPersonRef, {
           ...personData,
+          wochenstunden: personData.wochenstunden || 40, // Standard: 40 Stunden
           erstelltAm: new Date().toISOString(),
           letzteAenderung: new Date().toISOString(),
         });
@@ -335,7 +337,7 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
     }
   });
   const weisePersonDatenproduktRolleZu = preventWriteActions(
-    async (personId, produktId, rolleId) => {
+    async (personId, produktId, rolleId, stunden = 0) => {
       const existing = zuordnungen.find(
         (z) =>
           z.personId === personId &&
@@ -354,6 +356,7 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
             personId,
             datenproduktId: produktId,
             rolleId,
+            stunden: Number(stunden) || 0,
             erstelltAm: new Date().toISOString(),
           }
         );
@@ -375,6 +378,22 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
       } catch (e) {
         console.error(e);
         setError(`Löschfehler: ${e.code}`);
+        return false;
+      }
+    }
+  );
+
+  const aktualisiereZuordnungStunden = preventWriteActions(
+    async (zuordnungId, stunden) => {
+      try {
+        await updateDoc(doc(db, getCollectionPath("zuordnungen"), zuordnungId), {
+          stunden: Number(stunden) || 0,
+        });
+        recordLastChange("Stunden aktualisiert");
+        return true;
+      } catch (e) {
+        console.error(e);
+        setError(`Update-Fehler Stunden: ${e.code}`);
         return false;
       }
     }
@@ -498,6 +517,7 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
         loescheDatenprodukt,
         weisePersonDatenproduktRolleZu,
         entfernePersonVonDatenproduktRolle,
+        aktualisiereZuordnungStunden,
         fuegeRolleHinzu,
         aktualisiereRolle,
         loescheRolle,

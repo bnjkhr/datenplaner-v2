@@ -17,6 +17,7 @@ export const DatenproduktVerwaltung = () => {
     weisePersonDatenproduktRolleZu,
     zuordnungen,
     entfernePersonVonDatenproduktRolle,
+    aktualisiereZuordnungStunden,
     fuegeRolleHinzu,
   } = useData();
 
@@ -30,7 +31,9 @@ export const DatenproduktVerwaltung = () => {
     useState(null);
   const [assignPersonId, setAssignPersonId] = useState("");
   const [assignRolleId, setAssignRolleId] = useState("");
+  const [assignStunden, setAssignStunden] = useState("");
   const [assignmentError, setAssignmentError] = useState("");
+  const [editingAssignment, setEditingAssignment] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [produktToDelete, setProduktToDelete] = useState(null);
   const [notesProdukt, setNotesProdukt] = useState(null);
@@ -116,11 +119,13 @@ export const DatenproduktVerwaltung = () => {
     const resultId = await weisePersonDatenproduktRolleZu(
       assignPersonId,
       selectedProduktForAssignment.id,
-      assignRolleId
+      assignRolleId,
+      assignStunden
     );
     if (resultId) {
       setAssignPersonId("");
       setAssignRolleId("");
+      setAssignStunden("");
     } else {
       setAssignmentError("Fehler bei der Zuweisung.");
     }
@@ -132,6 +137,19 @@ export const DatenproduktVerwaltung = () => {
     if (newId) {
       setAssignRolleId(newId);
       setNeueRolleName("");
+    }
+  };
+
+  const handleEditAssignment = (assignment) => {
+    setEditingAssignment(assignment);
+  };
+
+  const handleUpdateAssignmentHours = async (stunden) => {
+    if (editingAssignment) {
+      const success = await aktualisiereZuordnungStunden(editingAssignment.id, stunden);
+      if (success) {
+        setEditingAssignment(null);
+      }
     }
   };
 
@@ -288,21 +306,35 @@ export const DatenproduktVerwaltung = () => {
                       .map((zuordnung) => (
                         <li
                           key={zuordnung.id}
-                          className="text-xs bg-gray-100 p-2 rounded-md flex justify-between items-center"
+                          className="text-xs bg-gray-100 p-2 rounded-md"
                         >
-                          <span>
-                            {getPersonName(zuordnung.personId)} (
-                            {getRolleName(zuordnung.rolleId)})
-                          </span>
-                          <button
-                            onClick={() =>
-                              entfernePersonVonDatenproduktRolle(zuordnung.id)
-                            }
-                            className="text-red-400 hover:text-red-600 text-xs ml-2 p-0.5"
-                            title="Zuweisung entfernen"
-                          >
-                            &times;
-                          </button>
+                          <div className="flex justify-between items-center">
+                            <span>
+                              {getPersonName(zuordnung.personId)} (
+                              {getRolleName(zuordnung.rolleId)})
+                            </span>
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={() => handleEditAssignment(zuordnung)}
+                                className="text-blue-400 hover:text-blue-600 text-xs p-0.5"
+                                title="Stunden bearbeiten"
+                              >
+                                ✏️
+                              </button>
+                              <button
+                                onClick={() =>
+                                  entfernePersonVonDatenproduktRolle(zuordnung.id)
+                                }
+                                className="text-red-400 hover:text-red-600 text-xs p-0.5"
+                                title="Zuweisung entfernen"
+                              >
+                                &times;
+                              </button>
+                            </div>
+                          </div>
+                          <div className="mt-1 text-gray-600">
+                            {zuordnung.stunden || 0}h/Woche
+                          </div>
                         </li>
                       ))}
                   </ul>
@@ -423,6 +455,23 @@ export const DatenproduktVerwaltung = () => {
                   </button>
                 </div>
               </div>
+              <div>
+                <label htmlFor="assign-stunden" className="block text-sm">
+                  Stunden pro Woche
+                </label>
+                <input
+                  id="assign-stunden"
+                  type="number"
+                  min="0"
+                  max="80"
+                  step="0.5"
+                  value={assignStunden}
+                  onChange={(e) => setAssignStunden(e.target.value)}
+                  placeholder="z.B. 20"
+                  className="mt-1 block w-full p-2 border rounded-md"
+                />
+                <p className="mt-1 text-xs text-gray-500">Optional: Wochenstunden für diese Zuweisung</p>
+              </div>
               <div className="flex justify-end space-x-3 pt-3">
                 <button
                   type="button"
@@ -448,6 +497,76 @@ export const DatenproduktVerwaltung = () => {
         onSave={handleSaveNotes}
         onClose={() => setNotesProdukt(null)}
       />
+      {editingAssignment && (
+        <EditAssignmentHoursModal
+          assignment={editingAssignment}
+          onSave={handleUpdateAssignmentHours}
+          onClose={() => setEditingAssignment(null)}
+          getPersonName={getPersonName}
+          getRolleName={getRolleName}
+        />
+      )}
+    </div>
+  );
+};
+
+const EditAssignmentHoursModal = ({ assignment, onSave, onClose, getPersonName, getRolleName }) => {
+  const [stunden, setStunden] = useState(assignment.stunden || 0);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave(stunden);
+  };
+
+  return (
+    <div
+      className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-50 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-lg shadow-xl w-full max-w-md p-6"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h3 className="text-xl font-semibold mb-4">Stunden bearbeiten</h3>
+        <div className="mb-4 p-3 bg-gray-50 rounded-md">
+          <p className="text-sm">
+            <strong>{getPersonName(assignment.personId)}</strong> als <strong>{getRolleName(assignment.rolleId)}</strong>
+          </p>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="edit-stunden" className="block text-sm font-medium">
+              Stunden pro Woche
+            </label>
+            <input
+              id="edit-stunden"
+              type="number"
+              min="0"
+              max="80"
+              step="0.5"
+              value={stunden}
+              onChange={(e) => setStunden(e.target.value)}
+              className="mt-1 block w-full p-2 border rounded-md"
+              autoFocus
+            />
+          </div>
+          <div className="flex justify-end space-x-3 pt-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 border rounded-md"
+            >
+              Abbrechen
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-600 text-white rounded-md"
+            >
+              Speichern
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

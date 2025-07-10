@@ -5,34 +5,52 @@ import { ConfirmModal } from "../components/ui/ConfirmModal";
 import { TagInput } from "../components/ui/TagInput";
 import { ExcelUploadModal } from "../components/ExcelUploadModal";
 
-// --- Helper-Funktion für konsistente Tag-Farben ---
-const tagColors = [
-  "#FECACA",
-  "#FED7AA",
-  "#FDE68A",
-  "#D9F99D",
-  "#A7F3D0",
-  "#A5F3FC",
-  "#A5B4FC",
-  "#C4B5FD",
-  "#F5D0FE",
-  "#FECDD3",
-  "#FBCFE8",
-  "#BFDBFE",
-  "#B4E4D6",
-  "#FDECC8",
-  "#E4D8F9",
-];
 
-const getSkillColor = (skillName) => {
-  let hash = 0;
-  for (let i = 0; i < skillName.length; i++) {
-    hash = skillName.charCodeAt(i) + ((hash << 5) - hash);
-    hash = hash & hash;
+const WorkloadIndicator = ({ person, zuordnungen }) => {
+  const verfügbareStunden = person.wochenstunden || 40;
+  const gebuchteStunden = zuordnungen
+    .filter(z => z.personId === person.id)
+    .reduce((sum, z) => sum + (z.stunden || 0), 0);
+  
+  const auslastung = verfügbareStunden > 0 ? (gebuchteStunden / verfügbareStunden) * 100 : 0;
+  const isUnderbooked = auslastung < 20;
+  
+  // Farbe basierend auf Auslastung
+  let barColor = "bg-green-500"; // Normal (20-100%)
+  if (isUnderbooked) {
+    barColor = "bg-red-500"; // Unterbuchung (<20%)
+  } else if (auslastung > 100) {
+    barColor = "bg-orange-500"; // Überbucht (>100%)
   }
-  const index = Math.abs(hash % tagColors.length);
-  return tagColors[index];
+
+  return (
+    <div className="mb-3">
+      <div className="flex justify-between items-center mb-1">
+        <span className="text-xs font-medium text-gray-600">Auslastung</span>
+        <span className="text-xs text-gray-600">
+          {gebuchteStunden}h / {verfügbareStunden}h ({Math.round(auslastung)}%)
+        </span>
+      </div>
+      <div className="w-full bg-gray-200 rounded-full h-2">
+        <div 
+          className={`h-2 rounded-full transition-all duration-300 ${barColor}`}
+          style={{ width: `${Math.min(auslastung, 100)}%` }}
+        />
+      </div>
+      {auslastung > 100 && (
+        <div className="text-xs text-orange-600 mt-1">
+          Überbucht um {Math.round(auslastung - 100)}%
+        </div>
+      )}
+      {isUnderbooked && gebuchteStunden > 0 && (
+        <div className="text-xs text-red-600 mt-1">
+          Unterausgelastet
+        </div>
+      )}
+    </div>
+  );
 };
+
 
 const PersonEintrag = ({
   person,
@@ -40,7 +58,7 @@ const PersonEintrag = ({
   onDeleteInitiation,
   onSkillClick,
 }) => {
-  const { name, email, skillIds, msTeamsLink } = person;
+  const { name, email, skillIds, msTeamsLink, wochenstunden } = person;
   const {
     datenprodukte,
     zuordnungen,
@@ -163,6 +181,18 @@ const PersonEintrag = ({
           </div>
         )}
 
+        {/* Wochenstunden anzeigen */}
+        {wochenstunden && (
+          <div className="mb-3">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              ⏰ {wochenstunden}h/Woche
+            </span>
+          </div>
+        )}
+
+        {/* Auslastungsanzeige */}
+        <WorkloadIndicator person={person} zuordnungen={zuordnungen} />
+
         {/* Abwesenheiten anzeigen */}
         {upcomingVacations.length > 0 && (
           <div className="mb-4">
@@ -233,14 +263,27 @@ const PersonEintrag = ({
               Arbeitet an:
             </p>
             <ul className="list-none space-y-1">
-              {personAssignments.map((a) => (
-                <li
-                  key={a.assignmentId}
-                  className="text-xs text-gray-700 bg-indigo-50 p-2 rounded-md"
-                >
-                  <strong>{a.produktName}</strong> ({a.rolleName})
-                </li>
-              ))}
+              {personAssignments.map((a) => {
+                const assignment = zuordnungen.find(z => z.id === a.assignmentId);
+                const stunden = assignment?.stunden || 0;
+                return (
+                  <li
+                    key={a.assignmentId}
+                    className="text-xs text-gray-700 bg-indigo-50 p-2 rounded-md"
+                  >
+                    <div className="flex justify-between items-center">
+                      <span>
+                        <strong>{a.produktName}</strong> ({a.rolleName})
+                      </span>
+                      {stunden > 0 && (
+                        <span className="text-blue-600 font-medium">
+                          {stunden}h
+                        </span>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         )}
@@ -277,6 +320,7 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
   const [name, setName] = useState(personToEdit?.name || "");
   const [email, setEmail] = useState(personToEdit?.email || "");
   const [skillIds, setSkillIds] = useState(personToEdit?.skillIds || []);
+  const [wochenstunden, setWochenstunden] = useState(personToEdit?.wochenstunden || 40);
   const [msTeamsEmail, setMsTeamsEmail] = useState(() => {
     if (personToEdit?.msTeamsLink) {
       const emailMatch = personToEdit.msTeamsLink.match(/users=([^&]+)/);
@@ -294,6 +338,10 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
     }
     if (name.trim().length < 2 || name.trim().length > 50) {
       setValidationError("Der Name muss zwischen 2 und 50 Zeichen lang sein.");
+      return false;
+    }
+    if (wochenstunden < 1 || wochenstunden > 80) {
+      setValidationError("Wochenstunden müssen zwischen 1 und 80 liegen.");
       return false;
     }
     return true;
@@ -315,6 +363,7 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
       name: name.trim(),
       email: email.trim(),
       skillIds,
+      wochenstunden: Number(wochenstunden),
       msTeamsLink: finalMsTeamsLink,
     };
 
@@ -371,6 +420,26 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
           required
           className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
         />
+      </div>
+      <div>
+        <label
+          htmlFor="person-wochenstunden"
+          className="block text-sm font-medium text-gray-700"
+        >
+          Wochenstunden
+        </label>
+        <input
+          id="person-wochenstunden"
+          type="number"
+          min="1"
+          max="80"
+          step="0.5"
+          value={wochenstunden}
+          onChange={(e) => setWochenstunden(e.target.value)}
+          required
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+        />
+        <p className="mt-1 text-xs text-gray-500">Anzahl der Arbeitsstunden pro Woche (1-80).</p>
       </div>
       <div>
         <label
