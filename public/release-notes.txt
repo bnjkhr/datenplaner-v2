@@ -12,3 +12,5 @@ Version 2.0.0 - 10.07.2025
 * Stunden pro Woche in der Personenverwaltung hinzugefügt
 * Stunden pro Woche in der Zuordnung hinzugefügt
 * Stunden pro Woche in der Personverwaltung editierbar
+* globale Suche
+* moderne UI (huge changes!)

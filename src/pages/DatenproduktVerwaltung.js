@@ -171,18 +171,23 @@ export const DatenproduktVerwaltung = () => {
   if (error) return <p className="text-center text-red-500 py-8">{error}</p>;
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-wrap justify-between items-center mb-8 gap-4">
-        <h1 className="text-3xl font-bold text-gray-800">
-          Datenproduktverwaltung
-        </h1>
-        <button
-          onClick={() => handleOpenProduktForm()}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow-md"
-        >
-          + Neues Datenprodukt
-        </button>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30">
+      <div className="container mx-auto px-6 py-8">
+        <div className="flex flex-wrap justify-between items-center mb-8 gap-4">
+          <div>
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">
+              Datenproduktverwaltung
+            </h1>
+            <p className="text-gray-600">Verwalte deine Datenprodukte und Teams</p>
+          </div>
+          <button
+            onClick={() => handleOpenProduktForm()}
+            className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2"
+          >
+            <span className="text-lg">+</span>
+            Neues Datenprodukt
+          </button>
+        </div>
       {showProduktForm && (
         <div
           className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-40 p-4"
@@ -280,111 +285,111 @@ export const DatenproduktVerwaltung = () => {
           Noch keine Datenprodukte erfasst.
         </p>
       )}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {datenprodukte.map((dp) => (
-          <div
-            key={dp.id}
-            className="bg-white shadow-lg rounded-xl p-6 flex flex-col justify-between"
-          >
-            <div>
-              <h3 className="text-xl font-bold text-indigo-700 mb-2 break-words">
-                {dp.name}
-              </h3>
-              <p className="text-sm mb-1">
-                Status: <span className="font-semibold">{dp.status}</span>
-              </p>
-              <p className="text-sm mb-3 line-clamp-3" title={dp.beschreibung}>
-                {dp.beschreibung || "Keine Beschreibung"}
-              </p>
-              <div className="mb-3">
-                <h4 className="text-sm font-semibold mb-1">Team:</h4>
-                {zuordnungen.filter((z) => z.datenproduktId === dp.id).length >
-                0 ? (
-                  <ul className="list-none space-y-1">
-                    {zuordnungen
-                      .filter((z) => z.datenproduktId === dp.id)
-                      .map((zuordnung) => (
-                        <li
-                          key={zuordnung.id}
-                          className="text-xs bg-gray-100 p-2 rounded-md"
-                        >
-                          <div className="flex justify-between items-center">
-                            <span>
-                              {getPersonName(zuordnung.personId)} (
-                              {getRolleName(zuordnung.rolleId)})
-                            </span>
-                            <div className="flex items-center gap-1">
-                              <button
-                                onClick={() => handleEditAssignment(zuordnung)}
-                                className="text-blue-400 hover:text-blue-600 text-xs p-0.5"
-                                title="Stunden bearbeiten"
-                              >
-                                ✏️
-                              </button>
-                              <button
-                                onClick={() =>
-                                  entfernePersonVonDatenproduktRolle(zuordnung.id)
-                                }
-                                className="text-red-400 hover:text-red-600 text-xs p-0.5"
-                                title="Zuweisung entfernen"
-                              >
-                                &times;
-                              </button>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          {datenprodukte.map((dp) => (
+            <div
+              key={dp.id}
+              className="bg-white shadow-sm hover:shadow-lg transition-all duration-300 rounded-2xl p-6 flex flex-col justify-between border border-gray-100 hover:border-gray-200 hover:bg-gray-50/30"
+            >
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3 break-words">
+                  {dp.name}
+                </h3>
+                <div className="mb-3">
+                  <span className="inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold bg-gradient-to-r from-green-50 to-green-100 text-green-700 border border-green-200">
+                    {dp.status}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-600 mb-4 line-clamp-3" title={dp.beschreibung}>
+                  {dp.beschreibung || "Keine Beschreibung"}
+                </p>
+                <div className="mb-4">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-2">Team</h4>
+                  {zuordnungen.filter((z) => z.datenproduktId === dp.id).length > 0 ? (
+                    <ul className="list-none space-y-2">
+                      {zuordnungen
+                        .filter((z) => z.datenproduktId === dp.id)
+                        .map((zuordnung) => (
+                          <li
+                            key={zuordnung.id}
+                            className="text-xs bg-gradient-to-r from-gray-50 to-gray-100 p-3 rounded-lg border border-gray-200"
+                          >
+                            <div className="flex justify-between items-center mb-1">
+                              <span className="font-medium text-gray-900">
+                                {getPersonName(zuordnung.personId)}
+                              </span>
+                              <div className="flex items-center gap-1">
+                                <button
+                                  onClick={() => handleEditAssignment(zuordnung)}
+                                  className="text-blue-500 hover:text-blue-700 p-1 rounded transition-colors"
+                                  title="Stunden bearbeiten"
+                                >
+                                  ✏️
+                                </button>
+                                <button
+                                  onClick={() =>
+                                    entfernePersonVonDatenproduktRolle(zuordnung.id)
+                                  }
+                                  className="text-red-500 hover:text-red-700 p-1 rounded transition-colors"
+                                  title="Zuweisung entfernen"
+                                >
+                                  ×
+                                </button>
+                              </div>
                             </div>
-                          </div>
-                          <div className="mt-1 text-gray-600">
-                            {zuordnung.stunden || 0}h/Woche
-                          </div>
-                        </li>
-                      ))}
-                  </ul>
-                ) : (
-                  <p className="text-xs text-gray-500">Kein Team zugewiesen.</p>
-                )}
+                            <div className="flex justify-between items-center">
+                              <span className="text-gray-600">
+                                {getRolleName(zuordnung.rolleId)}
+                              </span>
+                              <span className="bg-blue-500 text-white px-2 py-0.5 rounded text-xs font-medium">
+                                {zuordnung.stunden || 0}h
+                              </span>
+                            </div>
+                          </li>
+                        ))}
+                    </ul>
+                  ) : (
+                    <p className="text-xs text-gray-500">Kein Team zugewiesen.</p>
+                  )}
+                </div>
+            </div>
+              <div className="mt-auto pt-4 border-t border-gray-100 flex flex-wrap gap-2 justify-end">
+                <button
+                  onClick={() => {
+                    setSelectedProduktForAssignment(dp);
+                    setAssignmentError("");
+                  }}
+                  className="px-3 py-1.5 text-sm text-green-600 hover:text-green-700 hover:bg-green-50 font-medium rounded-lg transition-all duration-200"
+                >
+                  Team zuweisen
+                </button>
+                <button
+                  onClick={() => setNotesProdukt(dp)}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 flex items-center gap-1 ${
+                    dp.notizen 
+                      ? "text-gray-700 hover:text-gray-800 hover:bg-gray-100" 
+                      : "text-gray-400 hover:text-gray-600 hover:bg-gray-50"
+                  }`}
+                  title="Notizen"
+                >
+                  📝
+                </button>
+                <button
+                  onClick={() => handleOpenProduktForm(dp)}
+                  className="px-3 py-1.5 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium rounded-lg transition-all duration-200"
+                >
+                  Bearbeiten
+                </button>
+                <button
+                  onClick={() => handleDeleteDatenproduktInitiation(dp)}
+                  className="px-3 py-1.5 text-sm text-red-500 hover:text-red-600 hover:bg-red-50 font-medium rounded-lg transition-all duration-200"
+                >
+                  Löschen
+                </button>
               </div>
             </div>
-            <div className="mt-auto pt-4 border-t flex flex-wrap gap-2 justify-end">
-              <button
-                onClick={() => {
-                  setSelectedProduktForAssignment(dp);
-                  setAssignmentError("");
-                }}
-                className="text-sm text-green-600 hover:text-green-800"
-              >
-                Team zuweisen
-              </button>
-              <button
-                onClick={() => setNotesProdukt(dp)}
-                className={`text-sm ${
-                  dp.notizen ? "text-black" : "text-gray-400"
-                } hover:text-black flex items-center`}
-                title="Notizen"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  className="w-5 h-5"
-                >
-                  <path d="M12 2a2 2 0 012 2v1h5a2 2 0 012 2v13a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2h5V4a2 2 0 012-2zM7 8v11h10V8H7z" />
-                </svg>
-              </button>
-              <button
-                onClick={() => handleOpenProduktForm(dp)}
-                className="text-sm text-indigo-600 hover:text-indigo-800"
-              >
-                Bearbeiten
-              </button>
-              <button
-                onClick={() => handleDeleteDatenproduktInitiation(dp)}
-                className="text-sm text-red-500 hover:text-red-700"
-              >
-                Löschen
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
       {selectedProduktForAssignment && (
         <div
           className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-50 p-4"
@@ -506,6 +511,7 @@ export const DatenproduktVerwaltung = () => {
           getRolleName={getRolleName}
         />
       )}
+      </div>
     </div>
   );
 };
