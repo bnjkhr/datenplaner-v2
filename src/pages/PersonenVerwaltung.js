@@ -135,7 +135,7 @@ const GlobalSearch = ({ searchTerm, setSearchTerm, suggestions, onSuggestionClic
 };
 
 const WorkloadIndicator = ({ person, zuordnungen }) => {
-  const verfügbareStunden = person.wochenstunden || 35;
+  const verfügbareStunden = person.wochenstunden || 31;
   const gebuchteStunden = zuordnungen
     .filter(z => z.personId === person.id)
     .reduce((sum, z) => sum + (z.stunden || 0), 0);
@@ -460,7 +460,7 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
   const [name, setName] = useState(personToEdit?.name || "");
   const [email, setEmail] = useState(personToEdit?.email || "");
   const [skillIds, setSkillIds] = useState(personToEdit?.skillIds || []);
-  const [wochenstunden, setWochenstunden] = useState(personToEdit?.wochenstunden || 35);
+  const [wochenstunden, setWochenstunden] = useState(personToEdit?.wochenstunden || 31);
   const [msTeamsEmail, setMsTeamsEmail] = useState(() => {
     if (personToEdit?.msTeamsLink) {
       const emailMatch = personToEdit.msTeamsLink.match(/users=([^&]+)/);
@@ -579,7 +579,7 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
           required
           className="block w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
         />
-        <p className="mt-2 text-xs text-gray-500">Anzahl der Arbeitsstunden pro Woche (1-80).</p>
+        <p className="mt-2 text-xs text-gray-500">Anzahl der Arbeitsstunden pro Woche (Standard: 31, Bereich: 1-80).</p>
       </div>
       <div>
         <label

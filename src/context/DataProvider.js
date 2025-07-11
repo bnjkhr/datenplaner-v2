@@ -197,7 +197,7 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
         collection(db, getCollectionPath("personen")),
         {
           ...personDaten,
-          wochenstunden: personDaten.wochenstunden || 35, // Standard: 35 Stunden
+          wochenstunden: personDaten.wochenstunden || 31, // Standard: 31 Stunden
           erstelltAm: new Date().toISOString(),
           letzteAenderung: new Date().toISOString(),
         }
@@ -228,7 +228,7 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
         const newPersonRef = doc(collection(db, getCollectionPath("personen")));
         batch.set(newPersonRef, {
           ...personData,
-          wochenstunden: personData.wochenstunden || 35, // Standard: 35 Stunden
+          wochenstunden: personData.wochenstunden || 31, // Standard: 31 Stunden
           erstelltAm: new Date().toISOString(),
           letzteAenderung: new Date().toISOString(),
         });
