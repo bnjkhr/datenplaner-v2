@@ -11,13 +11,13 @@ service cloud.firestore {
     // }
     
     // NEU: Read-Only Zugriff auf public data für alle (auch unauthentifizierte)
-    match /artifacts/{appId}/public/data/{collection}/{document=**} {
+    match /artifacts/datenplaner-app-v3/public/data/{collection}/{document=**} {
       allow read: if true; // Erlaubt jedem das Lesen der öffentlichen Daten
       allow write: if false; // Verhindert jegliche Schreibvorgänge
     }
     
     // NEU: Read-Only Zugriff auf Meta-Daten (für lastChange etc.)
-    match /artifacts/{appId}/public/meta {
+    match /artifacts/datenplaner-app-v3/public/meta {
       allow read: if true; // Erlaubt das Lesen von Meta-Informationen
       allow write: if false; // Verhindert Schreibvorgänge
     }
