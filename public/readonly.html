@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="Datenprodukt Planer - Read-Only Ansicht für Confluence"
+    />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <title>Datenprodukt Planer - Read-Only</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* Tailwind CSS wird über CDN geladen, aber wir können zusätzliche Styles hier definieren */
+      .bg-gradient-to-br {
+        background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
+      }
+      .from-slate-50 {
+        --tw-gradient-from: #f8fafc;
+        --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(248, 250, 252, 0));
+      }
+      .to-blue-50\/30 {
+        --tw-gradient-to: rgba(239, 246, 255, 0.3);
+      }
+      .shadow-inner {
+        box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+      }
+      .backdrop-blur-md {
+        backdrop-filter: blur(12px);
+      }
+      .bg-clip-text {
+        background-clip: text;
+        -webkit-background-clip: text;
+      }
+      .text-transparent {
+        color: transparent;
+      }
+    </style>
+  </head>
+  <body>
+    <noscript>Sie müssen JavaScript aktivieren, um diese Anwendung auszuführen.</noscript>
+    <div id="readonly-root"></div>
+    
+    <!-- Hinweis: In der Produktion sollten diese über ein Build-System gebündelt werden -->
+    <script type="module">
+      // Dies ist ein vereinfachtes Setup für die Read-Only Version
+      // In der Produktion würde dies über den normalen React Build-Prozess laufen
+      
+      console.log('Read-Only App wird geladen...');
+      
+      // Placeholder für die tatsächliche App-Logik
+      // Die eigentliche Implementierung würde hier die ReadOnlyApp Komponente rendern
+      
+      const container = document.getElementById('readonly-root');
+      if (container) {
+        container.innerHTML = `
+          <div style="
+            min-height: 100vh; 
+            background: linear-gradient(to bottom right, #f8fafc, rgba(239, 246, 255, 0.3));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+          ">
+            <div style="
+              background: white;
+              padding: 2rem;
+              border-radius: 1rem;
+              box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+              text-align: center;
+              max-width: 500px;
+            ">
+              <h1 style="
+                font-size: 2rem;
+                font-weight: bold;
+                background: linear-gradient(to right, #2563eb, #4f46e5);
+                background-clip: text;
+                -webkit-background-clip: text;
+                color: transparent;
+                margin-bottom: 1rem;
+              ">
+                Datenprodukt Planer
+              </h1>
+              <p style="color: #6b7280; margin-bottom: 1.5rem;">
+                Read-Only Ansicht für Confluence
+              </p>
+              <div style="
+                background: #f3f4f6;
+                padding: 1rem;
+                border-radius: 0.5rem;
+                border-left: 4px solid #3b82f6;
+              ">
+                <p style="color: #374151; font-size: 0.875rem;">
+                  Diese Seite ist für die Einbindung in Confluence vorbereitet. 
+                  Für die vollständige Funktionalität verwenden Sie bitte die Haupt-Anwendung.
+                </p>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    </script>
+  </body>
+</html>
