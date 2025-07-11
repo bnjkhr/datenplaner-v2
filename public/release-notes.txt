@@ -25,5 +25,5 @@ Version 2.1.0 - 11.07.2025
 * Auswertungen: Tabellarische Übersicht der Auslastung
 * Auswertungen: Grafische Auswertungen  
 * Auswertungen: Sortierbar
-
+* Excel-Export: Alle neuen Werte eingefügt.
 

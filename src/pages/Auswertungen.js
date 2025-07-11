@@ -173,8 +173,35 @@ export const Auswertungen = () => {
 
   // --- NEU: Funktion für den Excel-Export ---
   const handleExportToExcel = () => {
-    // 1. Daten für das erste Tabellenblatt (Team-Auslastung) vorbereiten
-    const auslastungSheetData = tableData.map((p) => ({
+    // 1. Auslastungsübersicht (Workload Data)
+    const workloadSheetData = workloadData.map((person) => {
+      const personData = personen.find(p => p.id === person.id);
+      const personSkills = personData?.skillIds?.map(skillId => 
+        skills.find(s => s.id === skillId)?.name
+      ).filter(Boolean).join(', ') || 'Keine Skills';
+      
+      const personProducts = zuordnungen
+        .filter(z => z.personId === person.id)
+        .map(z => {
+          const product = datenprodukte.find(dp => dp.id === z.datenproduktId)?.name || 'Unbekannt';
+          const role = rollen.find(r => r.id === z.rolleId)?.name || 'Unbekannt';
+          return `${product} (${role}, ${z.stunden}h)`;
+        }).join('; ');
+
+      return {
+        Name: person.name,
+        'Verfügbare Stunden': person.verfügbareStunden,
+        'Gebuchte Stunden': person.gebuchteStunden,
+        'Auslastung (%)': person.auslastung,
+        Status: person.status === 'overbooked' ? 'Überbucht' : 
+                person.status === 'underbooked' ? 'Unterausgelastet' : 'Normal',
+        Skills: personSkills,
+        'Zugewiesene Produkte': personProducts || 'Keine Zuweisungen'
+      };
+    });
+
+    // 2. Tabellarische Übersicht (Team-Auslastung)
+    const teamAuslastungSheetData = tableData.map((p) => ({
       Name: p.name,
       "Anzahl Produkte": p["Anzahl Produkte"],
       Datenprodukte: p.produktDetails
@@ -182,34 +209,92 @@ export const Auswertungen = () => {
         .join("; "),
     }));
 
-    // 2. Daten für das zweite Tabellenblatt (Skill-Verteilung)
+    // 3. Personen-Auslastung Chart Data
+    const personenChartSheetData = chartDataPersonen.map((p) => ({
+      Name: p.name,
+      'Anzahl Produkte': p['Anzahl Produkte'],
+      Status: p['Anzahl Produkte'] > 3 ? 'Hohe Auslastung' : 'Normale Auslastung'
+    }));
+
+    // 4. Datenprodukt-Besetzung
+    const produktBesetzungSheetData = produktBesetzungData.map((p) => ({
+      Datenprodukt: p.name,
+      'Anzahl Personen': p['Anzahl Personen']
+    }));
+
+    // 5. Skill-Verteilung
     const skillVerteilungSheetData = skillUsageCount.map((s) => ({
       Skill: s.name,
       "Anzahl Personen": s.Anzahl,
+      Farbe: s.color
     }));
 
-    // 3. Daten für das dritte Tabellenblatt (Unbelegte Skills)
+    // 6. Unbelegte Skills
     const unbelegteSkillsSheetData = unassignedSkills.map((s) => ({
       "Unbelegter Skill": s.name,
+      Farbe: s.color
     }));
 
+    // 7. Detaillierte Zuordnungen
+    const zuordnungenSheetData = zuordnungen.map((z) => {
+      const person = personen.find(p => p.id === z.personId);
+      const produkt = datenprodukte.find(dp => dp.id === z.datenproduktId);
+      const rolle = rollen.find(r => r.id === z.rolleId);
+      
+      return {
+        Person: person?.name || 'Unbekannt',
+        Datenprodukt: produkt?.name || 'Unbekannt',
+        Rolle: rolle?.name || 'Unbekannt',
+        'Stunden pro Woche': z.stunden || 0,
+        'Erstellt am': z.erstelltAm ? new Date(z.erstelltAm).toLocaleDateString('de-DE') : ''
+      };
+    });
+
+    // 8. Personen-Details
+    const personenDetailsSheetData = personen.map((p) => {
+      const personSkills = p.skillIds?.map(skillId => 
+        skills.find(s => s.id === skillId)?.name
+      ).filter(Boolean).join(', ') || 'Keine Skills';
+      
+      const totalStunden = zuordnungen
+        .filter(z => z.personId === p.id)
+        .reduce((sum, z) => sum + (z.stunden || 0), 0);
+
+      return {
+        Name: p.name,
+        Email: p.email || '',
+        'Wochenstunden': p.wochenstunden || 31,
+        'Gebuchte Stunden': totalStunden,
+        'Auslastung (%)': p.wochenstunden > 0 ? Math.round((totalStunden / p.wochenstunden) * 100 * 10) / 10 : 0,
+        Skills: personSkills,
+        'Erstellt am': p.erstelltAm ? new Date(p.erstelltAm).toLocaleDateString('de-DE') : '',
+        'Letzte Änderung': p.letzteAenderung ? new Date(p.letzteAenderung).toLocaleDateString('de-DE') : ''
+      };
+    });
+
     // Erstelle die Tabellenblätter
-    const wsAuslastung = XLSX.utils.json_to_sheet(auslastungSheetData);
-    const wsSkillVerteilung = XLSX.utils.json_to_sheet(
-      skillVerteilungSheetData
-    );
-    const wsUnbelegteSkills = XLSX.utils.json_to_sheet(
-      unbelegteSkillsSheetData
-    );
+    const wsWorkload = XLSX.utils.json_to_sheet(workloadSheetData);
+    const wsTeamAuslastung = XLSX.utils.json_to_sheet(teamAuslastungSheetData);
+    const wsPersonenChart = XLSX.utils.json_to_sheet(personenChartSheetData);
+    const wsProduktBesetzung = XLSX.utils.json_to_sheet(produktBesetzungSheetData);
+    const wsSkillVerteilung = XLSX.utils.json_to_sheet(skillVerteilungSheetData);
+    const wsUnbelegteSkills = XLSX.utils.json_to_sheet(unbelegteSkillsSheetData);
+    const wsZuordnungen = XLSX.utils.json_to_sheet(zuordnungenSheetData);
+    const wsPersonenDetails = XLSX.utils.json_to_sheet(personenDetailsSheetData);
 
     // Erstelle ein neues Workbook und füge die Blätter hinzu
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, wsAuslastung, "Team-Auslastung");
+    XLSX.utils.book_append_sheet(wb, wsWorkload, "Auslastungsübersicht");
+    XLSX.utils.book_append_sheet(wb, wsTeamAuslastung, "Team-Auslastung");
+    XLSX.utils.book_append_sheet(wb, wsPersonenChart, "Personen-Produktzahl");
+    XLSX.utils.book_append_sheet(wb, wsProduktBesetzung, "Produkt-Besetzung");
     XLSX.utils.book_append_sheet(wb, wsSkillVerteilung, "Skill-Verteilung");
     XLSX.utils.book_append_sheet(wb, wsUnbelegteSkills, "Unbelegte Skills");
+    XLSX.utils.book_append_sheet(wb, wsZuordnungen, "Detaillierte Zuordnungen");
+    XLSX.utils.book_append_sheet(wb, wsPersonenDetails, "Personen-Details");
 
     // Speichere die Datei
-    XLSX.writeFile(wb, "Datenprodukt_Auswertungen.xlsx");
+    XLSX.writeFile(wb, "Datenprodukt_Auswertungen_Komplett.xlsx");
   };
 
   const CustomTooltip = ({ active, payload, label }) => {
