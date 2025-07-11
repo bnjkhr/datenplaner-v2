@@ -98,6 +98,15 @@
         appId: "1:434802556568:web:33a97749df8de01f8b51ec"
       };
 
+      // Debug-Modus für Vercel
+      const isDebugMode = window.location.hostname.includes('vercel.app') || window.location.search.includes('debug=true');
+      
+      if (isDebugMode) {
+        console.log('🐛 Debug-Modus aktiviert');
+        console.log('🔧 Firebase Config:', firebaseConfig);
+        console.log('🌐 Hostname:', window.location.hostname);
+      }
+
       // Firebase initialisieren
       let db = null;
       let isConnected = false;
