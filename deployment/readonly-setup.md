@@ -180,7 +180,42 @@ server {
 </div>
 ```
 
-## API Endpoints
+## Verfügbare Read-Only Versionen
+
+### 1. `readonly.html` - Demo-Version
+- ✅ Keine Konfiguration nötig
+- ✅ Simulierte Daten
+- ✅ Alle Features sichtbar
+- 📱 Perfekt für Demos und Tests
+
+### 2. `readonly-firebase.html` - Firebase Direct
+- ✅ Echte Firebase-Daten
+- ✅ Keine Backend-Server nötig
+- ⚠️ Firebase-Config im Frontend sichtbar (Read-Only ist OK)
+- 🔧 Benötigt Firestore-Security-Rules für öffentlichen Zugriff
+- 🚀 **EMPFOHLEN für interne Teams/Confluence**
+
+### 3. `readonly-secure.html` - Sichere Backend-API
+- ✅ Firebase-Credentials geschützt
+- ✅ Backend-API mit Admin SDK
+- ✅ CORS-Schutz
+- 🔧 Benötigt Server-Setup
+- 🏢 **EMPFOHLEN für öffentliche Websites**
+
+## Confluence Integration
+
+```html
+<!-- Demo-Version -->
+<iframe src="./readonly.html" width="100%" height="800" frameborder="0"></iframe>
+
+<!-- Firebase Direct (empfohlen für interne Nutzung) -->
+<iframe src="./readonly-firebase.html" width="100%" height="800" frameborder="0"></iframe>
+
+<!-- Sichere Version (für öffentliche Websites) -->
+<iframe src="./readonly-secure.html" width="100%" height="800" frameborder="0"></iframe>
+```
+
+## API Endpoints (nur für sichere Version)
 
 - `GET /api/readonly/health` - Health Check
 - `GET /api/readonly/data` - Alle Daten
