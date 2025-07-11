@@ -17,7 +17,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "readonly-api": "node server/readonly-api.js",
+    "generate-confluence": "node scripts/generate-static-confluence.js",
     "dev:readonly": "concurrently \"npm start\" \"npm run readonly-api\"",
     "start:readonly-api": "NODE_ENV=production node server/readonly-api.js"
   },
