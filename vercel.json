@@ -1,0 +1,17 @@
+{
+  "functions": {
+    "api/calendar.js": {
+      "maxDuration": 30
+    }
+  },
+  "routes": [
+    {
+      "src": "/api/readonly/(.*)",
+      "dest": "/server/readonly-api.js"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/server/api.js"
+    }
+  ]
+}
