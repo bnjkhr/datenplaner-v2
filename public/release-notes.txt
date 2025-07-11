@@ -16,3 +16,14 @@ Version 2.0.0 - 10.07.2025
 * moderne UI (huge changes!)
 * Link zur Notion-Seite für Fehler und Feature-Anfragen im Footer
 * aktuelle Abwesenheiten ganz oben
+
+
+Version 2.1.0 - 11.07.2025
+--------------------------
+* Auswertungen: Stundenauslastung
+* Auswertungen: Skill-Analyse
+* Auswertungen: Tabellarische Übersicht der Auslastung
+* Auswertungen: Grafische Auswertungen  
+* Auswertungen: Sortierbar
+
+

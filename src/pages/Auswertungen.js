@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useData } from "../context/DataProvider";
 import {
   BarChart,
@@ -23,6 +23,12 @@ export const Auswertungen = () => {
     loading,
     error,
   } = useData();
+
+  // Filter states
+  const [filterAuslastung, setFilterAuslastung] = useState("alle");
+  const [filterSkill, setFilterSkill] = useState("");
+  const [filterDatenprodukt, setFilterDatenprodukt] = useState("");
+  const [filterRolle, setFilterRolle] = useState("");
 
   if (loading)
     return (
@@ -111,6 +117,60 @@ export const Auswertungen = () => {
     (skill) => !assignedSkillIds.has(skill.id)
   );
 
+  // --- NEU: Auslastungs-Daten ---
+  const workloadData = personen.map((person) => {
+    const verfügbareStunden = person.wochenstunden || 31; // Standard: 31 Stunden
+    const gebuchteStunden = zuordnungen
+      .filter(z => z.personId === person.id)
+      .reduce((sum, z) => sum + (z.stunden || 0), 0);
+    
+    const auslastung = verfügbareStunden > 0 ? (gebuchteStunden / verfügbareStunden) * 100 : 0;
+    
+    return {
+      id: person.id,
+      name: person.name,
+      verfügbareStunden,
+      gebuchteStunden,
+      auslastung: Math.round(auslastung * 10) / 10, // Runde auf 1 Dezimalstelle
+      status: auslastung > 100 ? 'overbooked' : 
+              auslastung < 20 ? 'underbooked' : 'normal'
+    };
+  }).sort((a, b) => b.auslastung - a.auslastung); // Sortiert von hoch zu niedrig
+
+  // Filter logic
+  const filteredWorkloadData = workloadData.filter(person => {
+    // Filter by utilization
+    if (filterAuslastung !== "alle") {
+      if (filterAuslastung === "hoch" && person.auslastung <= 100) return false;
+      if (filterAuslastung === "normal" && (person.auslastung < 20 || person.auslastung > 100)) return false;
+      if (filterAuslastung === "niedrig" && person.auslastung >= 20) return false;
+    }
+
+    // Filter by skill
+    if (filterSkill) {
+      const personData = personen.find(p => p.id === person.id);
+      if (!personData?.skillIds?.includes(filterSkill)) return false;
+    }
+
+    // Filter by data product
+    if (filterDatenprodukt) {
+      const hasDataProduct = zuordnungen.some(z => 
+        z.personId === person.id && z.datenproduktId === filterDatenprodukt
+      );
+      if (!hasDataProduct) return false;
+    }
+
+    // Filter by role
+    if (filterRolle) {
+      const hasRole = zuordnungen.some(z => 
+        z.personId === person.id && z.rolleId === filterRolle
+      );
+      if (!hasRole) return false;
+    }
+
+    return true;
+  });
+
   // --- NEU: Funktion für den Excel-Export ---
   const handleExportToExcel = () => {
     // 1. Daten für das erste Tabellenblatt (Team-Auslastung) vorbereiten
@@ -186,6 +246,173 @@ export const Auswertungen = () => {
         </div>
 
         <div className="space-y-8">
+
+          {/* NEU: Kompakte Auslastungsübersicht */}
+          <CollapsibleSection title="Auslastungsübersicht" defaultOpen={true}>
+            {/* Filter Controls */}
+            <div className="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
+              <h3 className="text-sm font-semibold text-gray-700 mb-3">Filter</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                
+                {/* Auslastung Filter */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Auslastung</label>
+                  <select
+                    value={filterAuslastung}
+                    onChange={(e) => setFilterAuslastung(e.target.value)}
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="alle">Alle</option>
+                    <option value="hoch">Hoch (&gt;100%)</option>
+                    <option value="normal">Normal (20-100%)</option>
+                    <option value="niedrig">Niedrig (&lt;20%)</option>
+                  </select>
+                </div>
+
+                {/* Skill Filter */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Skill</label>
+                  <select
+                    value={filterSkill}
+                    onChange={(e) => setFilterSkill(e.target.value)}
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">Alle Skills</option>
+                    {skills.map(skill => (
+                      <option key={skill.id} value={skill.id}>{skill.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Datenprodukt Filter */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Datenprodukt</label>
+                  <select
+                    value={filterDatenprodukt}
+                    onChange={(e) => setFilterDatenprodukt(e.target.value)}
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">Alle Datenprodukte</option>
+                    {datenprodukte.map(dp => (
+                      <option key={dp.id} value={dp.id}>{dp.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Rolle Filter */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Rolle</label>
+                  <select
+                    value={filterRolle}
+                    onChange={(e) => setFilterRolle(e.target.value)}
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">Alle Rollen</option>
+                    {rollen.map(rolle => (
+                      <option key={rolle.id} value={rolle.id}>{rolle.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+              </div>
+              
+              {/* Clear filters button */}
+              {(filterAuslastung !== "alle" || filterSkill || filterDatenprodukt || filterRolle) && (
+                <button
+                  onClick={() => {
+                    setFilterAuslastung("alle");
+                    setFilterSkill("");
+                    setFilterDatenprodukt("");
+                    setFilterRolle("");
+                  }}
+                  className="mt-3 px-3 py-1.5 text-xs text-gray-600 hover:text-gray-800 hover:bg-gray-200 rounded-lg transition-colors"
+                >
+                  Filter zurücksetzen
+                </button>
+              )}
+            </div>
+
+            <p className="text-sm text-gray-600 mb-4">
+              Sortiert nach Auslastung (hoch → niedrig) • {filteredWorkloadData.length} von {workloadData.length} Personen
+            </p>
+            
+            {filteredWorkloadData.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {filteredWorkloadData.map((person) => (
+                    <div 
+                      key={person.id}
+                      className={`p-4 rounded-xl border-2 transition-all hover:shadow-md ${
+                        person.status === 'overbooked' 
+                          ? 'bg-gradient-to-br from-orange-50 to-red-50 border-orange-200' 
+                          : person.status === 'underbooked'
+                            ? 'bg-gradient-to-br from-red-50 to-red-100 border-red-200'
+                            : 'bg-gradient-to-br from-green-50 to-emerald-50 border-emerald-200'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-semibold text-gray-900 text-sm truncate">{person.name}</h3>
+                        <span 
+                          className={`text-xs font-bold px-2 py-1 rounded-full ${
+                            person.status === 'overbooked' 
+                              ? 'bg-orange-200 text-orange-800' 
+                              : person.status === 'underbooked'
+                                ? 'bg-red-200 text-red-800'
+                                : 'bg-emerald-200 text-emerald-800'
+                          }`}
+                        >
+                          {person.auslastung}%
+                        </span>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-xs text-gray-600">
+                          <span>Gebucht:</span>
+                          <span className="font-medium">{person.gebuchteStunden}h</span>
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-600">
+                          <span>Verfügbar:</span>
+                          <span className="font-medium">{person.verfügbareStunden}h</span>
+                        </div>
+                        
+                        {/* Progress Bar */}
+                        <div className="w-full bg-white/60 rounded-full h-2 overflow-hidden">
+                          <div 
+                            className={`h-full rounded-full transition-all duration-500 ${
+                              person.status === 'overbooked' 
+                                ? 'bg-gradient-to-r from-orange-400 to-red-500' 
+                                : person.status === 'underbooked'
+                                  ? 'bg-gradient-to-r from-red-400 to-red-500'
+                                  : 'bg-gradient-to-r from-emerald-400 to-emerald-500'
+                            }`}
+                            style={{ width: `${Math.min(person.auslastung, 100)}%` }}
+                          />
+                        </div>
+                        
+                        {person.auslastung > 100 && (
+                          <div className="text-xs text-orange-700 font-medium">
+                            ⚠️ Überbucht um {Math.round(person.auslastung - 100)}%
+                          </div>
+                        )}
+                        {person.status === 'underbooked' && person.gebuchteStunden > 0 && (
+                          <div className="text-xs text-red-700 font-medium">
+                            📉 Unterausgelastet
+                          </div>
+                        )}
+                        {person.gebuchteStunden === 0 && (
+                          <div className="text-xs text-gray-500 font-medium">
+                            💤 Nicht zugewiesen
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12 text-gray-500">
+                  {workloadData.length === 0 ? "Keine Auslastungsdaten verfügbar." : "Keine Personen entsprechen den Filterkriterien."}
+                </div>
+              )}
+          </CollapsibleSection>
 
           {/* Tabellarische Übersicht */}
           <CollapsibleSection title="Tabellarische Übersicht der Auslastung" defaultOpen={false}>
@@ -270,11 +497,7 @@ export const Auswertungen = () => {
           </CollapsibleSection>
 
           {/* Grafische Auswertungen */}
-          <div className="bg-white shadow-lg rounded-2xl border border-gray-100 overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100">
-              <h2 className="text-xl font-semibold text-gray-900">Grafische Auswertungen</h2>
-            </div>
-            <div className="p-6">
+          <CollapsibleSection title="Grafische Auswertungen" defaultOpen={false}>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-700 mb-4">
@@ -377,77 +600,72 @@ export const Auswertungen = () => {
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
+          </CollapsibleSection>
 
           {/* Skill-Analyse */}
-          <div className="bg-white shadow-lg rounded-2xl border border-gray-100 overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100">
-              <h2 className="text-xl font-semibold text-gray-900">Skill-Analyse</h2>
-            </div>
-            <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-700 mb-4">
-                    Häufigkeit der Skills
-                  </h3>
-                  <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-4 shadow-inner">
-                    {skillUsageCount.length > 0 ? (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {skillUsageCount.map((skill) => (
-                          <div
-                            key={skill.name}
-                            className="flex items-center justify-between bg-white/80 backdrop-blur-sm p-2 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
-                          >
-                            <div className="flex items-center gap-2 min-w-0">
-                              <div
-                                className="w-3 h-3 rounded-full flex-shrink-0"
-                                style={{ backgroundColor: skill.color }}
-                              />
-                              <span className="text-sm font-medium text-gray-800 truncate">
-                                {skill.name}
-                              </span>
-                            </div>
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-bold bg-white text-gray-700 shadow-sm ml-2 flex-shrink-0">
-                              {skill.Anzahl}
+          <CollapsibleSection title="Skill-Analyse" defaultOpen={false}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-700 mb-4">
+                  Häufigkeit der Skills
+                </h3>
+                <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-4 shadow-inner">
+                  {skillUsageCount.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {skillUsageCount.map((skill) => (
+                        <div
+                          key={skill.name}
+                          className="flex items-center justify-between bg-white/80 backdrop-blur-sm p-2 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <div
+                              className="w-3 h-3 rounded-full flex-shrink-0"
+                              style={{ backgroundColor: skill.color }}
+                            />
+                            <span className="text-sm font-medium text-gray-800 truncate">
+                              {skill.name}
                             </span>
                           </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-sm text-gray-500 text-center py-4">Keine Skills zugewiesen.</p>
-                    )}
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-700 mb-4">
-                    Nicht zugewiesene Skills
-                  </h3>
-                  <div className="bg-gray-50 rounded-xl p-4">
-                    {unassignedSkills.length > 0 ? (
-                      <div className="flex flex-wrap gap-2">
-                        {unassignedSkills.map((skill) => (
-                          <span
-                            key={skill.id}
-                            className="inline-flex items-center px-3 py-1.5 bg-orange-100 text-orange-700 rounded-lg text-xs font-semibold border border-orange-200"
-                          >
-                            {skill.name}
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-bold bg-white text-gray-700 shadow-sm ml-2 flex-shrink-0">
+                            {skill.Anzahl}
                           </span>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-4">
-                        <div className="text-green-600 text-2xl mb-2">✅</div>
-                        <p className="text-sm text-gray-600">
-                          Alle Skills sind mindestens einer Person zugewiesen.
-                        </p>
-                      </div>
-                    )}
-                  </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500 text-center py-4">Keine Skills zugewiesen.</p>
+                  )}
+                </div>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-700 mb-4">
+                  Nicht zugewiesene Skills
+                </h3>
+                <div className="bg-gray-50 rounded-xl p-4">
+                  {unassignedSkills.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {unassignedSkills.map((skill) => (
+                        <span
+                          key={skill.id}
+                          className="inline-flex items-center px-3 py-1.5 bg-orange-100 text-orange-700 rounded-lg text-xs font-semibold border border-orange-200"
+                        >
+                          {skill.name}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-4">
+                      <div className="text-green-600 text-2xl mb-2">✅</div>
+                      <p className="text-sm text-gray-600">
+                        Alle Skills sind mindestens einer Person zugewiesen.
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
-          </div>
+          </CollapsibleSection>
+
         </div>
       </div>
     </div>
