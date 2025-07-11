@@ -54,13 +54,13 @@
         display: flex;
         align-items: center;
         font-size: 14px;
-        color: #f59e0b;
+        color: #059669;
       }
       
       .status-dot {
         width: 8px;
         height: 8px;
-        background-color: #f59e0b;
+        background-color: #10b981;
         border-radius: 50%;
         margin-right: 8px;
       }
@@ -275,10 +275,10 @@
       <!-- Header -->
       <div class="header">
         <h1 class="title">Datenprodukt Planer</h1>
-        <p class="subtitle">Team-Übersicht • Demo-Daten</p>
+        <p class="subtitle">Team-Übersicht • Live Firebase-Daten</p>
         <div class="status">
           <div class="status-dot"></div>
-          <span>Demo-Daten (Firebase nicht verfügbar)</span>
+          <span>Live-Daten • Aktualisiert: 11.7.2025, 15:04:49</span>
         </div>
       </div>
 
@@ -288,7 +288,7 @@
           <div class="stat-icon icon-blue">👥</div>
           <div class="stat-content">
             <h3>Gesamt</h3>
-            <p>5</p>
+            <p>25</p>
           </div>
         </div>
         
@@ -296,7 +296,7 @@
           <div class="stat-icon icon-green">✅</div>
           <div class="stat-content">
             <h3>Mit Zuordnung</h3>
-            <p>5</p>
+            <p>24</p>
           </div>
         </div>
         
@@ -304,15 +304,15 @@
           <div class="stat-icon icon-orange">⚠️</div>
           <div class="stat-content">
             <h3>Überbucht</h3>
-            <p>3</p>
+            <p>0</p>
           </div>
         </div>
         
         <div class="stat-card">
-          <div class="stat-icon icon-gray">🔥</div>
+          <div class="stat-icon icon-green">🔥</div>
           <div class="stat-content">
             <h3>Status</h3>
-            <p style="font-size: 16px;">Demo</p>
+            <p style="font-size: 16px;">Live</p>
           </div>
         </div>
       </div>
@@ -320,7 +320,7 @@
       <!-- Team List -->
       <div class="card">
         <div class="card-header">
-          <h2 class="card-title">Team-Mitglieder (5)</h2>
+          <h2 class="card-title">Team-Mitglieder (25)</h2>
         </div>
         <div class="card-content">
           <table class="team-table">
@@ -336,20 +336,18 @@
               
                   <tr>
                     <td>
-                      <div class="person-name">Max Mustermann</div>
-                      <div class="person-email">max@example.com</div>
+                      <div class="person-name">Andreas Westiner</div>
+                      <div class="person-email">andreas.westiner@pub.tech</div>
                     </td>
                     <td>
-                      <div class="status-badge status-overbooked">
-                        112.9% (35h/31h)
+                      <div class="status-badge status-underbooked">
+                        0% (0h/20h)
                       </div>
                     </td>
                     <td>
                       <div class="skills">
                         
-                          <span class="skill-tag">Python</span>
-                        
-                          <span class="skill-tag">Data Science</span>
+                          <span class="skill-tag">Data Products</span>
                         
                       </div>
                     </td>
@@ -357,15 +355,15 @@
                       <div class="assignments">
                         
                             <div class="assignment">
-                              <span class="assignment-name">Customer Analytics Dashboard</span>
-                              <span class="assignment-role"> als Data Scientist</span>
-                              <span class="assignment-hours"> • 20h/Woche</span>
+                              <span class="assignment-name">Social Media</span>
+                              <span class="assignment-role"> als Daten-Analyst</span>
+                              <span class="assignment-hours"> • 0h/Woche</span>
                             </div>
                           
                             <div class="assignment">
-                              <span class="assignment-name">Sales Forecast Model</span>
-                              <span class="assignment-role"> als Analytics Engineer</span>
-                              <span class="assignment-hours"> • 15h/Woche</span>
+                              <span class="assignment-name">ARD Theken</span>
+                              <span class="assignment-role"> als Daten-Analyst</span>
+                              <span class="assignment-hours"> • 0h/Woche</span>
                             </div>
                           
                       </div>
@@ -374,20 +372,44 @@
                 
                   <tr>
                     <td>
-                      <div class="person-name">Anna Schmidt</div>
-                      <div class="person-email">anna@example.com</div>
+                      <div class="person-name">Anja Pilz</div>
+                      <div class="person-email">anja.pilz@wdr.de</div>
                     </td>
                     <td>
-                      <div class="status-badge status-normal">
-                        100% (35h/35h)
+                      <div class="status-badge status-underbooked">
+                        0% (0h/31h)
                       </div>
                     </td>
                     <td>
                       <div class="skills">
                         
-                          <span class="skill-tag">Data Science</span>
+                          <span class="skill-tag">AI</span>
                         
-                          <span class="skill-tag">Machine Learning</span>
+                          <span class="skill-tag">OKR</span>
+                        
+                      </div>
+                    </td>
+                    <td>
+                      <div class="assignments">
+                        <span style="color: #6b7280; font-style: italic;">Keine Zuordnungen</span>
+                      </div>
+                    </td>
+                  </tr>
+                
+                  <tr>
+                    <td>
+                      <div class="person-name">Annamaria Libor</div>
+                      <div class="person-email">annamaria.libor@pub.tech</div>
+                    </td>
+                    <td>
+                      <div class="status-badge status-underbooked">
+                        0% (0h/31h)
+                      </div>
+                    </td>
+                    <td>
+                      <div class="skills">
+                        
+                          <span class="skill-tag">Data Products</span>
                         
                       </div>
                     </td>
@@ -395,37 +417,593 @@
                       <div class="assignments">
                         
                             <div class="assignment">
-                              <span class="assignment-name">Sales Forecast Model</span>
-                              <span class="assignment-role"> als Data Scientist</span>
-                              <span class="assignment-hours"> • 25h/Woche</span>
+                              <span class="assignment-name">Audio</span>
+                              <span class="assignment-role"> als Daten-Analyst</span>
+                              <span class="assignment-hours"> • 0h/Woche</span>
                             </div>
                           
                             <div class="assignment">
-                              <span class="assignment-name">ML Recommendation Engine</span>
-                              <span class="assignment-role"> als Data Scientist</span>
+                              <span class="assignment-name">Web/App</span>
+                              <span class="assignment-role"> als Daten-Analyst</span>
+                              <span class="assignment-hours"> • 0h/Woche</span>
+                            </div>
+                          
+                      </div>
+                    </td>
+                  </tr>
+                
+                  <tr>
+                    <td>
+                      <div class="person-name">Artur Kepka</div>
+                      <div class="person-email">artur.kepka@pub.tech</div>
+                    </td>
+                    <td>
+                      <div class="status-badge status-underbooked">
+                        0% (0h/31h)
+                      </div>
+                    </td>
+                    <td>
+                      <div class="skills">
+                        
+                      </div>
+                    </td>
+                    <td>
+                      <div class="assignments">
+                        
+                            <div class="assignment">
+                              <span class="assignment-name">Plattform-Team</span>
+                              <span class="assignment-role"> als Datenprodukt-Engineer (Data-Engineer)</span>
+                              <span class="assignment-hours"> • 0h/Woche</span>
+                            </div>
+                          
+                      </div>
+                    </td>
+                  </tr>
+                
+                  <tr>
+                    <td>
+                      <div class="person-name">Ashwin Mahendran</div>
+                      <div class="person-email">ashwin.mahendran@pub.tech</div>
+                    </td>
+                    <td>
+                      <div class="status-badge status-underbooked">
+                        0% (0h/31h)
+                      </div>
+                    </td>
+                    <td>
+                      <div class="skills">
+                        
+                      </div>
+                    </td>
+                    <td>
+                      <div class="assignments">
+                        
+                            <div class="assignment">
+                              <span class="assignment-name">Plattform-Team</span>
+                              <span class="assignment-role"> als Datenprodukt-Engineer (Data-Engineer)</span>
+                              <span class="assignment-hours"> • 0h/Woche</span>
+                            </div>
+                          
+                      </div>
+                    </td>
+                  </tr>
+                
+                  <tr>
+                    <td>
+                      <div class="person-name">Ben Kohler</div>
+                      <div class="person-email">ben.kohler@pub.tech</div>
+                    </td>
+                    <td>
+                      <div class="status-badge status-normal">
+                        95.2% (29.5h/31h)
+                      </div>
+                    </td>
+                    <td>
+                      <div class="skills">
+                        
+                          <span class="skill-tag">Agile</span>
+                        
+                          <span class="skill-tag">AI</span>
+                        
+                          <span class="skill-tag">Data-Mesh</span>
+                        
+                          <span class="skill-tag">PM</span>
+                        
+                          <span class="skill-tag">Data Products</span>
+                        
+                      </div>
+                    </td>
+                    <td>
+                      <div class="assignments">
+                        
+                            <div class="assignment">
+                              <span class="assignment-name">Gesamtportfolio</span>
+                              <span class="assignment-role"> als Projektmanager:in</span>
+                              <span class="assignment-hours"> • 4h/Woche</span>
+                            </div>
+                          
+                            <div class="assignment">
+                              <span class="assignment-name">M13 Core</span>
+                              <span class="assignment-role"> als Transparenzmeister:in</span>
                               <span class="assignment-hours"> • 10h/Woche</span>
                             </div>
                           
+                            <div class="assignment">
+                              <span class="assignment-name">M13 Core</span>
+                              <span class="assignment-role"> als Projektmanager:in</span>
+                              <span class="assignment-hours"> • 10.5h/Woche</span>
+                            </div>
+                          
+                            <div class="assignment">
+                              <span class="assignment-name">ARD Theken</span>
+                              <span class="assignment-role"> als Projektmanager:in</span>
+                              <span class="assignment-hours"> • 5h/Woche</span>
+                            </div>
+                          
                       </div>
                     </td>
                   </tr>
                 
                   <tr>
                     <td>
-                      <div class="person-name">Tom Weber</div>
-                      <div class="person-email">tom@example.com</div>
+                      <div class="person-name">Benjamin Böhme</div>
+                      <div class="person-email">Benjamin.Boehme@EXT.WDR.DE</div>
+                    </td>
+                    <td>
+                      <div class="status-badge status-underbooked">
+                        0% (0h/31h)
+                      </div>
+                    </td>
+                    <td>
+                      <div class="skills">
+                        
+                      </div>
+                    </td>
+                    <td>
+                      <div class="assignments">
+                        
+                            <div class="assignment">
+                              <span class="assignment-name">Plattform-Team</span>
+                              <span class="assignment-role"> als Datenprodukt-Engineer (Data-Engineer)</span>
+                              <span class="assignment-hours"> • 0h/Woche</span>
+                            </div>
+                          
+                      </div>
+                    </td>
+                  </tr>
+                
+                  <tr>
+                    <td>
+                      <div class="person-name">Christian Jörres</div>
+                      <div class="person-email">Christian.Joerres@wdr.de</div>
+                    </td>
+                    <td>
+                      <div class="status-badge status-underbooked">
+                        0% (0h/31h)
+                      </div>
+                    </td>
+                    <td>
+                      <div class="skills">
+                        
+                          <span class="skill-tag">Loop</span>
+                        
+                          <span class="skill-tag">OKR</span>
+                        
+                          <span class="skill-tag">Agile</span>
+                        
+                          <span class="skill-tag">Data Contract</span>
+                        
+                      </div>
+                    </td>
+                    <td>
+                      <div class="assignments">
+                        
+                            <div class="assignment">
+                              <span class="assignment-name">M13 Core</span>
+                              <span class="assignment-role"> als M13 Co-Lead</span>
+                              <span class="assignment-hours"> • 0h/Woche</span>
+                            </div>
+                          
+                      </div>
+                    </td>
+                  </tr>
+                
+                  <tr>
+                    <td>
+                      <div class="person-name">Constantin Schreyer</div>
+                      <div class="person-email">constantin.schreyer@pub.tech</div>
+                    </td>
+                    <td>
+                      <div class="status-badge status-underbooked">
+                        0% (0h/31h)
+                      </div>
+                    </td>
+                    <td>
+                      <div class="skills">
+                        
+                      </div>
+                    </td>
+                    <td>
+                      <div class="assignments">
+                        
+                            <div class="assignment">
+                              <span class="assignment-name">Plattform-Team</span>
+                              <span class="assignment-role"> als Datenprodukt-Engineer (Data-Engineer)</span>
+                              <span class="assignment-hours"> • 0h/Woche</span>
+                            </div>
+                          
+                      </div>
+                    </td>
+                  </tr>
+                
+                  <tr>
+                    <td>
+                      <div class="person-name">David Hemmerle</div>
+                      <div class="person-email">david.hemmerle@pub.tech</div>
+                    </td>
+                    <td>
+                      <div class="status-badge status-underbooked">
+                        0% (0h/31h)
+                      </div>
+                    </td>
+                    <td>
+                      <div class="skills">
+                        
+                          <span class="skill-tag">Data Products</span>
+                        
+                      </div>
+                    </td>
+                    <td>
+                      <div class="assignments">
+                        
+                            <div class="assignment">
+                              <span class="assignment-name">Plattform-Team</span>
+                              <span class="assignment-role"> als Platform Expert</span>
+                              <span class="assignment-hours"> • 0h/Woche</span>
+                            </div>
+                          
+                      </div>
+                    </td>
+                  </tr>
+                
+                  <tr>
+                    <td>
+                      <div class="person-name">Heiko Sonnenberg</div>
+                      <div class="person-email">heiko.sonnenberg@pub.tech</div>
+                    </td>
+                    <td>
+                      <div class="status-badge status-underbooked">
+                        0% (0h/31h)
+                      </div>
+                    </td>
+                    <td>
+                      <div class="skills">
+                        
+                          <span class="skill-tag">Data Engineer</span>
+                        
+                          <span class="skill-tag">Data Products</span>
+                        
+                      </div>
+                    </td>
+                    <td>
+                      <div class="assignments">
+                        
+                            <div class="assignment">
+                              <span class="assignment-name">Web/App</span>
+                              <span class="assignment-role"> als Datenprodukt-Engineer (Data-Engineer)</span>
+                              <span class="assignment-hours"> • 0h/Woche</span>
+                            </div>
+                          
+                      </div>
+                    </td>
+                  </tr>
+                
+                  <tr>
+                    <td>
+                      <div class="person-name">Johanna Giesecke</div>
+                      <div class="person-email">Johanna.Giesecke@ard.de</div>
+                    </td>
+                    <td>
+                      <div class="status-badge status-underbooked">
+                        0% (0h/5h)
+                      </div>
+                    </td>
+                    <td>
+                      <div class="skills">
+                        
+                      </div>
+                    </td>
+                    <td>
+                      <div class="assignments">
+                        
+                            <div class="assignment">
+                              <span class="assignment-name">ARD Theken</span>
+                              <span class="assignment-role"> als Datenprodukt-Owner (DPO)</span>
+                              <span class="assignment-hours"> • 0h/Woche</span>
+                            </div>
+                          
+                      </div>
+                    </td>
+                  </tr>
+                
+                  <tr>
+                    <td>
+                      <div class="person-name">Jonathan Thiemann</div>
+                      <div class="person-email">Jonathan.Thiemann@EXT.WDR.DE</div>
+                    </td>
+                    <td>
+                      <div class="status-badge status-underbooked">
+                        0% (0h/20h)
+                      </div>
+                    </td>
+                    <td>
+                      <div class="skills">
+                        
+                          <span class="skill-tag">Data Contract</span>
+                        
+                          <span class="skill-tag">Data Analyst</span>
+                        
+                          <span class="skill-tag">Data Engineer</span>
+                        
+                          <span class="skill-tag">Data Products</span>
+                        
+                      </div>
+                    </td>
+                    <td>
+                      <div class="assignments">
+                        
+                            <div class="assignment">
+                              <span class="assignment-name">Social Media</span>
+                              <span class="assignment-role"> als Datenprodukt-Engineer (Data-Engineer)</span>
+                              <span class="assignment-hours"> • 0h/Woche</span>
+                            </div>
+                          
+                            <div class="assignment">
+                              <span class="assignment-name">ARD Theken</span>
+                              <span class="assignment-role"> als Datenprodukt-Engineer (Data-Engineer)</span>
+                              <span class="assignment-hours"> • 0h/Woche</span>
+                            </div>
+                          
+                      </div>
+                    </td>
+                  </tr>
+                
+                  <tr>
+                    <td>
+                      <div class="person-name">Jyoti Tiwari</div>
+                      <div class="person-email">jyoti.tiwari@pub.tech</div>
+                    </td>
+                    <td>
+                      <div class="status-badge status-underbooked">
+                        0% (0h/31h)
+                      </div>
+                    </td>
+                    <td>
+                      <div class="skills">
+                        
+                          <span class="skill-tag">Data Products</span>
+                        
+                      </div>
+                    </td>
+                    <td>
+                      <div class="assignments">
+                        
+                            <div class="assignment">
+                              <span class="assignment-name">Audio</span>
+                              <span class="assignment-role"> als Datenprodukt-Engineer (Data-Engineer)</span>
+                              <span class="assignment-hours"> • 0h/Woche</span>
+                            </div>
+                          
+                      </div>
+                    </td>
+                  </tr>
+                
+                  <tr>
+                    <td>
+                      <div class="person-name">Kerstin Renger</div>
+                      <div class="person-email">kerstin.renger@pub.tech</div>
+                    </td>
+                    <td>
+                      <div class="status-badge status-underbooked">
+                        0% (0h/31h)
+                      </div>
+                    </td>
+                    <td>
+                      <div class="skills">
+                        
+                          <span class="skill-tag">PM</span>
+                        
+                          <span class="skill-tag">Data-Mesh</span>
+                        
+                          <span class="skill-tag">Data Products</span>
+                        
+                      </div>
+                    </td>
+                    <td>
+                      <div class="assignments">
+                        
+                            <div class="assignment">
+                              <span class="assignment-name">Social Media</span>
+                              <span class="assignment-role"> als Projektmanager:in</span>
+                              <span class="assignment-hours"> • 0h/Woche</span>
+                            </div>
+                          
+                      </div>
+                    </td>
+                  </tr>
+                
+                  <tr>
+                    <td>
+                      <div class="person-name">Korbinian Schwinger</div>
+                      <div class="person-email">korbinian.schwinger@pub.tech</div>
+                    </td>
+                    <td>
+                      <div class="status-badge status-underbooked">
+                        0% (0h/5h)
+                      </div>
+                    </td>
+                    <td>
+                      <div class="skills">
+                        
+                      </div>
+                    </td>
+                    <td>
+                      <div class="assignments">
+                        
+                            <div class="assignment">
+                              <span class="assignment-name">ARD Theken</span>
+                              <span class="assignment-role"> als Platform Expert</span>
+                              <span class="assignment-hours"> • 0h/Woche</span>
+                            </div>
+                          
+                            <div class="assignment">
+                              <span class="assignment-name">Plattform-Team</span>
+                              <span class="assignment-role"> als Datenprodukt-Engineer (Data-Engineer)</span>
+                              <span class="assignment-hours"> • 0h/Woche</span>
+                            </div>
+                          
+                      </div>
+                    </td>
+                  </tr>
+                
+                  <tr>
+                    <td>
+                      <div class="person-name">Krzyz Binkowski</div>
+                      <div class="person-email">krzyzstof.binkowski@pub.tech</div>
+                    </td>
+                    <td>
+                      <div class="status-badge status-underbooked">
+                        0% (0h/31h)
+                      </div>
+                    </td>
+                    <td>
+                      <div class="skills">
+                        
+                      </div>
+                    </td>
+                    <td>
+                      <div class="assignments">
+                        
+                            <div class="assignment">
+                              <span class="assignment-name">Plattform-Team</span>
+                              <span class="assignment-role"> als Datenprodukt-Engineer (Data-Engineer)</span>
+                              <span class="assignment-hours"> • 0h/Woche</span>
+                            </div>
+                          
+                      </div>
+                    </td>
+                  </tr>
+                
+                  <tr>
+                    <td>
+                      <div class="person-name">Matthias Thar (Hias)</div>
+                      <div class="person-email">matthias.thar@br.de</div>
+                    </td>
+                    <td>
+                      <div class="status-badge status-underbooked">
+                        0% (0h/31h)
+                      </div>
+                    </td>
+                    <td>
+                      <div class="skills">
+                        
+                          <span class="skill-tag">Data-Mesh</span>
+                        
+                          <span class="skill-tag">Data Contract</span>
+                        
+                          <span class="skill-tag">AI</span>
+                        
+                      </div>
+                    </td>
+                    <td>
+                      <div class="assignments">
+                        
+                            <div class="assignment">
+                              <span class="assignment-name">Gesamtportfolio</span>
+                              <span class="assignment-role"> als Link Domäne Gremien</span>
+                              <span class="assignment-hours"> • 0h/Woche</span>
+                            </div>
+                          
+                            <div class="assignment">
+                              <span class="assignment-name">M13 Core</span>
+                              <span class="assignment-role"> als M13 Co-Lead</span>
+                              <span class="assignment-hours"> • 0h/Woche</span>
+                            </div>
+                          
+                      </div>
+                    </td>
+                  </tr>
+                
+                  <tr>
+                    <td>
+                      <div class="person-name">Nora Dejia Wen</div>
+                      <div class="person-email">nora-dejia.wen@wdr.de</div>
+                    </td>
+                    <td>
+                      <div class="status-badge status-underbooked">
+                        0% (0h/31h)
+                      </div>
+                    </td>
+                    <td>
+                      <div class="skills">
+                        
+                          <span class="skill-tag">Plattform</span>
+                        
+                      </div>
+                    </td>
+                    <td>
+                      <div class="assignments">
+                        
+                            <div class="assignment">
+                              <span class="assignment-name">Social Media</span>
+                              <span class="assignment-role"> als Platform Expert</span>
+                              <span class="assignment-hours"> • 0h/Woche</span>
+                            </div>
+                          
+                            <div class="assignment">
+                              <span class="assignment-name">Plattform-Team</span>
+                              <span class="assignment-role"> als Platform Expert</span>
+                              <span class="assignment-hours"> • 0h/Woche</span>
+                            </div>
+                          
+                            <div class="assignment">
+                              <span class="assignment-name">Gesamtportfolio</span>
+                              <span class="assignment-role"> als Platform Expert</span>
+                              <span class="assignment-hours"> • 0h/Woche</span>
+                            </div>
+                          
+                            <div class="assignment">
+                              <span class="assignment-name">Audio</span>
+                              <span class="assignment-role"> als Platform Expert</span>
+                              <span class="assignment-hours"> • 0h/Woche</span>
+                            </div>
+                          
+                      </div>
+                    </td>
+                  </tr>
+                
+                  <tr>
+                    <td>
+                      <div class="person-name">René Bärje-Keßler</div>
+                      <div class="person-email">rene.kessler@pub.tech</div>
                     </td>
                     <td>
                       <div class="status-badge status-normal">
-                        100% (31h/31h)
+                        75% (24h/32h)
                       </div>
                     </td>
                     <td>
                       <div class="skills">
                         
-                          <span class="skill-tag">Python</span>
+                          <span class="skill-tag">Agile</span>
                         
-                          <span class="skill-tag">Machine Learning</span>
+                          <span class="skill-tag">Loop</span>
+                        
+                          <span class="skill-tag">OKR</span>
+                        
+                          <span class="skill-tag">Organisationsentwicklung</span>
+                        
+                          <span class="skill-tag">Data Products</span>
                         
                       </div>
                     </td>
@@ -433,9 +1011,15 @@
                       <div class="assignments">
                         
                             <div class="assignment">
-                              <span class="assignment-name">ML Recommendation Engine</span>
-                              <span class="assignment-role"> als ML Engineer</span>
-                              <span class="assignment-hours"> • 31h/Woche</span>
+                              <span class="assignment-name">Plattform-Team</span>
+                              <span class="assignment-role"> als Agile Coach</span>
+                              <span class="assignment-hours"> • 12h/Woche</span>
+                            </div>
+                          
+                            <div class="assignment">
+                              <span class="assignment-name">M13 Core</span>
+                              <span class="assignment-role"> als Agile Coach</span>
+                              <span class="assignment-hours"> • 12h/Woche</span>
                             </div>
                           
                       </div>
@@ -444,22 +1028,16 @@
                 
                   <tr>
                     <td>
-                      <div class="person-name">Lisa Müller</div>
-                      <div class="person-email">lisa@example.com</div>
+                      <div class="person-name">Sebastian Britz</div>
+                      <div class="person-email">Sebastian.Britz@ard.de</div>
                     </td>
                     <td>
-                      <div class="status-badge status-overbooked">
-                        112.9% (35h/31h)
+                      <div class="status-badge status-underbooked">
+                        0% (0h/5h)
                       </div>
                     </td>
                     <td>
                       <div class="skills">
-                        
-                          <span class="skill-tag">Python</span>
-                        
-                          <span class="skill-tag">Data Science</span>
-                        
-                          <span class="skill-tag">Machine Learning</span>
                         
                       </div>
                     </td>
@@ -467,15 +1045,9 @@
                       <div class="assignments">
                         
                             <div class="assignment">
-                              <span class="assignment-name">Customer Analytics Dashboard</span>
-                              <span class="assignment-role"> als Analytics Engineer</span>
-                              <span class="assignment-hours"> • 15h/Woche</span>
-                            </div>
-                          
-                            <div class="assignment">
-                              <span class="assignment-name">Inventory Optimization</span>
-                              <span class="assignment-role"> als Business Analyst</span>
-                              <span class="assignment-hours"> • 20h/Woche</span>
+                              <span class="assignment-name">ARD Theken</span>
+                              <span class="assignment-role"> als Analyst Domain</span>
+                              <span class="assignment-hours"> • 0h/Woche</span>
                             </div>
                           
                       </div>
@@ -484,18 +1056,26 @@
                 
                   <tr>
                     <td>
-                      <div class="person-name">Peter Klein</div>
-                      <div class="person-email">peter@example.com</div>
+                      <div class="person-name">Sophie v.Hoyningen-Huene</div>
+                      <div class="person-email">sophie.hoyningen-huene@br.de</div>
                     </td>
                     <td>
-                      <div class="status-badge status-overbooked">
-                        125% (25h/20h)
+                      <div class="status-badge status-underbooked">
+                        0% (0h/15h)
                       </div>
                     </td>
                     <td>
                       <div class="skills">
                         
-                          <span class="skill-tag">Data Science</span>
+                          <span class="skill-tag">Organisationsentwicklung</span>
+                        
+                          <span class="skill-tag">Redaktion</span>
+                        
+                          <span class="skill-tag">Business Coaching</span>
+                        
+                          <span class="skill-tag">Kommunikation</span>
+                        
+                          <span class="skill-tag">Führungskräfteentwicklung</span>
                         
                       </div>
                     </td>
@@ -503,9 +1083,123 @@
                       <div class="assignments">
                         
                             <div class="assignment">
-                              <span class="assignment-name">Inventory Optimization</span>
-                              <span class="assignment-role"> als Business Analyst</span>
-                              <span class="assignment-hours"> • 25h/Woche</span>
+                              <span class="assignment-name">M13 Core</span>
+                              <span class="assignment-role"> als Change Coach</span>
+                              <span class="assignment-hours"> • 0h/Woche</span>
+                            </div>
+                          
+                      </div>
+                    </td>
+                  </tr>
+                
+                  <tr>
+                    <td>
+                      <div class="person-name">Tilman Ziegler</div>
+                      <div class="person-email">tilman.ziegler@pub.tech</div>
+                    </td>
+                    <td>
+                      <div class="status-badge status-underbooked">
+                        0% (0h/31h)
+                      </div>
+                    </td>
+                    <td>
+                      <div class="skills">
+                        
+                          <span class="skill-tag">Data-Mesh</span>
+                        
+                          <span class="skill-tag">PM</span>
+                        
+                          <span class="skill-tag">Data Products</span>
+                        
+                      </div>
+                    </td>
+                    <td>
+                      <div class="assignments">
+                        
+                            <div class="assignment">
+                              <span class="assignment-name">SEO</span>
+                              <span class="assignment-role"> als Projektmanager:in</span>
+                              <span class="assignment-hours"> • 0h/Woche</span>
+                            </div>
+                          
+                            <div class="assignment">
+                              <span class="assignment-name">M13 Core</span>
+                              <span class="assignment-role"> als Projektmanager:in</span>
+                              <span class="assignment-hours"> • 0h/Woche</span>
+                            </div>
+                          
+                            <div class="assignment">
+                              <span class="assignment-name">Audio</span>
+                              <span class="assignment-role"> als Projektmanager:in</span>
+                              <span class="assignment-hours"> • 0h/Woche</span>
+                            </div>
+                          
+                            <div class="assignment">
+                              <span class="assignment-name">M13 Core</span>
+                              <span class="assignment-role"> als Transparenzmeister:in</span>
+                              <span class="assignment-hours"> • 0h/Woche</span>
+                            </div>
+                          
+                            <div class="assignment">
+                              <span class="assignment-name">Web/App</span>
+                              <span class="assignment-role"> als Projektmanager:in</span>
+                              <span class="assignment-hours"> • 0h/Woche</span>
+                            </div>
+                          
+                      </div>
+                    </td>
+                  </tr>
+                
+                  <tr>
+                    <td>
+                      <div class="person-name">Tobias Hofmann</div>
+                      <div class="person-email">tobias.hofmann@adesso.de</div>
+                    </td>
+                    <td>
+                      <div class="status-badge status-underbooked">
+                        0% (0h/31h)
+                      </div>
+                    </td>
+                    <td>
+                      <div class="skills">
+                        
+                      </div>
+                    </td>
+                    <td>
+                      <div class="assignments">
+                        
+                            <div class="assignment">
+                              <span class="assignment-name">Plattform-Team</span>
+                              <span class="assignment-role"> als Datenprodukt-Engineer (Data-Engineer)</span>
+                              <span class="assignment-hours"> • 0h/Woche</span>
+                            </div>
+                          
+                      </div>
+                    </td>
+                  </tr>
+                
+                  <tr>
+                    <td>
+                      <div class="person-name">Trijit Ghosh</div>
+                      <div class="person-email">trijit.ghosh@pub.tech</div>
+                    </td>
+                    <td>
+                      <div class="status-badge status-underbooked">
+                        0% (0h/31h)
+                      </div>
+                    </td>
+                    <td>
+                      <div class="skills">
+                        
+                      </div>
+                    </td>
+                    <td>
+                      <div class="assignments">
+                        
+                            <div class="assignment">
+                              <span class="assignment-name">Plattform-Team</span>
+                              <span class="assignment-role"> als Datenprodukt-Engineer (Data-Engineer)</span>
+                              <span class="assignment-hours"> • 0h/Woche</span>
                             </div>
                           
                       </div>
