@@ -192,7 +192,7 @@ server {
 - ✅ Echte Firebase-Daten
 - ✅ Keine Backend-Server nötig
 - ⚠️ Firebase-Config im Frontend sichtbar (Read-Only ist OK)
-- 🔧 Benötigt Firestore-Security-Rules für öffentlichen Zugriff
+- 🔧 **Benötigt Firestore-Security-Rules Anpassung** → siehe `firestore-setup.md`
 - 🚀 **EMPFOHLEN für interne Teams/Confluence**
 
 ### 3. `readonly-secure.html` - Sichere Backend-API

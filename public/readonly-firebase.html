@@ -139,18 +139,34 @@
           const collections = ['personen', 'skills', 'datenprodukte', 'rollen', 'zuordnungen'];
           const data = {};
 
+          // Teste zuerst die Verbindung mit einer kleinen Abfrage
+          console.log('🔍 Teste Firebase-Verbindung...');
+          
           // Lade alle Collections parallel
           const promises = collections.map(async (collectionName) => {
             const path = `artifacts/${appId}/public/data/${collectionName}`;
-            const snapshot = await db.collection(path).get();
-            data[collectionName] = snapshot.docs.map(doc => ({
-              id: doc.id,
-              ...doc.data()
-            }));
+            console.log(`📊 Lade Collection: ${path}`);
             
-            // Sortiere Daten außer Zuordnungen
-            if (collectionName !== 'zuordnungen') {
-              data[collectionName].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'de'));
+            try {
+              const snapshot = await db.collection(path).get();
+              console.log(`✅ ${collectionName}: ${snapshot.docs.length} Dokumente geladen`);
+              
+              data[collectionName] = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+              }));
+              
+              // Sortiere Daten außer Zuordnungen
+              if (collectionName !== 'zuordnungen') {
+                data[collectionName].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'de'));
+              }
+            } catch (collectionError) {
+              console.error(`❌ Fehler bei Collection ${collectionName}:`, collectionError);
+              // Prüfe auf Permission-Fehler
+              if (collectionError.code === 'permission-denied') {
+                throw new Error(`Firestore Permission Denied für ${collectionName}. Firestore Security Rules müssen angepasst werden.`);
+              }
+              throw collectionError;
             }
           });
 
@@ -163,7 +179,18 @@
           return data;
         } catch (error) {
           console.error('❌ Fehler beim Laden der Firebase-Daten:', error);
-          updateConnectionStatus('disconnected', 'Verbindungsfehler');
+          
+          // Spezifische Fehlermeldungen
+          let errorMessage = 'Verbindungsfehler';
+          if (error.message.includes('Permission Denied')) {
+            errorMessage = 'Firestore Rules müssen angepasst werden';
+          } else if (error.code === 'permission-denied') {
+            errorMessage = 'Keine Berechtigung - Rules prüfen';
+          } else if (error.code === 'unavailable') {
+            errorMessage = 'Firebase nicht erreichbar';
+          }
+          
+          updateConnectionStatus('disconnected', errorMessage);
           throw error;
         }
       }
