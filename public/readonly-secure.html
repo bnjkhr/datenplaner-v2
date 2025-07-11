@@ -5,10 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
     <meta name="description" content="Datenprodukt Planer - Read-Only Ansicht für Confluence" />
-    <title>Datenprodukt Planer - Read-Only (Live)</title>
+    <title>Datenprodukt Planer - Read-Only (Secure)</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
     <style>
       .gradient-bg {
         background: linear-gradient(135deg, #f8fafc 0%, rgba(239, 246, 255, 0.3) 100%);
@@ -35,6 +33,20 @@
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
       }
+      .status-indicator {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-right: 8px;
+      }
+      .status-connected { background-color: #10b981; }
+      .status-disconnected { background-color: #ef4444; }
+      .status-loading { background-color: #f59e0b; animation: pulse 2s infinite; }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+      }
     </style>
   </head>
   <body class="gradient-bg min-h-screen">
@@ -44,15 +56,21 @@
         <nav class="container mx-auto px-6 py-4">
           <div class="flex justify-between items-center">
             <div class="text-2xl font-bold text-gradient">
-              Datenprodukt Planer - Live Übersicht
+              Datenprodukt Planer - Secure
             </div>
-            <div class="flex gap-2">
-              <button onclick="showView('team')" id="nav-team" class="px-4 py-2 rounded-lg text-sm font-semibold bg-blue-600 text-white">
-                Team-Übersicht
-              </button>
-              <button onclick="showView('analytics')" id="nav-analytics" class="px-4 py-2 rounded-lg text-sm font-semibold text-gray-600 hover:bg-blue-50">
-                Auswertungen
-              </button>
+            <div class="flex items-center gap-4">
+              <div class="flex items-center text-sm text-gray-600">
+                <span class="status-indicator status-loading" id="connection-status"></span>
+                <span id="connection-text">Verbinde...</span>
+              </div>
+              <div class="flex gap-2">
+                <button onclick="showView('team')" id="nav-team" class="px-4 py-2 rounded-lg text-sm font-semibold bg-blue-600 text-white">
+                  Team-Übersicht
+                </button>
+                <button onclick="showView('analytics')" id="nav-analytics" class="px-4 py-2 rounded-lg text-sm font-semibold text-gray-600 hover:bg-blue-50">
+                  Auswertungen
+                </button>
+              </div>
             </div>
           </div>
         </nav>
@@ -62,98 +80,96 @@
       <main id="main-content" class="container mx-auto px-6 py-8">
         <div class="loading-container text-center py-20">
           <div class="loading mx-auto mb-4"></div>
-          <p class="text-gray-600">Lade Live-Daten...</p>
+          <p class="text-gray-600">Lade sichere Daten...</p>
         </div>
       </main>
     </div>
 
     <script>
-      // Firebase Konfiguration (diese müsste durch echte Werte ersetzt werden)
-      const firebaseConfig = {
-        // Hier würden deine echten Firebase-Konfigurationsdaten stehen
-        // Diese müssten für jede Installation angepasst werden
-        apiKey: "AIzaSyDNdCSEHHveLZloWrdrgq4zqgi8DUR72RE",
-        authDomain: "datenprodukt-planer-app.firebaseapp.com",
-        projectId: "datenprodukt-planer-app",
-        storageBucket: "your-project.appspot.com",
-        messagingSenderId: "123456789",
-        appId: "your-app-id"
-      };
+      // Konfiguration für API-Endpunkt
+      const API_BASE_URL = window.location.origin.includes('localhost') 
+        ? 'http://localhost:3002' 
+        : 'https://your-domain.com'; // Produktions-URL hier anpassen
 
-      // Firebase initialisieren (nur wenn Konfiguration verfügbar)
-      let db = null;
-      let useFirebase = false;
+      let currentData = null;
+      let currentView = 'team';
+      let isConnected = false;
+      let lastUpdate = null;
 
-      try {
-        if (firebaseConfig.apiKey !== "your-api-key") {
-          firebase.initializeApp(firebaseConfig);
-          db = firebase.firestore();
-          useFirebase = true;
-        }
-      } catch (error) {
-        console.log("Firebase nicht konfiguriert, verwende Mock-Daten:", error);
+      // Connection Status updaten
+      function updateConnectionStatus(status, text) {
+        const indicator = document.getElementById('connection-status');
+        const textElement = document.getElementById('connection-text');
+        
+        indicator.className = `status-indicator status-${status}`;
+        textElement.textContent = text;
+        isConnected = status === 'connected';
       }
 
-      // App ID für Firestore Pfade (müsste angepasst werden)
-      const appId = "your-app-id";
-
-      // Fallback Mock-Daten
-      const mockData = {
-        personen: [
-          { id: 1, name: "Max Mustermann", email: "max@example.com", wochenstunden: 31, skillIds: [1, 2] },
-          { id: 2, name: "Anna Schmidt", email: "anna@example.com", wochenstunden: 35, skillIds: [2, 3] },
-          { id: 3, name: "Tom Weber", email: "tom@example.com", wochenstunden: 31, skillIds: [1, 3] }
-        ],
-        skills: [
-          { id: 1, name: "Python", color: "#3776ab" },
-          { id: 2, name: "Data Science", color: "#ff6b35" },
-          { id: 3, name: "Machine Learning", color: "#4caf50" }
-        ],
-        datenprodukte: [
-          { id: 1, name: "Customer Analytics" },
-          { id: 2, name: "Sales Dashboard" },
-          { id: 3, name: "ML Pipeline" }
-        ],
-        rollen: [
-          { id: 1, name: "Data Scientist" },
-          { id: 2, name: "Analytics Engineer" },
-          { id: 3, name: "ML Engineer" }
-        ],
-        zuordnungen: [
-          { id: 1, personId: 1, datenproduktId: 1, rolleId: 1, stunden: 20 },
-          { id: 2, personId: 1, datenproduktId: 2, rolleId: 2, stunden: 15 },
-          { id: 3, personId: 2, datenproduktId: 2, rolleId: 1, stunden: 25 },
-          { id: 4, personId: 3, datenproduktId: 3, rolleId: 3, stunden: 31 }
-        ]
-      };
-
-      let currentData = { ...mockData };
-      let currentView = 'team';
-
-      // Daten von Firebase laden
-      async function loadDataFromFirebase() {
-        if (!useFirebase || !db) {
-          console.log("Firebase nicht verfügbar, verwende Mock-Daten");
-          return mockData;
-        }
-
+      // API Call mit Error Handling
+      async function apiCall(endpoint) {
         try {
-          const collections = ['personen', 'skills', 'datenprodukte', 'rollen', 'zuordnungen'];
-          const data = {};
-
-          for (const collectionName of collections) {
-            const path = `artifacts/${appId}/public/data/${collectionName}`;
-            const snapshot = await db.collection(path).get();
-            data[collectionName] = snapshot.docs.map(doc => ({
-              id: doc.id,
-              ...doc.data()
-            }));
+          updateConnectionStatus('loading', 'Lädt...');
+          const response = await fetch(`${API_BASE_URL}/api/readonly/${endpoint}`);
+          
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
           }
-
+          
+          const data = await response.json();
+          
+          if (!data.success) {
+            throw new Error(data.error || 'API returned error');
+          }
+          
+          updateConnectionStatus('connected', `Verbunden (${new Date(data.timestamp).toLocaleTimeString('de-DE')})`);
+          lastUpdate = data.timestamp;
           return data;
         } catch (error) {
-          console.error("Fehler beim Laden der Firebase-Daten:", error);
-          return mockData;
+          console.error('API Call failed:', error);
+          updateConnectionStatus('disconnected', 'Verbindungsfehler');
+          throw error;
+        }
+      }
+
+      // Daten von sicherer API laden
+      async function loadSecureData() {
+        try {
+          const response = await apiCall('data');
+          return response.data;
+        } catch (error) {
+          console.error("Fehler beim Laden der sicheren Daten:", error);
+          
+          // Fallback zu Demo-Daten bei Verbindungsproblemen
+          updateConnectionStatus('disconnected', 'Demo-Modus');
+          return {
+            personen: [
+              { id: 1, name: "Max Mustermann", email: "max@example.com", wochenstunden: 31, skillIds: [1, 2] },
+              { id: 2, name: "Anna Schmidt", email: "anna@example.com", wochenstunden: 35, skillIds: [2, 3] },
+              { id: 3, name: "Tom Weber", email: "tom@example.com", wochenstunden: 31, skillIds: [1, 3] }
+            ],
+            skills: [
+              { id: 1, name: "Python", color: "#3776ab" },
+              { id: 2, name: "Data Science", color: "#ff6b35" },
+              { id: 3, name: "Machine Learning", color: "#4caf50" }
+            ],
+            datenprodukte: [
+              { id: 1, name: "Customer Analytics" },
+              { id: 2, name: "Sales Dashboard" },
+              { id: 3, name: "ML Pipeline" }
+            ],
+            rollen: [
+              { id: 1, name: "Data Scientist" },
+              { id: 2, name: "Analytics Engineer" },
+              { id: 3, name: "ML Engineer" }
+            ],
+            zuordnungen: [
+              { id: 1, personId: 1, datenproduktId: 1, rolleId: 1, stunden: 20 },
+              { id: 2, personId: 1, datenproduktId: 2, rolleId: 2, stunden: 15 },
+              { id: 3, personId: 2, datenproduktId: 2, rolleId: 1, stunden: 25 },
+              { id: 4, personId: 3, datenproduktId: 3, rolleId: 3, stunden: 31 }
+            ]
+          };
         }
       }
 
@@ -181,6 +197,8 @@
       }
 
       function getWorkloadData() {
+        if (!currentData) return [];
+        
         return currentData.personen.map(person => {
           const assignments = currentData.zuordnungen.filter(z => z.personId === person.id);
           const gebuchteStunden = assignments.reduce((sum, a) => sum + (a.stunden || 0), 0);
@@ -196,6 +214,8 @@
       }
 
       function renderTeamView() {
+        if (!currentData) return;
+        
         const workloadData = getWorkloadData();
         const totalPersons = currentData.personen.length;
         const assignedPersons = currentData.personen.filter(p => 
@@ -206,8 +226,11 @@
         document.getElementById('main-content').innerHTML = `
           <div class="mb-6">
             <h1 class="text-3xl font-bold text-gray-900 mb-2">Team-Übersicht</h1>
-            <p class="text-gray-600">Live-Daten aus dem Datenprodukt Planer</p>
-            ${useFirebase ? '<p class="text-sm text-green-600">✓ Verbunden mit Live-Daten</p>' : '<p class="text-sm text-orange-600">⚠ Demo-Daten (Firebase nicht konfiguriert)</p>'}
+            <p class="text-gray-600">Sichere Live-Daten über Backend-API</p>
+            <div class="mt-2 text-sm ${isConnected ? 'text-green-600' : 'text-orange-600'}">
+              ${isConnected ? '✓ Sichere Verbindung aktiv' : '⚠ Demo-Modus (Backend nicht erreichbar)'}
+              ${lastUpdate ? ` • Letzte Aktualisierung: ${new Date(lastUpdate).toLocaleString('de-DE')}` : ''}
+            </div>
           </div>
 
           <!-- Statistics -->
@@ -250,12 +273,12 @@
             
             <div class="bg-white rounded-xl p-6 card-shadow">
               <div class="flex items-center">
-                <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
-                  <span class="text-blue-600 text-lg">🔄</span>
+                <div class="w-8 h-8 ${isConnected ? 'bg-green-100' : 'bg-gray-100'} rounded-lg flex items-center justify-center mr-4">
+                  <span class="${isConnected ? 'text-green-600' : 'text-gray-600'} text-lg">${isConnected ? '🔒' : '📱'}</span>
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-gray-500">Letzte Aktualisierung</p>
-                  <p class="text-sm font-semibold text-gray-900">${new Date().toLocaleTimeString('de-DE')}</p>
+                  <p class="text-sm font-medium text-gray-500">Status</p>
+                  <p class="text-sm font-semibold text-gray-900">${isConnected ? 'Live' : 'Demo'}</p>
                 </div>
               </div>
             </div>
@@ -337,13 +360,17 @@
       }
 
       function renderAnalyticsView() {
+        if (!currentData) return;
+        
         const workloadData = getWorkloadData().sort((a, b) => b.auslastung - a.auslastung);
         
         document.getElementById('main-content').innerHTML = `
           <div class="mb-8">
             <h1 class="text-4xl font-bold text-gray-900 mb-2">Team-Auswertungen</h1>
-            <p class="text-gray-600">Live-Analyse deiner Teams und Datenprodukte</p>
-            ${useFirebase ? '<p class="text-sm text-green-600">✓ Verbunden mit Live-Daten</p>' : '<p class="text-sm text-orange-600">⚠ Demo-Daten (Firebase nicht konfiguriert)</p>'}
+            <p class="text-gray-600">Sichere Analyse über Backend-API</p>
+            <div class="mt-2 text-sm ${isConnected ? 'text-green-600' : 'text-orange-600'}">
+              ${isConnected ? '✓ Sichere Verbindung aktiv' : '⚠ Demo-Modus (Backend nicht erreichbar)'}
+            </div>
           </div>
 
           <!-- Auslastungsübersicht -->
@@ -457,7 +484,7 @@
         });
 
         try {
-          currentData = await loadDataFromFirebase();
+          currentData = await loadSecureData();
           if (currentView === 'team') {
             renderTeamView();
           } else {
@@ -471,16 +498,27 @@
       // Initialisierung
       async function init() {
         try {
-          currentData = await loadDataFromFirebase();
+          // Zuerst Health Check
+          await apiCall('health');
+          currentData = await loadSecureData();
           renderTeamView();
         } catch (error) {
           console.error("Fehler beim Laden der Daten:", error);
+          // Fallback zu Demo-Daten
+          currentData = await loadSecureData();
           renderTeamView();
         }
       }
 
       // App starten
       setTimeout(init, 1000);
+
+      // Auto-refresh alle 5 Minuten (nur wenn verbunden)
+      setInterval(() => {
+        if (isConnected) {
+          refreshData();
+        }
+      }, 5 * 60 * 1000);
     </script>
   </body>
 </html>
