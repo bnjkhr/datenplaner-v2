@@ -33,7 +33,7 @@ Die Read-Only Version des Datenprodukt Planers kann in Confluence eingebettet we
 
 ## Integration in Confluence
 
-### Option 1: iframe Integration
+### Option 1: iframe Integration (Demo-Daten)
 
 ```html
 <iframe 
@@ -44,6 +44,20 @@ Die Read-Only Version des Datenprodukt Planers kann in Confluence eingebettet we
   style="border: none;">
 </iframe>
 ```
+
+### Option 1a: iframe Integration (Live-Daten)
+
+```html
+<iframe 
+  src="https://your-domain.com/readonly-live.html" 
+  width="100%" 
+  height="800" 
+  frameborder="0"
+  style="border: none;">
+</iframe>
+```
+
+**Hinweis**: Für Live-Daten müssen in `readonly-live.html` die Firebase-Konfigurationsdaten angepasst werden.
 
 ### Option 2: JavaScript Widget (empfohlen)
 
@@ -154,9 +168,20 @@ firebase deploy --only hosting:readonly
 
 Nach dem Deployment sind folgende URLs verfügbar:
 
-- **Vollständige Read-Only App**: `https://your-domain.com/readonly.html`
-- **Nur Team-Übersicht**: `https://your-domain.com/readonly.html#personen`
-- **Nur Auswertungen**: `https://your-domain.com/readonly.html#auswertungen`
+- **Demo-Version**: `https://your-domain.com/readonly.html`
+- **Live-Version**: `https://your-domain.com/readonly-live.html`
+
+## Schnellstart für iframe Integration
+
+1. **Demo-Version** (sofort einsatzbereit):
+   ```html
+   <iframe src="https://your-domain.com/readonly.html" width="100%" height="800" frameborder="0"></iframe>
+   ```
+
+2. **Live-Version** (benötigt Firebase-Konfiguration):
+   - Bearbeite `readonly-live.html` 
+   - Ersetze die Firebase-Konfiguration mit deinen echten Werten
+   - Lade die Datei auf deinen Server hoch
 
 ## Troubleshooting
 

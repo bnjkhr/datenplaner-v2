@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
     <meta name="description" content="Datenprodukt Planer - Read-Only Ansicht für Confluence" />
-    <title>Datenprodukt Planer - Read-Only</title>
+    <title>Datenprodukt Planer - Read-Only (Live)</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
     <style>
       .gradient-bg {
         background: linear-gradient(135deg, #f8fafc 0%, rgba(239, 246, 255, 0.3) 100%);
@@ -43,7 +44,7 @@
         <nav class="container mx-auto px-6 py-4">
           <div class="flex justify-between items-center">
             <div class="text-2xl font-bold text-gradient">
-              Datenprodukt Planer - Übersicht
+              Datenprodukt Planer - Live Übersicht
             </div>
             <div class="flex gap-2">
               <button onclick="showView('team')" id="nav-team" class="px-4 py-2 rounded-lg text-sm font-semibold bg-blue-600 text-white">
@@ -61,13 +62,42 @@
       <main id="main-content" class="container mx-auto px-6 py-8">
         <div class="loading-container text-center py-20">
           <div class="loading mx-auto mb-4"></div>
-          <p class="text-gray-600">Lade Daten...</p>
+          <p class="text-gray-600">Lade Live-Daten...</p>
         </div>
       </main>
     </div>
 
     <script>
-      // Simulierte Daten (in der echten Version würden diese von der API kommen)
+      // Firebase Konfiguration (diese müsste durch echte Werte ersetzt werden)
+      const firebaseConfig = {
+        // Hier würden deine echten Firebase-Konfigurationsdaten stehen
+        // Diese müssten für jede Installation angepasst werden
+        apiKey: "your-api-key",
+        authDomain: "your-project.firebaseapp.com",
+        projectId: "your-project-id",
+        storageBucket: "your-project.appspot.com",
+        messagingSenderId: "123456789",
+        appId: "your-app-id"
+      };
+
+      // Firebase initialisieren (nur wenn Konfiguration verfügbar)
+      let db = null;
+      let useFirebase = false;
+
+      try {
+        if (firebaseConfig.apiKey !== "your-api-key") {
+          firebase.initializeApp(firebaseConfig);
+          db = firebase.firestore();
+          useFirebase = true;
+        }
+      } catch (error) {
+        console.log("Firebase nicht konfiguriert, verwende Mock-Daten:", error);
+      }
+
+      // App ID für Firestore Pfade (müsste angepasst werden)
+      const appId = "your-app-id";
+
+      // Fallback Mock-Daten
       const mockData = {
         personen: [
           { id: 1, name: "Max Mustermann", email: "max@example.com", wochenstunden: 31, skillIds: [1, 2] },
@@ -97,7 +127,35 @@
         ]
       };
 
+      let currentData = { ...mockData };
       let currentView = 'team';
+
+      // Daten von Firebase laden
+      async function loadDataFromFirebase() {
+        if (!useFirebase || !db) {
+          console.log("Firebase nicht verfügbar, verwende Mock-Daten");
+          return mockData;
+        }
+
+        try {
+          const collections = ['personen', 'skills', 'datenprodukte', 'rollen', 'zuordnungen'];
+          const data = {};
+
+          for (const collectionName of collections) {
+            const path = `artifacts/${appId}/public/data/${collectionName}`;
+            const snapshot = await db.collection(path).get();
+            data[collectionName] = snapshot.docs.map(doc => ({
+              id: doc.id,
+              ...doc.data()
+            }));
+          }
+
+          return data;
+        } catch (error) {
+          console.error("Fehler beim Laden der Firebase-Daten:", error);
+          return mockData;
+        }
+      }
 
       function showView(view) {
         currentView = view;
@@ -123,10 +181,10 @@
       }
 
       function getWorkloadData() {
-        return mockData.personen.map(person => {
-          const assignments = mockData.zuordnungen.filter(z => z.personId === person.id);
-          const gebuchteStunden = assignments.reduce((sum, a) => sum + a.stunden, 0);
-          const auslastung = (gebuchteStunden / person.wochenstunden) * 100;
+        return currentData.personen.map(person => {
+          const assignments = currentData.zuordnungen.filter(z => z.personId === person.id);
+          const gebuchteStunden = assignments.reduce((sum, a) => sum + (a.stunden || 0), 0);
+          const auslastung = (gebuchteStunden / (person.wochenstunden || 31)) * 100;
           
           return {
             ...person,
@@ -139,16 +197,17 @@
 
       function renderTeamView() {
         const workloadData = getWorkloadData();
-        const totalPersons = mockData.personen.length;
-        const assignedPersons = mockData.personen.filter(p => 
-          mockData.zuordnungen.some(z => z.personId === p.id)
+        const totalPersons = currentData.personen.length;
+        const assignedPersons = currentData.personen.filter(p => 
+          currentData.zuordnungen.some(z => z.personId === p.id)
         ).length;
         const overbookedPersons = workloadData.filter(p => p.status === 'overbooked').length;
 
         document.getElementById('main-content').innerHTML = `
           <div class="mb-6">
             <h1 class="text-3xl font-bold text-gray-900 mb-2">Team-Übersicht</h1>
-            <p class="text-gray-600">Verwalte dein Team und überwache die Arbeitsauslastung</p>
+            <p class="text-gray-600">Live-Daten aus dem Datenprodukt Planer</p>
+            ${useFirebase ? '<p class="text-sm text-green-600">✓ Verbunden mit Live-Daten</p>' : '<p class="text-sm text-orange-600">⚠ Demo-Daten (Firebase nicht konfiguriert)</p>'}
           </div>
 
           <!-- Statistics -->
@@ -191,12 +250,12 @@
             
             <div class="bg-white rounded-xl p-6 card-shadow">
               <div class="flex items-center">
-                <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center mr-4">
-                  <span class="text-red-600 text-lg">🏖️</span>
+                <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                  <span class="text-blue-600 text-lg">🔄</span>
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-gray-500">Abwesend</p>
-                  <p class="text-2xl font-semibold text-gray-900">0</p>
+                  <p class="text-sm font-medium text-gray-500">Letzte Aktualisierung</p>
+                  <p class="text-sm font-semibold text-gray-900">${new Date().toLocaleTimeString('de-DE')}</p>
                 </div>
               </div>
             </div>
@@ -204,14 +263,17 @@
 
           <!-- Team List -->
           <div class="bg-white rounded-xl card-shadow">
-            <div class="px-6 py-4 border-b border-gray-100">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
               <h2 class="text-lg font-semibold text-gray-900">Team-Mitglieder (${totalPersons})</h2>
+              <button onclick="refreshData()" class="px-3 py-1 text-sm bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors">
+                🔄 Aktualisieren
+              </button>
             </div>
             <div class="divide-y divide-gray-100">
               ${workloadData.map(person => {
-                const assignments = mockData.zuordnungen.filter(z => z.personId === person.id);
-                const personSkills = person.skillIds.map(skillId => 
-                  mockData.skills.find(s => s.id === skillId)
+                const assignments = currentData.zuordnungen.filter(z => z.personId === person.id);
+                const personSkills = (person.skillIds || []).map(skillId => 
+                  currentData.skills.find(s => s.id === skillId)
                 ).filter(Boolean);
                 
                 const statusClass = person.status === 'overbooked' ? 'text-red-600 bg-red-50' :
@@ -225,11 +287,11 @@
                         <div class="flex items-center gap-3 mb-2">
                           <h3 class="text-lg font-semibold text-gray-900">${person.name}</h3>
                           <div class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-semibold ${statusClass}">
-                            ${person.auslastung}% (${person.gebuchteStunden}h/${person.wochenstunden}h)
+                            ${person.auslastung}% (${person.gebuchteStunden}h/${person.wochenstunden || 31}h)
                           </div>
                         </div>
                         
-                        <p class="text-sm text-gray-600 mb-3">${person.email}</p>
+                        ${person.email ? `<p class="text-sm text-gray-600 mb-3">${person.email}</p>` : ''}
 
                         ${personSkills.length > 0 ? `
                           <div class="mb-3">
@@ -250,20 +312,20 @@
                             <p class="text-xs font-medium text-gray-500 mb-2">Zuordnungen:</p>
                             <div class="space-y-1">
                               ${assignments.map(assignment => {
-                                const produkt = mockData.datenprodukte.find(dp => dp.id === assignment.datenproduktId);
-                                const rolle = mockData.rollen.find(r => r.id === assignment.rolleId);
+                                const produkt = currentData.datenprodukte.find(dp => dp.id === assignment.datenproduktId);
+                                const rolle = currentData.rollen.find(r => r.id === assignment.rolleId);
                                 return `
                                   <div class="text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded-lg">
                                     <span class="font-medium">${produkt?.name || 'Unbekanntes Produkt'}</span>
                                     <span class="text-gray-500"> als </span>
                                     <span class="font-medium">${rolle?.name || 'Unbekannte Rolle'}</span>
-                                    <span class="text-gray-500"> • ${assignment.stunden}h/Woche</span>
+                                    <span class="text-gray-500"> • ${assignment.stunden || 0}h/Woche</span>
                                   </div>
                                 `;
                               }).join('')}
                             </div>
                           </div>
-                        ` : ''}
+                        ` : '<p class="text-sm text-gray-500 italic">Keine Zuordnungen</p>'}
                       </div>
                     </div>
                   </div>
@@ -280,13 +342,17 @@
         document.getElementById('main-content').innerHTML = `
           <div class="mb-8">
             <h1 class="text-4xl font-bold text-gray-900 mb-2">Team-Auswertungen</h1>
-            <p class="text-gray-600">Analysiere deine Teams und Datenprodukte</p>
+            <p class="text-gray-600">Live-Analyse deiner Teams und Datenprodukte</p>
+            ${useFirebase ? '<p class="text-sm text-green-600">✓ Verbunden mit Live-Daten</p>' : '<p class="text-sm text-orange-600">⚠ Demo-Daten (Firebase nicht konfiguriert)</p>'}
           </div>
 
           <!-- Auslastungsübersicht -->
           <div class="bg-white rounded-xl card-shadow mb-8">
-            <div class="px-6 py-4 border-b border-gray-100">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
               <h2 class="text-lg font-semibold text-gray-900">Auslastungsübersicht</h2>
+              <button onclick="refreshData()" class="px-3 py-1 text-sm bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors">
+                🔄 Aktualisieren
+              </button>
             </div>
             <div class="p-6">
               <p class="text-sm text-gray-600 mb-4">
@@ -323,7 +389,7 @@
                         </div>
                         <div class="flex justify-between text-xs text-gray-600">
                           <span>Verfügbar:</span>
-                          <span class="font-medium">${person.wochenstunden}h</span>
+                          <span class="font-medium">${person.wochenstunden || 31}h</span>
                         </div>
                         
                         <!-- Progress Bar -->
@@ -362,8 +428,8 @@
             </div>
             <div class="p-6">
               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                ${mockData.skills.map(skill => {
-                  const anzahl = mockData.personen.filter(p => p.skillIds.includes(skill.id)).length;
+                ${currentData.skills.map(skill => {
+                  const anzahl = currentData.personen.filter(p => (p.skillIds || []).includes(skill.id)).length;
                   return `
                     <div class="flex items-center justify-between bg-gray-50 p-3 rounded-xl">
                       <div class="flex items-center gap-2">
@@ -382,10 +448,39 @@
         `;
       }
 
+      // Daten aktualisieren
+      async function refreshData() {
+        const buttons = document.querySelectorAll('button[onclick="refreshData()"]');
+        buttons.forEach(btn => {
+          btn.innerHTML = '🔄 Lädt...';
+          btn.disabled = true;
+        });
+
+        try {
+          currentData = await loadDataFromFirebase();
+          if (currentView === 'team') {
+            renderTeamView();
+          } else {
+            renderAnalyticsView();
+          }
+        } catch (error) {
+          console.error("Fehler beim Aktualisieren:", error);
+        }
+      }
+
       // Initialisierung
-      setTimeout(() => {
-        renderTeamView();
-      }, 1000);
+      async function init() {
+        try {
+          currentData = await loadDataFromFirebase();
+          renderTeamView();
+        } catch (error) {
+          console.error("Fehler beim Laden der Daten:", error);
+          renderTeamView();
+        }
+      }
+
+      // App starten
+      setTimeout(init, 1000);
     </script>
   </body>
 </html>
