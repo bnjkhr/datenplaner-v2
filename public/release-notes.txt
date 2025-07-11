@@ -14,3 +14,5 @@ Version 2.0.0 - 10.07.2025
 * Stunden pro Woche in der Personverwaltung editierbar
 * globale Suche
 * moderne UI (huge changes!)
+* Link zur Notion-Seite für Fehler und Feature-Anfragen im Footer
+* aktuelle Abwesenheiten ganz oben

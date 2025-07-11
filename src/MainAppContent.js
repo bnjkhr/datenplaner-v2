@@ -32,9 +32,19 @@ const AppFooter = ({ user }) => {
           <span className="font-semibold">{lastChange.userEmail}</span>
         </div>
       )}
-      <p className="text-sm text-gray-500">
-        &copy; {new Date().getFullYear()} Dein Datenprodukt Planungs-Tool
-      </p>
+      <div className="flex flex-col items-center gap-2">
+        <a
+          href="https://www.notion.so/Datenprodukt-Planer-20a15fafe8268041aca7d879881030a5?source=copy_link"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+        >
+          Bugs? Feature-Request? Hier eintragen.
+        </a>
+        <p className="text-sm text-gray-500">
+          &copy; {new Date().getFullYear()} Dein Datenprodukt Planungs-Tool
+        </p>
+      </div>
     </footer>
   );
 };
