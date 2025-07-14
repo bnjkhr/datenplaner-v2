@@ -29,6 +29,7 @@ export const Auswertungen = () => {
   const [filterSkill, setFilterSkill] = useState("");
   const [filterDatenprodukt, setFilterDatenprodukt] = useState("");
   const [filterRolle, setFilterRolle] = useState("");
+  const [selectedKategorie, setSelectedKategorie] = useState("alle");
 
   if (loading)
     return (
@@ -133,43 +134,89 @@ export const Auswertungen = () => {
       gebuchteStunden,
       auslastung: Math.round(auslastung * 10) / 10, // Runde auf 1 Dezimalstelle
       status: auslastung > 100 ? 'overbooked' : 
-              auslastung < 20 ? 'underbooked' : 'normal'
+              auslastung < 20 ? 'underbooked' : 'normal',
+      kategorien: person.kategorien || []
     };
   }).sort((a, b) => b.auslastung - a.auslastung); // Sortiert von hoch zu niedrig
 
-  // Filter logic
-  const filteredWorkloadData = workloadData.filter(person => {
-    // Filter by utilization
-    if (filterAuslastung !== "alle") {
-      if (filterAuslastung === "hoch" && person.auslastung <= 100) return false;
-      if (filterAuslastung === "normal" && (person.auslastung < 20 || person.auslastung > 100)) return false;
-      if (filterAuslastung === "niedrig" && person.auslastung >= 20) return false;
-    }
+  // Gruppiere Workload-Daten nach Kategorien (Personen können mehrfach aufgelistet werden)
+  const groupWorkloadByCategories = (workloadData) => {
+    const categories = {
+      'Plattform': [],
+      'Datenprodukt': [],
+      'Governance': [],
+      'Ohne Kategorie': []
+    };
+    
+    workloadData.forEach(person => {
+      if (!person.kategorien || person.kategorien.length === 0) {
+        categories['Ohne Kategorie'].push(person);
+      } else {
+        // Person kann in mehreren Kategorien sein - mehrfach auflisten
+        person.kategorien.forEach(kategorie => {
+          if (categories[kategorie]) {
+            categories[kategorie].push(person);
+          }
+        });
+        
+        // Falls Person nicht in bekannte Kategorien eingeordnet wurde
+        const hasKnownCategory = person.kategorien.some(k => ['Plattform', 'Datenprodukt', 'Governance'].includes(k));
+        if (!hasKnownCategory) {
+          categories['Ohne Kategorie'].push(person);
+        }
+      }
+    });
+    
+    return categories;
+  };
 
-    // Filter by skill
-    if (filterSkill) {
-      const personData = personen.find(p => p.id === person.id);
-      if (!personData?.skillIds?.includes(filterSkill)) return false;
-    }
+  const groupedWorkloadData = groupWorkloadByCategories(workloadData);
 
-    // Filter by data product
-    if (filterDatenprodukt) {
-      const hasDataProduct = zuordnungen.some(z => 
-        z.personId === person.id && z.datenproduktId === filterDatenprodukt
-      );
-      if (!hasDataProduct) return false;
+  // Filter logic für kategorienspezifische Daten
+  const getFilteredWorkloadData = () => {
+    let dataToFilter;
+    
+    if (selectedKategorie === "alle") {
+      dataToFilter = workloadData;
+    } else {
+      dataToFilter = groupedWorkloadData[selectedKategorie] || [];
     }
+    
+    return dataToFilter.filter(person => {
+      // Filter by utilization
+      if (filterAuslastung !== "alle") {
+        if (filterAuslastung === "hoch" && person.auslastung <= 100) return false;
+        if (filterAuslastung === "normal" && (person.auslastung < 20 || person.auslastung > 100)) return false;
+        if (filterAuslastung === "niedrig" && person.auslastung >= 20) return false;
+      }
 
-    // Filter by role
-    if (filterRolle) {
-      const hasRole = zuordnungen.some(z => 
-        z.personId === person.id && z.rolleId === filterRolle
-      );
-      if (!hasRole) return false;
-    }
+      // Filter by skill
+      if (filterSkill) {
+        const personData = personen.find(p => p.id === person.id);
+        if (!personData?.skillIds?.includes(filterSkill)) return false;
+      }
 
-    return true;
-  });
+      // Filter by data product
+      if (filterDatenprodukt) {
+        const hasDataProduct = zuordnungen.some(z => 
+          z.personId === person.id && z.datenproduktId === filterDatenprodukt
+        );
+        if (!hasDataProduct) return false;
+      }
+
+      // Filter by role
+      if (filterRolle) {
+        const hasRole = zuordnungen.some(z => 
+          z.personId === person.id && z.rolleId === filterRolle
+        );
+        if (!hasRole) return false;
+      }
+
+      return true;
+    });
+  };
+
+  const filteredWorkloadData = getFilteredWorkloadData();
 
   // --- NEU: Funktion für den Excel-Export ---
   const handleExportToExcel = () => {
@@ -337,7 +384,23 @@ export const Auswertungen = () => {
             {/* Filter Controls */}
             <div className="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
               <h3 className="text-sm font-semibold text-gray-700 mb-3">Filter</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                
+                {/* Kreis Filter */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Kreis</label>
+                  <select
+                    value={selectedKategorie}
+                    onChange={(e) => setSelectedKategorie(e.target.value)}
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="alle">Alle</option>
+                    <option value="Plattform">🏗️ Plattform</option>
+                    <option value="Datenprodukt">📊 Datenprodukt</option>
+                    <option value="Governance">⚖️ Governance</option>
+                    <option value="Ohne Kategorie">❓ Ohne Kreis</option>
+                  </select>
+                </div>
                 
                 {/* Auslastung Filter */}
                 <div>
@@ -402,9 +465,10 @@ export const Auswertungen = () => {
               </div>
               
               {/* Clear filters button */}
-              {(filterAuslastung !== "alle" || filterSkill || filterDatenprodukt || filterRolle) && (
+              {(selectedKategorie !== "alle" || filterAuslastung !== "alle" || filterSkill || filterDatenprodukt || filterRolle) && (
                 <button
                   onClick={() => {
+                    setSelectedKategorie("alle");
                     setFilterAuslastung("alle");
                     setFilterSkill("");
                     setFilterDatenprodukt("");
@@ -418,14 +482,22 @@ export const Auswertungen = () => {
             </div>
 
             <p className="text-sm text-gray-600 mb-4">
-              Sortiert nach Auslastung (hoch → niedrig) • {filteredWorkloadData.length} von {workloadData.length} Personen
+              Sortiert nach Auslastung (hoch → niedrig) • {filteredWorkloadData.length} von {selectedKategorie === "alle" ? workloadData.length : (groupedWorkloadData[selectedKategorie] || []).length} Personen
+              {selectedKategorie !== "alle" && (
+                <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-xs font-medium">
+                  {selectedKategorie === "Plattform" ? "🏗️ Plattform" :
+                   selectedKategorie === "Datenprodukt" ? "📊 Datenprodukt" :
+                   selectedKategorie === "Governance" ? "⚖️ Governance" :
+                   selectedKategorie === "Ohne Kategorie" ? "❓ Ohne Kreis" : selectedKategorie}
+                </span>
+              )}
             </p>
             
             {filteredWorkloadData.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {filteredWorkloadData.map((person) => (
+                {filteredWorkloadData.map((person, index) => (
                     <div 
-                      key={person.id}
+                      key={`${person.id}-${selectedKategorie}-${index}`}
                       className={`p-4 rounded-xl border-2 transition-all hover:shadow-md ${
                         person.status === 'overbooked' 
                           ? 'bg-gradient-to-br from-orange-50 to-red-50 border-orange-200' 

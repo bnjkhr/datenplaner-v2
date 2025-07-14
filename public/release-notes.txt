@@ -28,3 +28,11 @@ Version 2.1.0 - 11.07.2025
 * Excel-Export: Alle neuen Werte eingefügt.
 * Read-Only Views für Confluence-Einbindung
 
+Version 2.2.0 - 14.07.2025
+--------------------------
+* Confluence-View: Nur M13 Mitarbeiter
+* Confluence-View: Kategorien-Gruppierung
+* Confluence-View: Skills entfernt
+* Confluence-View: Angepasste Statistiken
+* Confluence-View: Titel aktualisiert
+* Kreise eingeführt

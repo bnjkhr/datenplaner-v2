@@ -649,7 +649,7 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
       
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Kategorien
+          Kreise
         </label>
         <div className="space-y-2">
           {['Plattform', 'Datenprodukt', 'Governance'].map((kategorie) => (
@@ -787,8 +787,8 @@ const PersonenVerwaltung = () => {
           id: person.id,
           name: person.name,
           type: 'person',
-          details: `Kategorie: ${matchedKategorie}`,
-          matchedField: 'Kategorie',
+          details: `Kreis: ${matchedKategorie}`,
+          matchedField: 'Kreis',
           data: person
         });
       }
