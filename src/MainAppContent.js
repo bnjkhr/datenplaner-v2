@@ -81,8 +81,15 @@ export const MainAppContent = ({ user }) => {
       <header className="bg-white/80 backdrop-blur-md shadow-lg border-b border-gray-100 sticky top-0 z-30">
         <nav className="container mx-auto px-6 py-4">
           <div className="flex flex-wrap justify-between items-center gap-4">
-            <div className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Datenprodukt Planer
+            <div className="flex items-center gap-3">
+              <img 
+                src="/ard-logo.svg" 
+                alt="ARD Logo" 
+                className="h-8 w-auto"
+              />
+              <div className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                Datenprodukt Planer
+              </div>
             </div>
             <div className="flex flex-wrap items-center gap-1 sm:gap-2">
               <NavLink pageName="personen">Personen</NavLink>
