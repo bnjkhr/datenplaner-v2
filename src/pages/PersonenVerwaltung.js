@@ -1010,7 +1010,7 @@ const PersonenVerwaltung = () => {
                         {person.name}
                       </span>
                       {index < currentlyAbsentPeople.length - 1 && (
-                        <span className="text-gray-400">,</span>
+                        <span className="text-gray-400"></span>
                       )}
                     </span>
                   ))}
