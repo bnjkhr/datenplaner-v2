@@ -335,12 +335,14 @@ const PersonEintrag = ({
                 </span>
               )}
               {kategorien && kategorien.map((kategorie) => (
-                <span 
+                <button
                   key={kategorie}
-                  className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-purple-50 to-purple-100 text-purple-700 border border-purple-200"
+                  onClick={() => onSkillClick(kategorie)}
+                  className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-purple-50 to-purple-100 text-purple-700 border border-purple-200 hover:from-purple-100 hover:to-purple-200 hover:scale-105 transition-all duration-200 cursor-pointer"
+                  title={`Nach Kreis "${kategorie}" filtern`}
                 >
                   {kategorie}
-                </span>
+                </button>
               ))}
             </div>
           </div>
