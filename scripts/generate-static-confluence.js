@@ -53,11 +53,11 @@ const appId = "datenplaner-app-v3";
 function getDemoData() {
   return {
     personen: [
-      { id: "1", name: "Max Mustermann", email: "max@example.com", wochenstunden: 31, skillIds: ["1", "2"] },
-      { id: "2", name: "Anna Schmidt", email: "anna@example.com", wochenstunden: 35, skillIds: ["2", "3"] },
-      { id: "3", name: "Tom Weber", email: "tom@example.com", wochenstunden: 31, skillIds: ["1", "3"] },
-      { id: "4", name: "Lisa Müller", email: "lisa@example.com", wochenstunden: 31, skillIds: ["1", "2", "3"] },
-      { id: "5", name: "Peter Klein", email: "peter@example.com", wochenstunden: 20, skillIds: ["2"] }
+      { id: "1", name: "Max Mustermann", email: "max@example.com", wochenstunden: 31, skillIds: ["1", "2"], isM13: true, kategorien: ["Plattform"] },
+      { id: "2", name: "Anna Schmidt", email: "anna@example.com", wochenstunden: 35, skillIds: ["2", "3"], isM13: true, kategorien: ["Datenprodukt", "Governance"] },
+      { id: "3", name: "Tom Weber", email: "tom@example.com", wochenstunden: 31, skillIds: ["1", "3"], isM13: false, kategorien: [] },
+      { id: "4", name: "Lisa Müller", email: "lisa@example.com", wochenstunden: 31, skillIds: ["1", "2", "3"], isM13: true, kategorien: ["Governance"] },
+      { id: "5", name: "Peter Klein", email: "peter@example.com", wochenstunden: 20, skillIds: ["2"], isM13: true, kategorien: [] }
     ],
     skills: [
       { id: "1", name: "Python", color: "#3776ab" },
@@ -130,9 +130,12 @@ async function loadFirebaseData() {
   }
 }
 
-// Workload-Daten berechnen
+// Workload-Daten berechnen - nur M13 Mitarbeiter
 function calculateWorkloadData(data) {
-  return data.personen.map(person => {
+  // Filtere nur M13 Mitarbeiter
+  const m13Personen = data.personen.filter(person => person.isM13 === true);
+  
+  return m13Personen.map(person => {
     const assignments = data.zuordnungen.filter(z => z.personId === person.id);
     const gebuchteStunden = assignments.reduce((sum, a) => sum + (a.stunden || 0), 0);
     const auslastung = (gebuchteStunden / (person.wochenstunden || 31)) * 100;
@@ -146,11 +149,43 @@ function calculateWorkloadData(data) {
   });
 }
 
+// Gruppiere M13 Mitarbeiter nach Kategorien
+function groupByCategories(workloadData) {
+  const categories = {
+    'Plattform': [],
+    'Datenprodukt': [],
+    'Governance': [],
+    'Ohne Kategorie': []
+  };
+  
+  workloadData.forEach(person => {
+    if (!person.kategorien || person.kategorien.length === 0) {
+      categories['Ohne Kategorie'].push(person);
+    } else {
+      // Person kann in mehreren Kategorien sein
+      person.kategorien.forEach(kategorie => {
+        if (categories[kategorie]) {
+          categories[kategorie].push(person);
+        }
+      });
+      
+      // Falls Person nicht in bekannte Kategorien eingeordnet wurde
+      const hasKnownCategory = person.kategorien.some(k => ['Plattform', 'Datenprodukt', 'Governance'].includes(k));
+      if (!hasKnownCategory) {
+        categories['Ohne Kategorie'].push(person);
+      }
+    }
+  });
+  
+  return categories;
+}
+
 // HTML generieren
 function generateHTML(data, isLiveData = true) {
   const workloadData = calculateWorkloadData(data);
-  const totalPersons = data.personen.length;
-  const assignedPersons = data.personen.filter(p => 
+  const groupedData = groupByCategories(workloadData);
+  const totalM13Persons = workloadData.length;
+  const assignedM13Persons = workloadData.filter(p => 
     data.zuordnungen.some(z => z.personId === p.id)
   ).length;
   const overbookedPersons = workloadData.filter(p => p.status === 'overbooked').length;
@@ -432,8 +467,8 @@ function generateHTML(data, isLiveData = true) {
     <div class="container">
       <!-- Header -->
       <div class="header">
-        <h1 class="title">Datenprodukt Planer</h1>
-        <p class="subtitle">Team-Übersicht • ${isLiveData ? 'Live Firebase-Daten' : 'Demo-Daten'}</p>
+        <h1 class="title">Datenprodukt Planer - M13 Mitarbeiter</h1>
+        <p class="subtitle">M13 Team-Übersicht nach Kategorien • ${isLiveData ? 'Live Firebase-Daten' : 'Demo-Daten'}</p>
         <div class="status">
           <div class="status-dot"></div>
           <span>${isLiveData ? `Live-Daten • Aktualisiert: ${lastUpdate}` : 'Demo-Daten (Firebase nicht verfügbar)'}</span>
@@ -445,8 +480,8 @@ function generateHTML(data, isLiveData = true) {
         <div class="stat-card">
           <div class="stat-icon icon-blue">👥</div>
           <div class="stat-content">
-            <h3>Gesamt</h3>
-            <p>${totalPersons}</p>
+            <h3>M13 Gesamt</h3>
+            <p>${totalM13Persons}</p>
           </div>
         </div>
         
@@ -454,7 +489,7 @@ function generateHTML(data, isLiveData = true) {
           <div class="stat-icon icon-green">✅</div>
           <div class="stat-content">
             <h3>Mit Zuordnung</h3>
-            <p>${assignedPersons}</p>
+            <p>${assignedM13Persons}</p>
           </div>
         </div>
         
@@ -475,72 +510,71 @@ function generateHTML(data, isLiveData = true) {
         </div>
       </div>
 
-      <!-- Team List -->
-      <div class="card">
-        <div class="card-header">
-          <h2 class="card-title">Team-Mitglieder (${totalPersons})</h2>
-        </div>
-        <div class="card-content">
-          <table class="team-table">
-            <thead>
-              <tr>
-                <th>Name & E-Mail</th>
-                <th>Auslastung</th>
-                <th>Skills</th>
-                <th>Zuordnungen</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${workloadData.map(person => {
-                const assignments = data.zuordnungen.filter(z => z.personId === person.id);
-                const personSkills = (person.skillIds || []).map(skillId => 
-                  data.skills.find(s => s.id === skillId)
-                ).filter(Boolean);
-                
-                const statusClass = person.status === 'overbooked' ? 'status-overbooked' :
-                                   person.status === 'underbooked' ? 'status-underbooked' :
-                                   'status-normal';
-                
-                return `
+      <!-- Categories -->
+      ${Object.entries(groupedData).map(([kategorie, personen]) => {
+        if (personen.length === 0) return '';
+        
+        const categoryIcon = kategorie === 'Plattform' ? '🏗️' :
+                            kategorie === 'Datenprodukt' ? '📊' :
+                            kategorie === 'Governance' ? '⚖️' : '❓';
+        
+        return `
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">${categoryIcon} ${kategorie} (${personen.length})</h2>
+            </div>
+            <div class="card-content">
+              <table class="team-table">
+                <thead>
                   <tr>
-                    <td>
-                      <div class="person-name">${person.name}</div>
-                      <div class="person-email">${person.email || ''}</div>
-                    </td>
-                    <td>
-                      <div class="status-badge ${statusClass}">
-                        ${person.auslastung}% (${person.gebuchteStunden}h/${person.wochenstunden || 31}h)
-                      </div>
-                    </td>
-                    <td>
-                      <div class="skills">
-                        ${personSkills.map(skill => `
-                          <span class="skill-tag">${skill.name}</span>
-                        `).join('')}
-                      </div>
-                    </td>
-                    <td>
-                      <div class="assignments">
-                        ${assignments.length > 0 ? assignments.map(assignment => {
-                          const produkt = data.datenprodukte.find(dp => dp.id === assignment.datenproduktId);
-                          const rolle = data.rollen.find(r => r.id === assignment.rolleId);
-                          return `
-                            <div class="assignment">
-                              <span class="assignment-name">${produkt?.name || 'Unbekanntes Produkt'}</span>
-                              <span class="assignment-role"> als ${rolle?.name || 'Unbekannte Rolle'}</span>
-                              <span class="assignment-hours"> • ${assignment.stunden || 0}h/Woche</span>
-                            </div>
-                          `;
-                        }).join('') : '<span style="color: #6b7280; font-style: italic;">Keine Zuordnungen</span>'}
-                      </div>
-                    </td>
+                    <th>Name & E-Mail</th>
+                    <th>Auslastung</th>
+                    <th>Zuordnungen</th>
                   </tr>
-                `;
-              }).join('')}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                </thead>
+                <tbody>
+                  ${personen.map(person => {
+                    const assignments = data.zuordnungen.filter(z => z.personId === person.id);
+                    
+                    const statusClass = person.status === 'overbooked' ? 'status-overbooked' :
+                                       person.status === 'underbooked' ? 'status-underbooked' :
+                                       'status-normal';
+                    
+                    return `
+                      <tr>
+                        <td>
+                          <div class="person-name">${person.name}</div>
+                          <div class="person-email">${person.email || ''}</div>
+                        </td>
+                        <td>
+                          <div class="status-badge ${statusClass}">
+                            ${person.auslastung}% (${person.gebuchteStunden}h/${person.wochenstunden || 31}h)
+                          </div>
+                        </td>
+                        <td>
+                          <div class="assignments">
+                            ${assignments.length > 0 ? assignments.map(assignment => {
+                              const produkt = data.datenprodukte.find(dp => dp.id === assignment.datenproduktId);
+                              const rolle = data.rollen.find(r => r.id === assignment.rolleId);
+                              return `
+                                <div class="assignment">
+                                  <span class="assignment-name">${produkt?.name || 'Unbekanntes Produkt'}</span>
+                                  <span class="assignment-role"> als ${rolle?.name || 'Unbekannte Rolle'}</span>
+                                  <span class="assignment-hours"> • ${assignment.stunden || 0}h/Woche</span>
+                                </div>
+                              `;
+                            }).join('') : '<span style="color: #6b7280; font-style: italic;">Keine Zuordnungen</span>'}
+                          </div>
+                        </td>
+                      </tr>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      }).join('')}
     </div>
   </body>
 </html>`;

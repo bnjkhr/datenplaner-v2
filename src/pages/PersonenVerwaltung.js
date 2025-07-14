@@ -193,7 +193,7 @@ const PersonEintrag = ({
   onDeleteInitiation,
   onSkillClick,
 }) => {
-  const { name, email, skillIds, msTeamsLink, wochenstunden } = person;
+  const { name, email, skillIds, msTeamsLink, wochenstunden, isM13, kategorien } = person;
   const {
     datenprodukte,
     zuordnungen,
@@ -322,6 +322,27 @@ const PersonEintrag = ({
             <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 border border-blue-200">
               ⏰ {wochenstunden}h/Woche
             </span>
+          </div>
+        )}
+
+        {/* M13 und Kategorien anzeigen */}
+        {(isM13 || (kategorien && kategorien.length > 0)) && (
+          <div className="mb-4">
+            <div className="flex flex-wrap gap-2">
+              {isM13 && (
+                <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-green-50 to-green-100 text-green-700 border border-green-200">
+                  ✓ M13
+                </span>
+              )}
+              {kategorien && kategorien.map((kategorie) => (
+                <span 
+                  key={kategorie}
+                  className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-purple-50 to-purple-100 text-purple-700 border border-purple-200"
+                >
+                  {kategorie}
+                </span>
+              ))}
+            </div>
           </div>
         )}
 
@@ -468,6 +489,8 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
     }
     return personToEdit?.email || "";
   });
+  const [isM13, setIsM13] = useState(personToEdit?.isM13 || false);
+  const [kategorien, setKategorien] = useState(personToEdit?.kategorien || []);
   const [validationError, setValidationError] = useState("");
 
   const validateForm = () => {
@@ -505,6 +528,8 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
       skillIds,
       wochenstunden: Number(wochenstunden),
       msTeamsLink: finalMsTeamsLink,
+      isM13,
+      kategorien,
     };
 
     const success = personToEdit
@@ -608,6 +633,45 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
           onCreateSkill={fuegeSkillHinzu}
         />
       </div>
+      
+      <div>
+        <label className="flex items-center space-x-3">
+          <input
+            type="checkbox"
+            checked={isM13}
+            onChange={(e) => setIsM13(e.target.checked)}
+            className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+          />
+          <span className="text-sm font-medium text-gray-700">M13</span>
+        </label>
+        <p className="mt-1 text-xs text-gray-500">Mitarbeiter mit M13-Status</p>
+      </div>
+      
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Kategorien
+        </label>
+        <div className="space-y-2">
+          {['Plattform', 'Datenprodukt', 'Governance'].map((kategorie) => (
+            <label key={kategorie} className="flex items-center space-x-3">
+              <input
+                type="checkbox"
+                checked={kategorien.includes(kategorie)}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setKategorien([...kategorien, kategorie]);
+                  } else {
+                    setKategorien(kategorien.filter(k => k !== kategorie));
+                  }
+                }}
+                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+              />
+              <span className="text-sm text-gray-700">{kategorie}</span>
+            </label>
+          ))}
+        </div>
+        <p className="mt-2 text-xs text-gray-500">Mehrfachauswahl möglich</p>
+      </div>
       <div className="flex justify-end space-x-4 pt-6">
         {onFormClose && (
           <button
@@ -688,7 +752,7 @@ const PersonenVerwaltung = () => {
     const suggestions = [];
     const lowerTerm = term.toLowerCase();
 
-    // Search in persons (name, email)
+    // Search in persons (name, email, M13, kategorien)
     personen.forEach(person => {
       if (person.name.toLowerCase().includes(lowerTerm)) {
         suggestions.push({
@@ -706,6 +770,25 @@ const PersonenVerwaltung = () => {
           type: 'person',
           details: person.email,
           matchedField: 'E-Mail',
+          data: person
+        });
+      } else if (person.isM13 && 'm13'.includes(lowerTerm)) {
+        suggestions.push({
+          id: person.id,
+          name: person.name,
+          type: 'person',
+          details: 'M13-Status',
+          matchedField: 'M13',
+          data: person
+        });
+      } else if (person.kategorien?.some(kat => kat.toLowerCase().includes(lowerTerm))) {
+        const matchedKategorie = person.kategorien.find(kat => kat.toLowerCase().includes(lowerTerm));
+        suggestions.push({
+          id: person.id,
+          name: person.name,
+          type: 'person',
+          details: `Kategorie: ${matchedKategorie}`,
+          matchedField: 'Kategorie',
           data: person
         });
       }
@@ -793,9 +876,11 @@ const PersonenVerwaltung = () => {
     const lowerTerm = debouncedSearchTerm.toLowerCase();
     
     return personen.filter(person => {
-      // Search in person name and email
+      // Search in person name, email, M13, and kategorien
       if (person.name.toLowerCase().includes(lowerTerm) || 
-          person.email?.toLowerCase().includes(lowerTerm)) {
+          person.email?.toLowerCase().includes(lowerTerm) ||
+          (person.isM13 && 'm13'.includes(lowerTerm)) ||
+          person.kategorien?.some(kat => kat.toLowerCase().includes(lowerTerm))) {
         return true;
       }
       

@@ -198,6 +198,8 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
         {
           ...personDaten,
           wochenstunden: personDaten.wochenstunden || 31, // Standard: 31 Stunden
+          isM13: personDaten.isM13 || false,
+          kategorien: personDaten.kategorien || [],
           erstelltAm: new Date().toISOString(),
           letzteAenderung: new Date().toISOString(),
         }
@@ -229,6 +231,8 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
         batch.set(newPersonRef, {
           ...personData,
           wochenstunden: personData.wochenstunden || 31, // Standard: 31 Stunden
+          isM13: personData.isM13 || false,
+          kategorien: personData.kategorien || [],
           erstelltAm: new Date().toISOString(),
           letzteAenderung: new Date().toISOString(),
         });
