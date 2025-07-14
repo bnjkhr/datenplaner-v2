@@ -34,12 +34,12 @@ export const Auswertungen = () => {
   if (loading)
     return (
       <div className="flex justify-center py-10">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ard-blue-600"></div>
       </div>
     );
   if (error)
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-ard-blue-50/30">
         <div className="container mx-auto px-6 py-8">
           <div className="bg-gradient-to-r from-red-50 to-red-100 border border-red-200 text-red-800 px-6 py-4 rounded-xl" role="alert">
             Fehler beim Laden der Daten: {error}
@@ -361,7 +361,7 @@ export const Auswertungen = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-ard-blue-50/30">
       <div className="container mx-auto px-6 py-8">
         <div className="flex flex-wrap justify-between items-center mb-8 gap-4">
           <div>
@@ -392,7 +392,7 @@ export const Auswertungen = () => {
                   <select
                     value={selectedKategorie}
                     onChange={(e) => setSelectedKategorie(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-ard-blue-500 focus:border-ard-blue-500"
                   >
                     <option value="alle">Alle</option>
                     <option value="Plattform">🏗️ Plattform</option>
@@ -408,7 +408,7 @@ export const Auswertungen = () => {
                   <select
                     value={filterAuslastung}
                     onChange={(e) => setFilterAuslastung(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-ard-blue-500 focus:border-ard-blue-500"
                   >
                     <option value="alle">Alle</option>
                     <option value="hoch">Hoch (&gt;100%)</option>
@@ -423,7 +423,7 @@ export const Auswertungen = () => {
                   <select
                     value={filterSkill}
                     onChange={(e) => setFilterSkill(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-ard-blue-500 focus:border-ard-blue-500"
                   >
                     <option value="">Alle Skills</option>
                     {skills.map(skill => (
@@ -438,7 +438,7 @@ export const Auswertungen = () => {
                   <select
                     value={filterDatenprodukt}
                     onChange={(e) => setFilterDatenprodukt(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-ard-blue-500 focus:border-ard-blue-500"
                   >
                     <option value="">Alle Datenprodukte</option>
                     {datenprodukte.map(dp => (
@@ -453,7 +453,7 @@ export const Auswertungen = () => {
                   <select
                     value={filterRolle}
                     onChange={(e) => setFilterRolle(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-ard-blue-500 focus:border-ard-blue-500"
                   >
                     <option value="">Alle Rollen</option>
                     {rollen.map(rolle => (
@@ -484,7 +484,7 @@ export const Auswertungen = () => {
             <p className="text-sm text-gray-600 mb-4">
               Sortiert nach Auslastung (hoch → niedrig) • {filteredWorkloadData.length} von {selectedKategorie === "alle" ? workloadData.length : (groupedWorkloadData[selectedKategorie] || []).length} Personen
               {selectedKategorie !== "alle" && (
-                <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-xs font-medium">
+                <span className="ml-2 px-2 py-1 bg-ard-blue-100 text-ard-blue-700 rounded-md text-xs font-medium">
                   {selectedKategorie === "Plattform" ? "🏗️ Plattform" :
                    selectedKategorie === "Datenprodukt" ? "📊 Datenprodukt" :
                    selectedKategorie === "Governance" ? "⚖️ Governance" :
@@ -660,7 +660,7 @@ export const Auswertungen = () => {
                   <h3 className="text-lg font-semibold text-gray-700 mb-4">
                     Personen-Auslastung
                   </h3>
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 shadow-inner">
+                  <div className="bg-gradient-to-r from-ard-blue-50 to-indigo-50 rounded-2xl p-6 shadow-inner">
                     {chartDataPersonen.length > 0 ? (
                       <ResponsiveContainer width="100%" height={personenChartHeight}>
                         <BarChart
@@ -700,7 +700,7 @@ export const Auswertungen = () => {
                             {chartDataPersonen.map((entry, index) => (
                               <Cell 
                                 key={`cell-${index}`} 
-                                fill={entry.fill === '#ef4444' ? '#f87171' : '#3b82f6'} 
+                                fill={entry.fill === '#ef4444' ? '#f87171' : '#4c84d4'} 
                               />
                             ))}
                           </Bar>

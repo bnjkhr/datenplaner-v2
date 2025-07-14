@@ -171,7 +171,7 @@ export const DatenproduktVerwaltung = () => {
   if (error) return <p className="text-center text-red-500 py-8">{error}</p>;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-ard-blue-50/30">
       <div className="container mx-auto px-6 py-8">
         <div className="flex flex-wrap justify-between items-center mb-8 gap-4">
           <div>
@@ -182,7 +182,7 @@ export const DatenproduktVerwaltung = () => {
           </div>
           <button
             onClick={() => handleOpenProduktForm()}
-            className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2"
+            className="bg-gradient-to-r from-ard-blue-600 to-ard-blue-700 hover:from-ard-blue-700 hover:to-ard-blue-800 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2"
           >
             <span className="text-lg">+</span>
             Neues Datenprodukt
@@ -306,48 +306,46 @@ export const DatenproduktVerwaltung = () => {
                 <div className="mb-4">
                   <h4 className="text-sm font-semibold text-gray-700 mb-2">Team</h4>
                   {zuordnungen.filter((z) => z.datenproduktId === dp.id).length > 0 ? (
-                    <ul className="list-none space-y-2">
+                    <div className="space-y-1">
                       {zuordnungen
                         .filter((z) => z.datenproduktId === dp.id)
                         .map((zuordnung) => (
-                          <li
+                          <div
                             key={zuordnung.id}
-                            className="text-xs bg-gradient-to-r from-gray-50 to-gray-100 p-3 rounded-lg border border-gray-200"
+                            className="text-xs bg-gradient-to-r from-gray-50 to-gray-100 p-2 rounded-md border border-gray-200 flex items-center justify-between"
                           >
-                            <div className="flex justify-between items-center mb-1">
-                              <span className="font-medium text-gray-900">
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium text-gray-900 truncate">
                                 {getPersonName(zuordnung.personId)}
-                              </span>
-                              <div className="flex items-center gap-1">
-                                <button
-                                  onClick={() => handleEditAssignment(zuordnung)}
-                                  className="text-blue-500 hover:text-blue-700 p-1 rounded transition-colors"
-                                  title="Stunden bearbeiten"
-                                >
-                                  ✏️
-                                </button>
-                                <button
-                                  onClick={() =>
-                                    entfernePersonVonDatenproduktRolle(zuordnung.id)
-                                  }
-                                  className="text-red-500 hover:text-red-700 p-1 rounded transition-colors"
-                                  title="Zuweisung entfernen"
-                                >
-                                  ×
-                                </button>
+                              </div>
+                              <div className="text-gray-600 text-xs truncate">
+                                {getRolleName(zuordnung.rolleId)}
                               </div>
                             </div>
-                            <div className="flex justify-between items-center">
-                              <span className="text-gray-600">
-                                {getRolleName(zuordnung.rolleId)}
-                              </span>
-                              <span className="bg-blue-500 text-white px-2 py-0.5 rounded text-xs font-medium">
+                            <div className="flex items-center gap-1 ml-2">
+                              <span className="bg-ard-blue-500 text-white px-2 py-0.5 rounded text-xs font-medium whitespace-nowrap">
                                 {zuordnung.stunden || 0}h
                               </span>
+                              <button
+                                onClick={() => handleEditAssignment(zuordnung)}
+                                className="text-ard-blue-500 hover:text-ard-blue-700 p-1 rounded transition-colors"
+                                title="Stunden bearbeiten"
+                              >
+                                ✏️
+                              </button>
+                              <button
+                                onClick={() =>
+                                  entfernePersonVonDatenproduktRolle(zuordnung.id)
+                                }
+                                className="text-red-500 hover:text-red-700 p-1 rounded transition-colors"
+                                title="Zuweisung entfernen"
+                              >
+                                ×
+                              </button>
                             </div>
-                          </li>
+                          </div>
                         ))}
-                    </ul>
+                    </div>
                   ) : (
                     <p className="text-xs text-gray-500">Kein Team zugewiesen.</p>
                   )}
@@ -367,16 +365,16 @@ export const DatenproduktVerwaltung = () => {
                   onClick={() => setNotesProdukt(dp)}
                   className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 flex items-center gap-1 ${
                     dp.notizen 
-                      ? "text-gray-700 hover:text-gray-800 hover:bg-gray-100" 
-                      : "text-gray-400 hover:text-gray-600 hover:bg-gray-50"
+                      ? "bg-ard-blue-500 text-white hover:bg-ard-blue-600 border border-ard-blue-500" 
+                      : "text-gray-400 hover:text-gray-600 hover:bg-gray-50 border border-gray-200"
                   }`}
-                  title="Notizen"
+                  title={dp.notizen ? "Notizen bearbeiten" : "Notizen hinzufügen"}
                 >
-                  📝
+                  {dp.notizen ? "📝" : "📄"}
                 </button>
                 <button
                   onClick={() => handleOpenProduktForm(dp)}
-                  className="px-3 py-1.5 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium rounded-lg transition-all duration-200"
+                  className="px-3 py-1.5 text-sm text-ard-blue-600 hover:text-ard-blue-700 hover:bg-ard-blue-50 font-medium rounded-lg transition-all duration-200"
                 >
                   Bearbeiten
                 </button>
@@ -566,7 +564,7 @@ const EditAssignmentHoursModal = ({ assignment, onSave, onClose, getPersonName, 
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-md"
+              className="px-4 py-2 bg-ard-blue-600 text-white rounded-md"
             >
               Speichern
             </button>

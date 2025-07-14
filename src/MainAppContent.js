@@ -37,7 +37,7 @@ const AppFooter = ({ user }) => {
           href="https://www.notion.so/Datenprodukt-Planer-20a15fafe8268041aca7d879881030a5?source=copy_link"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+          className="text-sm text-ard-blue-500 hover:text-ard-blue-700 hover:underline transition-colors"
         >
           Bugs? Feature-Request? Hier eintragen.
         </a>
@@ -68,8 +68,8 @@ export const MainAppContent = ({ user }) => {
       onClick={() => setCurrentPage(pageName)}
       className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
         currentPage === pageName
-          ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg"
-          : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"
+          ? "bg-gradient-to-r from-ard-blue-500 to-ard-blue-600 text-white shadow-lg"
+          : "text-gray-600 hover:text-ard-blue-500 hover:bg-ard-blue-50"
       }`}
     >
       {children}
@@ -77,7 +77,7 @@ export const MainAppContent = ({ user }) => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30 font-sans flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-ard-blue-50/30 font-sans flex flex-col">
       <header className="bg-white/80 backdrop-blur-md shadow-lg border-b border-gray-100 sticky top-0 z-30">
         <nav className="container mx-auto px-6 py-4">
           <div className="flex flex-wrap justify-between items-center gap-4">
@@ -87,7 +87,7 @@ export const MainAppContent = ({ user }) => {
                 alt="ARD Logo" 
                 className="h-8 w-auto"
               />
-              <div className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              <div className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-ard-blue-500 to-ard-blue-600 bg-clip-text text-transparent">
                 Datenprodukt Planer
               </div>
             </div>

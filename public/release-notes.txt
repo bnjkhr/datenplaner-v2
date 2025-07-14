@@ -1,11 +1,3 @@
-Version 1.3.1 - 27.6.2025
--------------------------
-* Neue Rolle kann jetzt direkt beim Zuweisen zu einem Datenprodukt angelegt werden
-
-Version 1.4.0 - 01.07.2025
---------------------------
-Abwesenheiten und bevorstehende Abwesenheiten werden jetzt in der Personenverwaltung angezeigt. Quelle: Confluence-Kalender
-
 Version 2.0.0 - 10.07.2025
 --------------------------
 * Stunden pro Woche in der Datenproduktverwaltung hinzugefügt
@@ -36,3 +28,6 @@ Version 2.2.0 - 14.07.2025
 * Confluence-View: Angepasste Statistiken
 * Confluence-View: Titel aktualisiert
 * Kreise eingeführt
+* ARD Logo
+* Blau an ARD-Logo angepasst
+* Datenprodukte übersichtlicher dargestellt

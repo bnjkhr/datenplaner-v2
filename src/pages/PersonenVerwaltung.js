@@ -67,7 +67,7 @@ const GlobalSearch = ({ searchTerm, setSearchTerm, suggestions, onSuggestionClic
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           onFocus={() => setShowSuggestions(searchTerm.length > 0 && suggestions.length > 0)}
-          className="flex-grow px-4 py-3 pr-10 border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all w-full"
+          className="flex-grow px-4 py-3 pr-10 border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-ard-blue-500 focus:border-ard-blue-500 transition-all w-full"
         />
         <div className="absolute inset-y-0 right-0 flex items-center pr-3">
           {searchTerm ? (
@@ -98,7 +98,7 @@ const GlobalSearch = ({ searchTerm, setSearchTerm, suggestions, onSuggestionClic
               onClick={() => handleSuggestionClick(suggestion)}
               className={`px-4 py-3 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0 ${
                 index === activeSuggestion 
-                  ? 'bg-blue-50 text-blue-900' 
+                  ? 'bg-ard-blue-50 text-ard-blue-900' 
                   : 'hover:bg-gray-50'
               }`}
             >
@@ -107,7 +107,7 @@ const GlobalSearch = ({ searchTerm, setSearchTerm, suggestions, onSuggestionClic
                   <div className="font-medium text-gray-900">{suggestion.name}</div>
                   <div className="text-sm text-gray-600 flex items-center gap-2">
                     <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
-                      suggestion.type === 'person' ? 'bg-blue-100 text-blue-700' :
+                      suggestion.type === 'person' ? 'bg-ard-blue-100 text-ard-blue-700' :
                       suggestion.type === 'skill' ? 'bg-green-100 text-green-700' :
                       suggestion.type === 'datenprodukt' ? 'bg-purple-100 text-purple-700' :
                       'bg-gray-100 text-gray-700'
@@ -297,7 +297,7 @@ const PersonEintrag = ({
               href={msTeamsLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center w-8 h-8 bg-blue-100 hover:bg-blue-200 rounded-lg transition-colors"
+              className="inline-flex items-center justify-center w-8 h-8 bg-ard-blue-100 hover:bg-ard-blue-200 rounded-lg transition-colors"
               title="Chat in MS Teams starten"
             >
               <span className="text-lg">💬</span>
@@ -309,7 +309,7 @@ const PersonEintrag = ({
           <div className="mb-4">
             <a
               href={`mailto:${email}`}
-              className="text-sm text-gray-600 hover:text-blue-600 break-all transition-colors"
+              className="text-sm text-gray-600 hover:text-ard-blue-600 break-all transition-colors"
             >
               {email}
             </a>
@@ -319,7 +319,7 @@ const PersonEintrag = ({
         {/* Wochenstunden anzeigen */}
         {wochenstunden && (
           <div className="mb-4">
-            <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 border border-blue-200">
+            <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-ard-blue-50 to-ard-blue-100 text-ard-blue-700 border border-ard-blue-200">
               ⏰ {wochenstunden}h/Woche
             </span>
           </div>
@@ -431,7 +431,7 @@ const PersonEintrag = ({
                 return (
                   <li
                     key={a.assignmentId}
-                    className="text-xs bg-gradient-to-r from-indigo-50 to-blue-50 p-3 rounded-lg border border-indigo-100 hover:border-indigo-200 transition-colors"
+                    className="text-xs bg-gradient-to-r from-indigo-50 to-ard-blue-50 p-3 rounded-lg border border-indigo-100 hover:border-indigo-200 transition-colors"
                   >
                     <div className="flex justify-between items-center">
                       <div className="flex flex-col">
@@ -439,7 +439,7 @@ const PersonEintrag = ({
                         <span className="text-gray-600">als {a.rolleName}</span>
                       </div>
                       {stunden > 0 && (
-                        <div className="bg-blue-500 text-white px-2 py-1 rounded-md font-semibold">
+                        <div className="bg-ard-blue-500 text-white px-2 py-1 rounded-md font-semibold">
                           {stunden}h
                         </div>
                       )}
@@ -455,7 +455,7 @@ const PersonEintrag = ({
       <div className="mt-auto pt-4 flex justify-end space-x-2 border-t border-gray-100">
         <button
           onClick={() => onEdit(person)}
-          className="px-3 py-1.5 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium rounded-lg transition-all duration-200"
+          className="px-3 py-1.5 text-sm text-ard-blue-600 hover:text-ard-blue-700 hover:bg-ard-blue-50 font-medium rounded-lg transition-all duration-200"
         >
           Bearbeiten
         </button>
@@ -569,7 +569,7 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
-          className="block w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+          className="block w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-ard-blue-500 focus:border-ard-blue-500 transition-all"
         />
       </div>
       <div>
@@ -585,7 +585,7 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="block w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+          className="block w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-ard-blue-500 focus:border-ard-blue-500 transition-all"
         />
       </div>
       <div>
@@ -604,7 +604,7 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
           value={wochenstunden}
           onChange={(e) => setWochenstunden(e.target.value)}
           required
-          className="block w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+          className="block w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-ard-blue-500 focus:border-ard-blue-500 transition-all"
         />
         <p className="mt-2 text-xs text-gray-500">Anzahl der Arbeitsstunden pro Woche (Standard: 31, Bereich: 1-80).</p>
       </div>
@@ -642,7 +642,7 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
             type="checkbox"
             checked={isM13}
             onChange={(e) => setIsM13(e.target.checked)}
-            className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+            className="w-4 h-4 text-ard-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-ard-blue-500 focus:ring-2"
           />
           <span className="text-sm font-medium text-gray-700">M13</span>
         </label>
@@ -666,7 +666,7 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
                     setKategorien(kategorien.filter(k => k !== kategorie));
                   }
                 }}
-                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                className="w-4 h-4 text-ard-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-ard-blue-500 focus:ring-2"
               />
               <span className="text-sm text-gray-700">{kategorie}</span>
             </label>
@@ -686,7 +686,7 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
         )}
         <button
           type="submit"
-          className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl shadow-lg font-semibold transition-all duration-200"
+          className="px-6 py-3 bg-gradient-to-r from-ard-blue-600 to-ard-blue-700 hover:from-ard-blue-700 hover:to-ard-blue-800 text-white rounded-xl shadow-lg font-semibold transition-all duration-200"
         >
           {personToEdit ? "Speichern" : "Hinzufügen"}
         </button>
@@ -992,7 +992,7 @@ const PersonenVerwaltung = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-ard-blue-50/30">
       <div className="container mx-auto px-6 py-8">
         <div className="mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
@@ -1037,7 +1037,7 @@ const PersonenVerwaltung = () => {
                 )}
                 <button
                   onClick={handleAddNewPerson}
-                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2 whitespace-nowrap"
+                  className="bg-gradient-to-r from-ard-blue-600 to-ard-blue-700 hover:from-ard-blue-700 hover:to-ard-blue-800 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2 whitespace-nowrap"
                 >
                   <span className="text-lg">+</span>
                   Neue Person

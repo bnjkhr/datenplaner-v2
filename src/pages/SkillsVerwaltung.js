@@ -7,7 +7,7 @@ export const SkillsVerwaltung = () => {
     const { skills, personen, fuegeSkillHinzu, aktualisiereSkill, loescheSkill, loading, error, setError } = useData();
     
     const [neuerSkillName, setNeuerSkillName] = useState('');
-    const [neueSkillFarbe, setNeueSkillFarbe] = useState('#3b82f6'); // Modern blue
+    const [neueSkillFarbe, setNeueSkillFarbe] = useState('#4c84d4'); // Modern blue
     const [editingSkill, setEditingSkill] = useState(null); 
     const [skillToDelete, setSkillToDelete] = useState(null);
 
@@ -17,7 +17,7 @@ export const SkillsVerwaltung = () => {
         if (neuerSkillName.trim()) {
             await fuegeSkillHinzu(neuerSkillName.trim(), neueSkillFarbe);
             setNeuerSkillName('');
-            setNeueSkillFarbe('#3b82f6');
+            setNeueSkillFarbe('#4c84d4');
         }
     };
 
@@ -53,13 +53,13 @@ export const SkillsVerwaltung = () => {
     if (loading) {
         return (
             <div className="flex justify-center py-10">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ard-blue-600"></div>
             </div>
         );
     }
     
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-ard-blue-50/30">
             <div className="container mx-auto px-6 py-6">
                 <div className="mb-6">
                     <h1 className="text-3xl font-bold text-gray-900 mb-1">Skill-Verwaltung</h1>
@@ -89,7 +89,7 @@ export const SkillsVerwaltung = () => {
                                 value={neuerSkillName} 
                                 onChange={(e) => setNeuerSkillName(e.target.value)} 
                                 placeholder="z.B. Python, React, Data Science" 
-                                className="block w-full px-3 py-2 border border-gray-200 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                                className="block w-full px-3 py-2 border border-gray-200 rounded-lg shadow-sm focus:ring-2 focus:ring-ard-blue-500 focus:border-ard-blue-500 transition-all"
                             />
                         </div>
                         <div className="flex-shrink-0">
@@ -106,7 +106,7 @@ export const SkillsVerwaltung = () => {
                         </div>
                         <button 
                             type="submit" 
-                            className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg shadow-md font-medium transition-all duration-200 flex items-center gap-2 whitespace-nowrap"
+                            className="px-4 py-2 bg-gradient-to-r from-ard-blue-600 to-ard-blue-700 hover:from-ard-blue-700 hover:to-ard-blue-800 text-white rounded-lg shadow-md font-medium transition-all duration-200 flex items-center gap-2 whitespace-nowrap"
                         >
                             <span className="text-lg">+</span>
                             Hinzufügen
@@ -146,7 +146,7 @@ export const SkillsVerwaltung = () => {
                                                     type="text" 
                                                     value={editingSkill.name} 
                                                     onChange={(e) => setEditingSkill({...editingSkill, name: e.target.value})} 
-                                                    className="flex-grow px-2 py-1 text-sm border border-blue-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500" 
+                                                    className="flex-grow px-2 py-1 text-sm border border-ard-blue-300 rounded focus:ring-1 focus:ring-ard-blue-500 focus:border-ard-blue-500" 
                                                     autoFocus 
                                                 />
                                             ) : (
@@ -176,7 +176,7 @@ export const SkillsVerwaltung = () => {
                                                 <>
                                                     <button 
                                                         onClick={() => setEditingSkill({ ...skill })} 
-                                                        className="p-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-all"
+                                                        className="p-1 text-ard-blue-600 hover:text-ard-blue-700 hover:bg-ard-blue-50 rounded transition-all"
                                                         title="Bearbeiten"
                                                     >
                                                         ✏️

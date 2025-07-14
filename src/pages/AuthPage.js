@@ -59,13 +59,13 @@ const AuthPage = () => {
 
         <button
           onClick={resetMode ? handlePasswordReset : handleLogin}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition"
+          className="w-full bg-ard-blue-500 hover:bg-ard-blue-600 text-white py-3 rounded-lg font-semibold transition"
         >
           {resetMode ? 'Zurücksetzen' : 'Login'}
         </button>
 
         <p
-          className="mt-5 text-sm text-blue-600 text-center cursor-pointer underline"
+          className="mt-5 text-sm text-ard-blue-500 text-center cursor-pointer underline"
           onClick={() => {
             setResetMode(!resetMode);
             setMessage('');
