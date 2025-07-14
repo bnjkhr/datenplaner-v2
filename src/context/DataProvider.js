@@ -114,10 +114,21 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
 
         const mapping = {};
         upcoming.forEach((ev) => {
-          (ev.attendees || []).forEach((name) => {
-            const key = name.toLowerCase();
-            if (!mapping[key]) mapping[key] = [];
-            mapping[key].push({
+          (ev.attendees || []).forEach((attendee) => {
+            const email = attendee.toLowerCase();
+            const name = attendee.replace(/[@.].*$/, '').replace(/[._]/g, ' ').toLowerCase();
+            
+            // Store under email key
+            if (!mapping[email]) mapping[email] = [];
+            mapping[email].push({
+              start: ev.start,
+              end: ev.end,
+              summary: ev.summary,
+            });
+            
+            // Also store under name key for fallback
+            if (!mapping[name]) mapping[name] = [];
+            mapping[name].push({
               start: ev.start,
               end: ev.end,
               summary: ev.summary,
