@@ -46,6 +46,10 @@ export const logServerUrl =
 // --- App ID for Firestore paths ---
 export const appId = "datenplaner-app-v3";
 
+// --- Multi-Tenant Konfiguration ---
+export const defaultTenantId = process.env.REACT_APP_DEFAULT_TENANT_ID || appId;
+export const tenantRegistrationEnabled = process.env.REACT_APP_TENANT_REGISTRATION_ENABLED === 'true';
+
 // --- Initialize Firebase ---
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);

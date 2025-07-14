@@ -5,6 +5,7 @@ import { auth } from './firebase/config';
 import { DataProvider } from './context/DataProvider';
 import AuthPage from './pages/AuthPage';
 import { MainAppContent } from './MainAppContent';
+import FeatureFlagManager from './components/admin/FeatureFlagManager';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -35,6 +36,7 @@ function App() {
                 <MainAppContent user={user} />
             </DataProvider>
         )}
+        <FeatureFlagManager />
       </>
   );
 }

@@ -8,10 +8,12 @@ import React, {
 import {
   db,
   appId,
+  defaultTenantId,
   confluenceCalendarUrl,
   calendarProxyUrl,
   logServerUrl,
 } from "../firebase/config";
+import { isFeatureEnabled, FEATURE_FLAGS } from "../utils/featureFlags";
 import { fetchCalendarEvents } from "../api/calendar";
 import {
   collection,
@@ -45,7 +47,7 @@ const tagColors = [
 const getRandomColor = () =>
   tagColors[Math.floor(Math.random() * tagColors.length)];
 
-export const DataProvider = ({ children, isReadOnly, user }) => {
+export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
   const [personen, setPersonen] = useState([]);
   const [datenprodukte, setDatenprodukte] = useState([]);
   const [rollen, setRollen] = useState([]);
@@ -56,7 +58,14 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
   const [error, setError] = useState(null);
   const [lastChange, setLastChange] = useState(null);
   const [vacations, setVacations] = useState({});
-  const lastChangeRef = doc(db, `artifacts/${appId}/public/meta`);
+  
+  // Multi-Tenancy: Wähle entsprechenden Tenant oder fallback zu appId
+  const currentTenantId = tenantId || (isFeatureEnabled(FEATURE_FLAGS.MULTI_TENANCY) ? defaultTenantId : appId);
+  const isMultiTenancy = isFeatureEnabled(FEATURE_FLAGS.MULTI_TENANCY);
+  
+  const lastChangeRef = doc(db, isMultiTenancy ? 
+    `tenants/${currentTenantId}` : 
+    `artifacts/${appId}/public/meta`);
 
   const recordLastChange = async (description) => {
     const change = {
@@ -66,7 +75,13 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
     };
     setLastChange(change);
     try {
-      await setDoc(lastChangeRef, { lastChange: change }, { merge: true });
+      if (isMultiTenancy) {
+        // Für Multi-Tenancy: Speichere als Field im Tenant-Dokument
+        await setDoc(lastChangeRef, { lastChange: change }, { merge: true });
+      } else {
+        // Legacy-Pfad: Nutze die alte Struktur
+        await setDoc(lastChangeRef, { lastChange: change }, { merge: true });
+      }
       const logUrl = logServerUrl || "http://localhost:3001/log";
       fetch(logUrl, {
         method: "POST",
@@ -79,8 +94,13 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
   };
 
   const getCollectionPath = useCallback(
-    (name) => `/artifacts/${appId}/public/data/${name}`,
-    []
+    (name) => {
+      if (isMultiTenancy) {
+        return `tenant-${currentTenantId}-${name}`;
+      }
+      return `artifacts/${appId}/public/data/${name}`;
+    },
+    [isMultiTenancy, currentTenantId]
   );
 
   useEffect(() => {
@@ -554,6 +574,9 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
         error,
         setError,
         lastChange,
+        // Multi-Tenancy Informationen
+        currentTenantId,
+        isMultiTenancy,
       }}
     >
       {" "}
