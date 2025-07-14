@@ -94,15 +94,15 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
 
   useEffect(() => {
     const loadVacations = async () => {
-      // Try different approaches based on environment
+      // Always use CORS proxy in production to avoid proxy issues
       let url;
       
       if (process.env.NODE_ENV === 'development') {
         // Development: use direct URL
         url = confluenceCalendarUrl;
       } else {
-        // Production: try proxy first, then fallback to corsproxy
-        url = calendarProxyUrl || `https://corsproxy.io/?${encodeURIComponent(confluenceCalendarUrl)}`;
+        // Production: use CORS proxy directly
+        url = `https://corsproxy.io/?${encodeURIComponent(confluenceCalendarUrl)}`;
       }
       
       console.log('🔍 Calendar URL:', url);
