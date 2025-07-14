@@ -94,11 +94,21 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
 
   useEffect(() => {
     const loadVacations = async () => {
-      // Always use direct confluence URL to avoid proxy issues
-      const url = confluenceCalendarUrl;
+      // Try different approaches based on environment
+      let url;
+      
+      if (process.env.NODE_ENV === 'development') {
+        // Development: use direct URL
+        url = confluenceCalendarUrl;
+      } else {
+        // Production: try proxy first, then fallback to corsproxy
+        url = calendarProxyUrl || `https://corsproxy.io/?${encodeURIComponent(confluenceCalendarUrl)}`;
+      }
+      
       console.log('🔍 Calendar URL:', url);
       console.log('🔍 calendarProxyUrl:', calendarProxyUrl);
       console.log('🔍 confluenceCalendarUrl:', confluenceCalendarUrl);
+      console.log('🔍 NODE_ENV:', process.env.NODE_ENV);
       
       if (!url) {
         console.log('❌ No calendar URL configured');
@@ -146,7 +156,7 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
       }
     };
     loadVacations();
-  }, [confluenceCalendarUrl]);
+  }, [calendarProxyUrl, confluenceCalendarUrl]);
 
   useEffect(() => {
     setLoading(true);
