@@ -94,7 +94,8 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
 
   useEffect(() => {
     const loadVacations = async () => {
-      const url = calendarProxyUrl || confluenceCalendarUrl;
+      // Always use direct confluence URL to avoid proxy issues
+      const url = confluenceCalendarUrl;
       console.log('🔍 Calendar URL:', url);
       console.log('🔍 calendarProxyUrl:', calendarProxyUrl);
       console.log('🔍 confluenceCalendarUrl:', confluenceCalendarUrl);
@@ -145,7 +146,7 @@ export const DataProvider = ({ children, isReadOnly, user }) => {
       }
     };
     loadVacations();
-  }, [calendarProxyUrl, confluenceCalendarUrl]);
+  }, [confluenceCalendarUrl]);
 
   useEffect(() => {
     setLoading(true);
