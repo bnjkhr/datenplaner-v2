@@ -309,11 +309,7 @@
       <!-- Header -->
       <div class="header">
         <h1 class="title">Datenprodukt Planer</h1>
-        <p class="subtitle">Team-Übersicht • Live Firebase-Daten</p>
-        <div class="status">
-          <span class="status-indicator status-loading" id="connection-status"></span>
-          <span id="connection-text">Verbinde mit Firebase...</span>
-        </div>
+        <p class="subtitle">Team-Übersicht</p>
       </div>
 
       <!-- Loading State -->
@@ -339,7 +335,7 @@
               <thead>
                 <tr>
                   <th>Name & E-Mail</th>
-                  <th>Auslastung</th>
+                  <th>Planstunden</th>
                   <th>Skills</th>
                   <th>Zuordnungen</th>
                 </tr>
@@ -523,7 +519,7 @@
         const assignedPersons = data.personen.filter(p => 
           data.zuordnungen.some(z => z.personId === p.id)
         ).length;
-        const overbookedPersons = workloadData.filter(p => p.status === 'overbooked').length;
+        const uniqueDataProducts = data.datenprodukte.length;
 
         // Statistics rendern
         document.getElementById('stats-grid').innerHTML = `
@@ -544,10 +540,10 @@
           </div>
           
           <div class="stat-card">
-            <div class="stat-icon icon-orange">⚠️</div>
+            <div class="stat-icon icon-orange">📊</div>
             <div class="stat-content">
-              <h3>Überbucht</h3>
-              <p>${overbookedPersons}</p>
+              <h3>Datenprodukt-Teams</h3>
+              <p>${uniqueDataProducts}</p>
             </div>
           </div>
           
@@ -570,9 +566,6 @@
             data.skills.find(s => s.id === skillId)
           ).filter(Boolean);
           
-          const statusClass = person.status === 'overbooked' ? 'status-overbooked' :
-                             person.status === 'underbooked' ? 'status-underbooked' :
-                             'status-normal';
           
           return `
             <tr>
@@ -581,8 +574,8 @@
                 <div class="person-email">${person.email || ''}</div>
               </td>
               <td>
-                <div class="status-badge ${statusClass}">
-                  ${person.auslastung}% (${person.gebuchteStunden}h/${person.wochenstunden || 31}h)
+                <div class="status-badge status-normal">
+                  ${person.wochenstunden || 31}h
                 </div>
               </td>
               <td>
@@ -596,12 +589,9 @@
                 <div class="assignments">
                   ${assignments.length > 0 ? assignments.map(assignment => {
                     const produkt = data.datenprodukte.find(dp => dp.id === assignment.datenproduktId);
-                    const rolle = data.rollen.find(r => r.id === assignment.rolleId);
                     return `
                       <div class="assignment">
                         <span class="assignment-name">${produkt?.name || 'Unbekanntes Produkt'}</span>
-                        <span class="assignment-role"> als ${rolle?.name || 'Unbekannte Rolle'}</span>
-                        <span class="assignment-hours"> • ${assignment.stunden || 0}h/Woche</span>
                       </div>
                     `;
                   }).join('') : '<span style="color: #6b7280; font-style: italic;">Keine Zuordnungen</span>'}

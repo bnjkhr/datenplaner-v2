@@ -188,8 +188,7 @@ function generateHTML(data, isLiveData = true) {
   const assignedM13Persons = workloadData.filter(p => 
     data.zuordnungen.some(z => z.personId === p.id)
   ).length;
-  const overbookedPersons = workloadData.filter(p => p.status === 'overbooked').length;
-  const lastUpdate = new Date().toLocaleString('de-DE');
+  const uniqueDataProducts = data.datenprodukte.length;
 
   return `<!DOCTYPE html>
 <html lang="de">
@@ -468,11 +467,7 @@ function generateHTML(data, isLiveData = true) {
       <!-- Header -->
       <div class="header">
         <h1 class="title">Datenprodukt Planer - M13 Mitarbeiter</h1>
-        <p class="subtitle">M13 Team-Übersicht nach Kategorien • ${isLiveData ? 'Live Firebase-Daten' : 'Demo-Daten'}</p>
-        <div class="status">
-          <div class="status-dot"></div>
-          <span>${isLiveData ? `Live-Daten • Aktualisiert: ${lastUpdate}` : 'Demo-Daten (Firebase nicht verfügbar)'}</span>
-        </div>
+        <p class="subtitle">M13 Team-Übersicht nach Kategorien</p>
       </div>
 
       <!-- Statistics -->
@@ -494,10 +489,10 @@ function generateHTML(data, isLiveData = true) {
         </div>
         
         <div class="stat-card">
-          <div class="stat-icon icon-orange">⚠️</div>
+          <div class="stat-icon icon-orange">📊</div>
           <div class="stat-content">
-            <h3>Überbucht</h3>
-            <p>${overbookedPersons}</p>
+            <h3>Datenprodukt-Teams</h3>
+            <p>${uniqueDataProducts}</p>
           </div>
         </div>
         
@@ -528,17 +523,13 @@ function generateHTML(data, isLiveData = true) {
                 <thead>
                   <tr>
                     <th>Name & E-Mail</th>
-                    <th>Auslastung</th>
+                    <th>Planstunden</th>
                     <th>Zuordnungen</th>
                   </tr>
                 </thead>
                 <tbody>
                   ${personen.map(person => {
                     const assignments = data.zuordnungen.filter(z => z.personId === person.id);
-                    
-                    const statusClass = person.status === 'overbooked' ? 'status-overbooked' :
-                                       person.status === 'underbooked' ? 'status-underbooked' :
-                                       'status-normal';
                     
                     return `
                       <tr>
@@ -547,20 +538,17 @@ function generateHTML(data, isLiveData = true) {
                           <div class="person-email">${person.email || ''}</div>
                         </td>
                         <td>
-                          <div class="status-badge ${statusClass}">
-                            ${person.auslastung}% (${person.gebuchteStunden}h/${person.wochenstunden || 31}h)
+                          <div class="status-badge status-normal">
+                            ${person.wochenstunden || 31}h
                           </div>
                         </td>
                         <td>
                           <div class="assignments">
                             ${assignments.length > 0 ? assignments.map(assignment => {
                               const produkt = data.datenprodukte.find(dp => dp.id === assignment.datenproduktId);
-                              const rolle = data.rollen.find(r => r.id === assignment.rolleId);
                               return `
                                 <div class="assignment">
                                   <span class="assignment-name">${produkt?.name || 'Unbekanntes Produkt'}</span>
-                                  <span class="assignment-role"> als ${rolle?.name || 'Unbekannte Rolle'}</span>
-                                  <span class="assignment-hours"> • ${assignment.stunden || 0}h/Woche</span>
                                 </div>
                               `;
                             }).join('') : '<span style="color: #6b7280; font-style: italic;">Keine Zuordnungen</span>'}
