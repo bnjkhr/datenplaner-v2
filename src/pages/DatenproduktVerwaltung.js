@@ -358,15 +358,16 @@ export const DatenproduktVerwaltung = () => {
                     setAssignmentError("");
                   }}
                   className="px-3 py-1.5 text-sm text-green-600 hover:text-green-700 hover:bg-green-50 font-medium rounded-lg transition-all duration-200"
+                  title="Team zuweisen"
                 >
-                  Team zuweisen
+                  👥
                 </button>
                 <button
                   onClick={() => setNotesProdukt(dp)}
                   className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 flex items-center gap-1 ${
                     dp.notizen 
-                      ? "bg-ard-blue-500 text-white hover:bg-ard-blue-600 border border-ard-blue-500" 
-                      : "text-gray-400 hover:text-gray-600 hover:bg-gray-50 border border-gray-200"
+                      ? "bg-ard-blue-500 text-white hover:bg-ard-blue-600" 
+                      : "text-gray-400 hover:text-gray-600 hover:bg-gray-50"
                   }`}
                   title={dp.notizen ? "Notizen bearbeiten" : "Notizen hinzufügen"}
                 >
@@ -375,14 +376,16 @@ export const DatenproduktVerwaltung = () => {
                 <button
                   onClick={() => handleOpenProduktForm(dp)}
                   className="px-3 py-1.5 text-sm text-ard-blue-600 hover:text-ard-blue-700 hover:bg-ard-blue-50 font-medium rounded-lg transition-all duration-200"
+                  title="Bearbeiten"
                 >
-                  Bearbeiten
+                  ✏️
                 </button>
                 <button
                   onClick={() => handleDeleteDatenproduktInitiation(dp)}
                   className="px-3 py-1.5 text-sm text-red-500 hover:text-red-600 hover:bg-red-50 font-medium rounded-lg transition-all duration-200"
+                  title="Löschen"
                 >
-                  Löschen
+                  🗑️
                 </button>
               </div>
             </div>

@@ -456,14 +456,16 @@ const PersonEintrag = ({
         <button
           onClick={() => onEdit(person)}
           className="px-3 py-1.5 text-sm text-ard-blue-600 hover:text-ard-blue-700 hover:bg-ard-blue-50 font-medium rounded-lg transition-all duration-200"
+          title="Bearbeiten"
         >
-          Bearbeiten
+          ✏️
         </button>
         <button
           onClick={() => onDeleteInitiation(person)}
           className="px-3 py-1.5 text-sm text-red-500 hover:text-red-600 hover:bg-red-50 font-medium rounded-lg transition-all duration-200"
+          title="Löschen"
         >
-          Löschen
+          🗑️
         </button>
       </div>
     </div>
