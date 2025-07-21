@@ -365,6 +365,8 @@
 
       let db = null;
       let isConnected = false;
+      let unsubscribeFunctions = [];
+      let reconnectInterval = null;
 
       // Firebase initialisieren
       try {
@@ -441,7 +443,109 @@
         renderData(demoData);
       }
 
-      // Daten von Firebase laden
+      // Cleanup Funktion für alle Listener
+      function cleanup() {
+        console.log('🧹 Cleaning up listeners...');
+        unsubscribeFunctions.forEach(unsubscribe => {
+          try {
+            unsubscribe();
+          } catch (e) {
+            console.warn('Warning during cleanup:', e);
+          }
+        });
+        unsubscribeFunctions = [];
+        
+        if (reconnectInterval) {
+          clearInterval(reconnectInterval);
+          reconnectInterval = null;
+        }
+      }
+
+      // Realtime Firebase Listener setuppen
+      function setupRealtimeListeners() {
+        if (!db) {
+          throw new Error('Firebase nicht initialisiert');
+        }
+
+        cleanup(); // Cleanup existing listeners
+        
+        const collections = ['personen', 'skills', 'datenprodukte', 'rollen', 'zuordnungen'];
+        const data = {};
+        let loadedCollections = 0;
+
+        updateConnectionStatus('loading', 'Lädt Realtime-Daten...');
+        console.log('🔍 Setup Realtime Firebase-Listeners...');
+
+        collections.forEach(collectionName => {
+          const path = `artifacts/${appId}/public/data/${collectionName}`;
+          console.log(`📊 Setup Listener für Collection: ${path}`);
+          
+          try {
+            const unsubscribe = db.collection(path).onSnapshot((snapshot) => {
+              console.log(`🔄 ${collectionName} Update: ${snapshot.docs.length} Dokumente`);
+              
+              data[collectionName] = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+              }));
+              
+              // Sortiere Daten außer Zuordnungen
+              if (collectionName !== 'zuordnungen') {
+                data[collectionName].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'de'));
+              }
+              
+              loadedCollections++;
+              
+              // Wenn alle Collections geladen wurden, render die Daten
+              if (loadedCollections >= collections.length) {
+                updateConnectionStatus('connected', `Live-Daten (${new Date().toLocaleTimeString('de-DE')})`);
+                console.log('✅ Alle Collections geladen, rendere Daten:', data);
+                renderData(data);
+                loadedCollections = collections.length; // Prevent multiple renders
+              }
+            }, (error) => {
+              console.error(`❌ Realtime Fehler bei ${collectionName}:`, error);
+              handleConnectionError(error);
+            });
+            
+            unsubscribeFunctions.push(unsubscribe);
+          } catch (error) {
+            console.error(`❌ Setup Fehler bei ${collectionName}:`, error);
+            throw error;
+          }
+        });
+
+        console.log('✅ Alle Realtime-Listener eingerichtet');
+      }
+
+      // Connection Error Handler mit Reconnect Logic
+      function handleConnectionError(error) {
+        console.error('❌ Firebase Connection Error:', error);
+        
+        let errorMessage = 'Verbindungsfehler';
+        if (error.code === 'permission-denied') {
+          errorMessage = 'Keine Berechtigung - Firestore Rules prüfen';
+        } else if (error.code === 'unavailable') {
+          errorMessage = 'Firebase nicht erreichbar';
+        }
+        
+        updateConnectionStatus('disconnected', errorMessage);
+        
+        // Starte Reconnect Interval falls noch nicht aktiv
+        if (!reconnectInterval) {
+          console.log('🔄 Starting reconnect attempts...');
+          reconnectInterval = setInterval(() => {
+            console.log('🔄 Attempting to reconnect...');
+            try {
+              setupRealtimeListeners();
+            } catch (e) {
+              console.error('❌ Reconnect failed:', e);
+            }
+          }, 30000); // Versuche alle 30 Sekunden erneut
+        }
+      }
+
+      // Fallback: Daten von Firebase laden (einmalig)
       async function loadFirebaseData() {
         if (!db) {
           throw new Error('Firebase nicht initialisiert');
@@ -453,7 +557,7 @@
           const collections = ['personen', 'skills', 'datenprodukte', 'rollen', 'zuordnungen'];
           const data = {};
 
-          console.log('🔍 Lade Firebase-Daten...');
+          console.log('🔍 Lade Firebase-Daten (Fallback)...');
           
           // Lade alle Collections parallel
           const promises = collections.map(async (collectionName) => {
@@ -481,7 +585,7 @@
 
           await Promise.all(promises);
           
-          updateConnectionStatus('connected', `Live-Daten (${new Date().toLocaleTimeString('de-DE')})`);
+          updateConnectionStatus('connected', `Daten geladen (${new Date().toLocaleTimeString('de-DE')})`);
           console.log('✅ Firebase-Daten erfolgreich geladen:', data);
           return data;
           
@@ -606,19 +710,65 @@
         document.getElementById('main-content').style.display = 'block';
       }
 
-      // Initialisierung
+      // Initialisierung mit Realtime Listeners
       async function init() {
         try {
-          const data = await loadFirebaseData();
-          renderData(data);
+          console.log('🚀 Starting app with realtime listeners...');
+          setupRealtimeListeners();
         } catch (error) {
-          console.error('Fehler beim Laden der Firebase-Daten:', error);
-          showError(error.message);
+          console.error('❌ Fehler beim Setup der Realtime-Listener:', error);
+          console.log('🔄 Fallback zu einmaligem Laden...');
+          
+          try {
+            const data = await loadFirebaseData();
+            renderData(data);
+          } catch (fallbackError) {
+            console.error('❌ Auch Fallback fehlgeschlagen:', fallbackError);
+            showError(fallbackError.message);
+          }
         }
       }
 
+      // Periodisches Backup-Polling (alle 5 Minuten)
+      function startBackupPolling() {
+        setInterval(() => {
+          if (!isConnected) {
+            console.log('🔄 Backup polling: Versuche Daten zu laden...');
+            loadFirebaseData()
+              .then(data => {
+                console.log('✅ Backup polling erfolgreich');
+                renderData(data);
+              })
+              .catch(error => {
+                console.error('❌ Backup polling fehlgeschlagen:', error);
+              });
+          }
+        }, 5 * 60 * 1000); // 5 Minuten
+      }
+
+      // Cleanup bei Page Unload
+      window.addEventListener('beforeunload', () => {
+        cleanup();
+      });
+
+      // Page Visibility API für bessere Performance
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          console.log('👁️ Page hidden, keeping listeners active');
+        } else {
+          console.log('👁️ Page visible, ensuring connection');
+          if (!isConnected) {
+            console.log('🔄 Page became visible, attempting reconnect...');
+            init();
+          }
+        }
+      });
+
       // App starten
-      setTimeout(init, 1000);
+      setTimeout(() => {
+        init();
+        startBackupPolling();
+      }, 1000);
     </script>
   </body>
 </html>
