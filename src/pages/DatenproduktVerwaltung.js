@@ -18,6 +18,7 @@ export const DatenproduktVerwaltung = () => {
     zuordnungen,
     entfernePersonVonDatenproduktRolle,
     aktualisiereZuordnungStunden,
+    aktualisiereZuordnung,
     fuegeRolleHinzu,
   } = useData();
 
@@ -147,6 +148,15 @@ export const DatenproduktVerwaltung = () => {
   const handleUpdateAssignmentHours = async (stunden) => {
     if (editingAssignment) {
       const success = await aktualisiereZuordnungStunden(editingAssignment.id, stunden);
+      if (success) {
+        setEditingAssignment(null);
+      }
+    }
+  };
+
+  const handleUpdateAssignment = async (updates) => {
+    if (editingAssignment) {
+      const success = await aktualisiereZuordnung(editingAssignment.id, updates);
       if (success) {
         setEditingAssignment(null);
       }
@@ -329,7 +339,7 @@ export const DatenproduktVerwaltung = () => {
                               <button
                                 onClick={() => handleEditAssignment(zuordnung)}
                                 className="text-ard-blue-500 hover:text-ard-blue-700 p-1 rounded transition-colors"
-                                title="Stunden bearbeiten"
+                                title="Bearbeiten"
                               >
                                 ✏️
                               </button>
@@ -504,12 +514,12 @@ export const DatenproduktVerwaltung = () => {
         onClose={() => setNotesProdukt(null)}
       />
       {editingAssignment && (
-        <EditAssignmentHoursModal
+        <EditAssignmentModal
           assignment={editingAssignment}
-          onSave={handleUpdateAssignmentHours}
+          rollen={rollen}
+          onSave={handleUpdateAssignment}
           onClose={() => setEditingAssignment(null)}
           getPersonName={getPersonName}
-          getRolleName={getRolleName}
         />
       )}
       </div>
@@ -517,12 +527,27 @@ export const DatenproduktVerwaltung = () => {
   );
 };
 
-const EditAssignmentHoursModal = ({ assignment, onSave, onClose, getPersonName, getRolleName }) => {
+const EditAssignmentModal = ({ assignment, rollen, onSave, onClose, getPersonName }) => {
   const [stunden, setStunden] = useState(assignment.stunden || 0);
+  const [rolleId, setRolleId] = useState(assignment.rolleId || "");
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(stunden);
+    const updates = {};
+    
+    if (Number(stunden) !== (assignment.stunden || 0)) {
+      updates.stunden = stunden;
+    }
+    
+    if (rolleId !== assignment.rolleId) {
+      updates.rolleId = rolleId;
+    }
+    
+    if (Object.keys(updates).length > 0) {
+      onSave(updates);
+    } else {
+      onClose();
+    }
   };
 
   return (
@@ -534,13 +559,32 @@ const EditAssignmentHoursModal = ({ assignment, onSave, onClose, getPersonName, 
         className="bg-white rounded-lg shadow-xl w-full max-w-md p-6"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="text-xl font-semibold mb-4">Stunden bearbeiten</h3>
+        <h3 className="text-xl font-semibold mb-4">Zuordnung bearbeiten</h3>
         <div className="mb-4 p-3 bg-gray-50 rounded-md">
           <p className="text-sm">
-            <strong>{getPersonName(assignment.personId)}</strong> als <strong>{getRolleName(assignment.rolleId)}</strong>
+            <strong>{getPersonName(assignment.personId)}</strong>
           </p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="edit-rolle" className="block text-sm font-medium">
+              Rolle
+            </label>
+            <select
+              id="edit-rolle"
+              value={rolleId}
+              onChange={(e) => setRolleId(e.target.value)}
+              required
+              className="mt-1 block w-full p-2 border rounded-md"
+            >
+              <option value="">Rolle auswählen</option>
+              {rollen.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.name}
+                </option>
+              ))}
+            </select>
+          </div>
           <div>
             <label htmlFor="edit-stunden" className="block text-sm font-medium">
               Stunden pro Woche
@@ -554,8 +598,8 @@ const EditAssignmentHoursModal = ({ assignment, onSave, onClose, getPersonName, 
               value={stunden}
               onChange={(e) => setStunden(e.target.value)}
               className="mt-1 block w-full p-2 border rounded-md"
-              autoFocus
             />
+            <p className="mt-1 text-xs text-gray-500">Optional: Wochenstunden für diese Zuweisung</p>
           </div>
           <div className="flex justify-end space-x-3 pt-3">
             <button

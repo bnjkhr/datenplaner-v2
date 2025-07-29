@@ -444,6 +444,28 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
       }
     }
   );
+
+  const aktualisiereZuordnung = preventWriteActions(
+    async (zuordnungId, updates) => {
+      try {
+        const updateData = {};
+        if (updates.stunden !== undefined) {
+          updateData.stunden = Number(updates.stunden) || 0;
+        }
+        if (updates.rolleId !== undefined) {
+          updateData.rolleId = updates.rolleId;
+        }
+        
+        await updateDoc(doc(db, getCollectionPath("zuordnungen"), zuordnungId), updateData);
+        recordLastChange("Zuordnung aktualisiert");
+        return true;
+      } catch (e) {
+        console.error(e);
+        setError(`Update-Fehler Zuordnung: ${e.code}`);
+        return false;
+      }
+    }
+  );
   const fuegeRolleHinzu = preventWriteActions(async (rollenName) => {
     if (!rollenName?.trim()) return null;
     try {
@@ -564,6 +586,7 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
         weisePersonDatenproduktRolleZu,
         entfernePersonVonDatenproduktRolle,
         aktualisiereZuordnungStunden,
+        aktualisiereZuordnung,
         fuegeRolleHinzu,
         aktualisiereRolle,
         loescheRolle,
