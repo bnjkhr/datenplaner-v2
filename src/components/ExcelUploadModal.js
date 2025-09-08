@@ -123,7 +123,7 @@ alert("Fehler beim Parsen:\n" + err.message);
             
             <div className="bg-ard-blue-50 border border-ard-blue-200 p-4 rounded-md mb-6 text-sm text-ard-blue-800">
                 <h3 className="font-bold mb-2">Anleitung & Format</h3>
-                <p>Laden Sie eine Excel-Datei (.xlsx) hoch. Die erste Zeile muss die Spaltenüberschriften enthalten. Erforderliche Spalten:</p>
+                <p>Lade eine Excel-Datei (.xlsx) hoch. Die erste Zeile muss die Spaltenüberschriften enthalten. Erforderliche Spalten:</p>
                 <ul className="list-disc list-inside mt-2 font-mono text-xs">
                     <li>Name</li>
                     <li>Email</li>

@@ -122,7 +122,7 @@ export const RoleRequirementsInput = ({
           Benötigte Rollen auswählen
         </h3>
         <p className="text-sm text-gray-600 mb-4">
-          Klicken Sie auf die Rollen, die für das Team benötigt werden. Bereits
+          Klicke auf die Rollen, die für das Team benötigt werden. Bereits
           ausgewählte Rollen können durch erneutes Klicken entfernt werden.
         </p>
 
@@ -436,7 +436,7 @@ export const TeamRecommendationResults = ({
                 {rec.rolleName} ({rec.requiredHours}h/Woche)
               </h4>
               <span className="text-sm text-gray-600">
-                - Wählen Sie eine Person aus:
+                - Wähle eine Person aus:
               </span>
             </div>
             <div className="grid gap-3">

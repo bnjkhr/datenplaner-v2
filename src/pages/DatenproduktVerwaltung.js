@@ -683,7 +683,7 @@ export const DatenproduktVerwaltung = () => {
                   }
                 </h2>
                 <p className="text-gray-600 mt-1">
-                  Wählen Sie die benötigten Rollen und Stunden aus, um Teamvorschläge zu erhalten
+                  Wähle die benötigten Rollen und Stunden aus, um Teamvorschläge zu erhalten
                 </p>
               </div>
               <button
@@ -744,7 +744,7 @@ export const DatenproduktVerwaltung = () => {
               Neues Team erstellen
             </h3>
             <p className="text-gray-600 mb-4">
-              Geben Sie einen Namen für das neue Datenprodukt ein. Das Team wird automatisch zugewiesen.
+              Gib einen Namen für das neue Datenprodukt ein. Das Team wird automatisch zugewiesen.
             </p>
             <div className="mb-6">
               <label htmlFor="team-name" className="block text-sm font-medium text-gray-700 mb-2">
