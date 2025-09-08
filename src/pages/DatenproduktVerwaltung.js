@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import { useData } from "../context/DataProvider";
 import { ConfirmModal } from "../components/ui/ConfirmModal";
 import { NotesModal } from "../components/ui/NotesModal";
+import { RoleRequirementsInput, TeamRecommendationResults } from "../components/TeamRecommendation";
+import { generateOptimalTeam } from "../utils/teamRecommendation";
 
 export const DatenproduktVerwaltung = () => {
   const {
@@ -40,6 +42,12 @@ export const DatenproduktVerwaltung = () => {
   const [notesProdukt, setNotesProdukt] = useState(null);
   const [neueRolleName, setNeueRolleName] = useState("");
   const [copySuccess, setCopySuccess] = useState(null);
+  const [showTeamPlanner, setShowTeamPlanner] = useState(false);
+  const [teamPlanerProdukt, setTeamPlanerProdukt] = useState(null);
+  const [roleRequirements, setRoleRequirements] = useState([]);
+  const [recommendedTeam, setRecommendedTeam] = useState(null);
+  const [showTeamSaveDialog, setShowTeamSaveDialog] = useState(false);
+  const [newTeamName, setNewTeamName] = useState("");
 
   useEffect(() => {
     if (editingProdukt) {
@@ -193,6 +201,97 @@ export const DatenproduktVerwaltung = () => {
     }
   };
 
+  const handleOpenTeamPlanner = (datenprodukt = null) => {
+    setShowTeamPlanner(true);
+    setTeamPlanerProdukt(datenprodukt);
+    setRoleRequirements([]);
+    setRecommendedTeam(null);
+  };
+
+  const handleCloseTeamPlanner = () => {
+    setShowTeamPlanner(false);
+    setTeamPlanerProdukt(null);
+    setRoleRequirements([]);
+    setRecommendedTeam(null);
+  };
+
+  const handleRoleRequirementsChange = (requirements) => {
+    setRoleRequirements(requirements);
+  };
+
+  const handleTeamChange = (team) => {
+    setRecommendedTeam(team);
+  };
+
+  const handleCreateTeam = () => {
+    // If no manual team selection was made, use the optimal team from recommendations
+    let teamToUse = recommendedTeam;
+    
+    if (!teamToUse && roleRequirements.length > 0) {
+      // Generate the optimal team automatically
+      const optimalTeam = generateOptimalTeam(
+        roleRequirements,
+        personen,
+        zuordnungen,
+        [],
+        rollen
+      );
+      teamToUse = optimalTeam;
+    }
+    
+    if (!teamToUse || !teamToUse.team || teamToUse.team.length === 0) {
+      return;
+    }
+    
+    // Store the team to use for creation
+    setRecommendedTeam(teamToUse);
+    setShowTeamPlanner(false); // Close the team planner modal first
+    setShowTeamSaveDialog(true);
+  };
+
+  const handleSaveNewTeam = async () => {
+    if (!newTeamName.trim() || !recommendedTeam) {
+      return;
+    }
+
+    try {
+      // Create new data product
+      const newProductId = await erstelleDatenprodukt({
+        name: newTeamName.trim(),
+        beschreibung: "Automatisch erstellt durch Team-Planung",
+        status: "In Planung"
+      });
+
+      if (newProductId) {
+        // Assign team members to the new data product
+        for (const member of recommendedTeam.team) {
+          await weisePersonDatenproduktRolleZu(
+            member.personId,
+            newProductId,
+            member.rolleId,
+            member.hours
+          );
+        }
+
+        // Close modals and reset state
+        setShowTeamSaveDialog(false);
+        setShowTeamPlanner(false);
+        setNewTeamName("");
+        setRoleRequirements([]);
+        setRecommendedTeam(null);
+        setTeamPlanerProdukt(null);
+      }
+    } catch (error) {
+      console.error('Error creating team:', error);
+    }
+  };
+
+  const handleCancelTeamSave = () => {
+    setShowTeamSaveDialog(false);
+    setNewTeamName("");
+    setShowTeamPlanner(true); // Reopen the team planner modal
+  };
+
   const sortedPersonen = [...personen].sort((a, b) =>
     a.name.localeCompare(b.name, "de")
   );
@@ -215,13 +314,22 @@ export const DatenproduktVerwaltung = () => {
             </h1>
             <p className="text-gray-600">Verwalte deine Datenprodukte und Teams</p>
           </div>
-          <button
-            onClick={() => handleOpenProduktForm()}
-            className="bg-gradient-to-r from-ard-blue-600 to-ard-blue-700 hover:from-ard-blue-700 hover:to-ard-blue-800 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2"
-          >
-            <span className="text-lg">+</span>
-            Neues Datenprodukt
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={() => handleOpenTeamPlanner(null)}
+              className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2"
+            >
+              <span className="text-lg">🎯</span>
+              Team planen
+            </button>
+            <button
+              onClick={() => handleOpenProduktForm()}
+              className="bg-gradient-to-r from-ard-blue-600 to-ard-blue-700 hover:from-ard-blue-700 hover:to-ard-blue-800 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2"
+            >
+              <span className="text-lg">+</span>
+              Neues Datenprodukt
+            </button>
+          </div>
         </div>
       {showProduktForm && (
         <div
@@ -556,6 +664,137 @@ export const DatenproduktVerwaltung = () => {
         />
       )}
       
+      {/* Team Planner Modal */}
+      {showTeamPlanner && (
+        <div
+          className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-50 p-4"
+          onClick={handleCloseTeamPlanner}
+        >
+          <div
+            className="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-y-auto p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  {teamPlanerProdukt 
+                    ? `Team planen für "${teamPlanerProdukt.name}"`
+                    : "Neues Team planen"
+                  }
+                </h2>
+                <p className="text-gray-600 mt-1">
+                  Wählen Sie die benötigten Rollen und Stunden aus, um Teamvorschläge zu erhalten
+                </p>
+              </div>
+              <button
+                onClick={handleCloseTeamPlanner}
+                className="text-gray-400 hover:text-gray-600 text-2xl p-2 rounded-full hover:bg-gray-100 transition-colors"
+                title="Schließen"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="space-y-8">
+              <RoleRequirementsInput
+                onRequirementsChange={handleRoleRequirementsChange}
+                initialRequirements={roleRequirements}
+              />
+
+              {roleRequirements.length > 0 && (
+                <TeamRecommendationResults
+                  roleRequirements={roleRequirements}
+                  onTeamChange={handleTeamChange}
+                />
+              )}
+
+              {roleRequirements.length > 0 && (
+                <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
+                  <button
+                    onClick={handleCloseTeamPlanner}
+                    className="px-6 py-3 text-gray-600 hover:text-gray-800 font-medium rounded-lg transition-colors"
+                  >
+                    Abbrechen
+                  </button>
+                  <button
+                    onClick={handleCreateTeam}
+                    className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2"
+                  >
+                    <span className="text-lg">✨</span>
+                    Team anlegen
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Team Save Dialog */}
+      {showTeamSaveDialog && (
+        <div
+          className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-60 p-4"
+          onClick={handleCancelTeamSave}
+        >
+          <div
+            className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-xl font-semibold text-gray-900 mb-4">
+              Neues Team erstellen
+            </h3>
+            <p className="text-gray-600 mb-4">
+              Geben Sie einen Namen für das neue Datenprodukt ein. Das Team wird automatisch zugewiesen.
+            </p>
+            <div className="mb-6">
+              <label htmlFor="team-name" className="block text-sm font-medium text-gray-700 mb-2">
+                Datenprodukt-Name
+              </label>
+              <input
+                id="team-name"
+                type="text"
+                value={newTeamName}
+                onChange={(e) => setNewTeamName(e.target.value)}
+                placeholder="z.B. Marketing Analytics Team"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                autoFocus
+                required
+              />
+            </div>
+            
+            {recommendedTeam && (
+              <div className="mb-6 bg-gray-50 p-4 rounded-lg">
+                <h4 className="font-medium text-gray-800 mb-2">Team-Übersicht</h4>
+                <div className="text-sm text-gray-600 space-y-1">
+                  {recommendedTeam.team.map((member, index) => (
+                    <div key={index} className="flex justify-between">
+                      <span>{member.personName}</span>
+                      <span>{member.rolleName} ({member.hours}h)</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={handleCancelTeamSave}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium rounded-lg transition-colors"
+              >
+                Abbrechen
+              </button>
+              <button
+                onClick={handleSaveNewTeam}
+                disabled={!newTeamName.trim()}
+                className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold py-2 px-6 rounded-lg shadow-lg hover:shadow-xl disabled:shadow-none transition-all duration-200 disabled:cursor-not-allowed"
+              >
+                Team erstellen
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Success Overlay */}
       {copySuccess && (
         <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
