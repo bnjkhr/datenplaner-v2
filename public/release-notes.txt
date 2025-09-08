@@ -31,3 +31,7 @@ Version 2.2.0 - 14.07.2025
 * ARD Logo
 * Blau an ARD-Logo angepasst
 * Datenprodukte übersichtlicher dargestellt
+
+Version 2.3.0 - 08.09.2025
+--------------------------
+* Bei den Datenprodukte gibt es jetzt einen Button, der die E-Mail-Adressen aller Team-Mitglieder Outlook-konform kopiert. 
