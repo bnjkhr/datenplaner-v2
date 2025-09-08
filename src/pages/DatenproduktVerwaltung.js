@@ -39,6 +39,7 @@ export const DatenproduktVerwaltung = () => {
   const [produktToDelete, setProduktToDelete] = useState(null);
   const [notesProdukt, setNotesProdukt] = useState(null);
   const [neueRolleName, setNeueRolleName] = useState("");
+  const [copySuccess, setCopySuccess] = useState(null);
 
   useEffect(() => {
     if (editingProdukt) {
@@ -167,6 +168,30 @@ export const DatenproduktVerwaltung = () => {
     personen.find((p) => p.id === personId)?.name || "...";
   const getRolleName = (rolleId) =>
     rollen.find((r) => r.id === rolleId)?.name || "...";
+
+  const getPersonEmail = (personId) =>
+    personen.find((p) => p.id === personId)?.email || "";
+
+  const copyTeamEmailsToClipboard = async (datenprodukt) => {
+    const teamZuordnungen = zuordnungen.filter((z) => z.datenproduktId === datenprodukt.id);
+    const emails = teamZuordnungen
+      .map((z) => {
+        const person = personen.find((p) => p.id === z.personId);
+        return person ? `${person.name} <${person.email}>` : null;
+      })
+      .filter(Boolean)
+      .join('; ');
+    
+    if (emails) {
+      try {
+        await navigator.clipboard.writeText(emails);
+        setCopySuccess(datenprodukt.id);
+        setTimeout(() => setCopySuccess(null), 2000);
+      } catch (err) {
+        console.error('Failed to copy emails:', err);
+      }
+    }
+  };
 
   const sortedPersonen = [...personen].sort((a, b) =>
     a.name.localeCompare(b.name, "de")
@@ -363,6 +388,14 @@ export const DatenproduktVerwaltung = () => {
             </div>
               <div className="mt-auto pt-4 border-t border-gray-100 flex flex-wrap gap-2 justify-end">
                 <button
+                  onClick={() => copyTeamEmailsToClipboard(dp)}
+                  className="px-3 py-1.5 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium rounded-lg transition-all duration-200 relative"
+                  title="E-Mail-Adressen des Teams kopieren"
+                  disabled={zuordnungen.filter((z) => z.datenproduktId === dp.id).length === 0}
+                >
+                  📧
+                </button>
+                <button
                   onClick={() => {
                     setSelectedProduktForAssignment(dp);
                     setAssignmentError("");
@@ -521,6 +554,18 @@ export const DatenproduktVerwaltung = () => {
           onClose={() => setEditingAssignment(null)}
           getPersonName={getPersonName}
         />
+      )}
+      
+      {/* Success Overlay */}
+      {copySuccess && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+          <div className="bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg animate-pulse">
+            <div className="flex items-center gap-2">
+              <span className="text-lg">✓</span>
+              <span>Adressen in die Zwischenablage kopiert</span>
+            </div>
+          </div>
+        </div>
       )}
       </div>
     </div>
