@@ -202,6 +202,8 @@ const PersonEintrag = ({
     vacations,
   } = useData();
 
+  const [isExpanded, setIsExpanded] = useState(false);
+
   // Verbesserte Abwesenheits-Logik mit mehreren Matching-Strategien
   const getPersonVacations = () => {
     const today = new Date();
@@ -274,200 +276,256 @@ const PersonEintrag = ({
     })
     .filter((a) => a.produktName !== "...");
 
+  // Kreis-Indikator für kompakte Ansicht
+  const getKreisIndicator = () => {
+    if (!kategorien || kategorien.length === 0) return null;
+    return kategorien.map(k => k.charAt(0)).join('');
+  };
+
   return (
     <div
-      className={`bg-white shadow-sm hover:shadow-lg transition-all duration-300 rounded-2xl p-6 flex flex-col justify-between border border-gray-100 hover:border-gray-200 ${
-        isCurrentlyAbsent() ? "bg-gradient-to-br from-red-50 to-red-100/30 border-red-200" : "hover:bg-gray-50/30"
+      className={`bg-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg border border-gray-200 hover:border-gray-300 overflow-hidden ${
+        isCurrentlyAbsent() ? "bg-gradient-to-br from-red-50 to-red-100/30 border-red-200" : ""
       }`}
     >
-      <div>
-        <div className="flex justify-between items-start">
-          <div className="flex items-center gap-2">
-            <h3 className="text-xl font-semibold text-gray-900 break-words">
-              {name}
-            </h3>
-            {isCurrentlyAbsent() && (
-              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-red-500 text-white shadow-sm">
-                Abwesend
-              </span>
+      {/* Kompakte Ansicht */}
+      <div 
+        className="p-4 cursor-pointer flex items-center justify-between"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          {/* Kreis-Indikator */}
+          {getKreisIndicator() && (
+            <div className="flex-shrink-0 w-8 h-8 bg-purple-100 text-purple-700 rounded-full flex items-center justify-center text-xs font-semibold">
+              {getKreisIndicator()}
+            </div>
+          )}
+          
+          {/* Name und Status */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold text-gray-900 truncate">{name}</h3>
+              {isCurrentlyAbsent() && (
+                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-red-500 text-white">
+                  Abwesend
+                </span>
+              )}
+            </div>
+            
+            {/* Arbeitet an - kompakt */}
+            {personAssignments.length > 0 && (
+              <div className="text-xs text-gray-500 truncate mt-1">
+                Arbeitet an: {personAssignments.slice(0, 2).map(a => a.produktName).join(', ')}
+                {personAssignments.length > 2 && ` +${personAssignments.length - 2}`}
+              </div>
             )}
           </div>
+        </div>
+        
+        {/* Teams Button - immer sichtbar */}
+        <div className="flex items-center gap-2">
           {msTeamsLink && (
             <a
               href={msTeamsLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center w-8 h-8 bg-ard-blue-100 hover:bg-ard-blue-200 rounded-lg transition-colors"
+              className="inline-flex items-center justify-center w-7 h-7 bg-ard-blue-100 hover:bg-ard-blue-200 rounded-md transition-colors"
               title="Chat in MS Teams starten"
+              onClick={(e) => e.stopPropagation()}
             >
-              <span className="text-lg">💬</span>
+              <span className="text-sm">💬</span>
             </a>
           )}
+          
+          {/* Expand-Indikator */}
+          <div className={`text-gray-400 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
+          </div>
         </div>
+      </div>
 
-        {email && (
-          <div className="mb-4">
-            <a
-              href={`mailto:${email}`}
-              className="text-sm text-gray-600 hover:text-ard-blue-600 break-all transition-colors"
-            >
-              {email}
-            </a>
-          </div>
-        )}
-
-        {/* Wochenstunden anzeigen */}
-        {wochenstunden && (
-          <div className="mb-4">
-            <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-ard-blue-50 to-ard-blue-100 text-ard-blue-700 border border-ard-blue-200">
-              ⏰ {wochenstunden}h/Woche
-            </span>
-          </div>
-        )}
-
-        {/* M13 und Kategorien anzeigen */}
-        {(isM13 || (kategorien && kategorien.length > 0)) && (
-          <div className="mb-4">
-            <div className="flex flex-wrap gap-2">
-              {isM13 && (
-                <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-green-50 to-green-100 text-green-700 border border-green-200">
-                  ✓ M13
-                </span>
-              )}
-              {kategorien && kategorien.map((kategorie) => (
-                <button
-                  key={kategorie}
-                  onClick={() => onSkillClick(kategorie)}
-                  className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-purple-50 to-purple-100 text-purple-700 border border-purple-200 hover:from-purple-100 hover:to-purple-200 hover:scale-105 transition-all duration-200 cursor-pointer"
-                  title={`Nach Kreis "${kategorie}" filtern`}
-                >
-                  {kategorie}
-                </button>
-              ))}
+      {/* Erweiterte Ansicht */}
+      {isExpanded && (
+        <div className="px-4 pb-4 border-t border-gray-100">
+          {email && (
+            <div className="mb-3 mt-3">
+              <a
+                href={`mailto:${email}`}
+                className="text-sm text-gray-600 hover:text-ard-blue-600 break-all transition-colors"
+              >
+                {email}
+              </a>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Auslastungsanzeige */}
-        <WorkloadIndicator person={person} zuordnungen={zuordnungen} />
-
-        {/* Abwesenheiten anzeigen */}
-        {upcomingVacations.length > 0 && (
-          <div className="mb-5">
-            <p className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-              <span>🏖️</span>
-              Anstehende Abwesenheiten
-            </p>
-            <div className="space-y-2">
-              {upcomingVacations.slice(0, 3).map((vacation, index) => {
-                const start = new Date(vacation.start);
-                const end = new Date(vacation.end);
-                const isCurrentVacation =
-                  new Date() >= start && new Date() <= end;
-
-                return (
-                  <div
-                    key={index}
-                    className={`text-xs p-3 rounded-lg border ${
-                      isCurrentVacation
-                        ? "bg-gradient-to-r from-red-50 to-red-100 border-red-200 text-red-800"
-                        : "bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-200 text-amber-800"
-                    }`}
-                  >
-                    <div className="font-semibold mb-1">
-                      {vacation.summary || "Abwesenheit"}
-                    </div>
-                    <div className="text-xs opacity-75">
-                      {formatDate(vacation.start)} - {formatDate(vacation.end)}
-                    </div>
-                  </div>
-                );
-              })}
-              {upcomingVacations.length > 3 && (
-                <div className="text-xs text-gray-500 italic mt-2 px-2">
-                  +{upcomingVacations.length - 3} weitere Abwesenheiten
-                </div>
-              )}
+          {/* Wochenstunden anzeigen */}
+          {wochenstunden && (
+            <div className="mb-3">
+              <span className="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-gradient-to-r from-ard-blue-50 to-ard-blue-100 text-ard-blue-700 border border-ard-blue-200">
+                ⏰ {wochenstunden}h/Woche
+              </span>
             </div>
-          </div>
-        )}
+          )}
 
-        {skillIds && skillIds.length > 0 && (
-          <div className="mb-5">
-            <p className="text-sm font-semibold text-gray-700 mb-2">Skills</p>
-            <div className="flex flex-wrap gap-2">
-              {skillIds.map((id) => {
-                const skill = allSkills.find((s) => s.id === id);
-                if (!skill) return null;
-                return (
+          {/* M13 und Kategorien anzeigen */}
+          {(isM13 || (kategorien && kategorien.length > 0)) && (
+            <div className="mb-3">
+              <div className="flex flex-wrap gap-2">
+                {isM13 && (
+                  <span className="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-gradient-to-r from-green-50 to-green-100 text-green-700 border border-green-200">
+                    ✓ M13
+                  </span>
+                )}
+                {kategorien && kategorien.map((kategorie) => (
                   <button
-                    key={id}
-                    onClick={() => onSkillClick(skill.name)}
-                    className="px-3 py-1.5 rounded-lg text-xs font-semibold hover:scale-105 transition-all duration-200 shadow-sm border"
-                    style={{ 
-                      backgroundColor: skill.color, 
-                      color: "#1f2937",
-                      borderColor: skill.color
+                    key={kategorie}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSkillClick(kategorie);
                     }}
-                    title={`Nach Skill "${skill.name}" filtern`}
+                    className="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-gradient-to-r from-purple-50 to-purple-100 text-purple-700 border border-purple-200 hover:from-purple-100 hover:to-purple-200 hover:scale-105 transition-all duration-200 cursor-pointer"
+                    title={`Nach Kreis "${kategorie}" filtern`}
                   >
-                    {skill.name}
+                    {kategorie}
                   </button>
-                );
-              })}
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {personAssignments.length > 0 && (
-          <div className="mb-5">
-            <p className="text-sm font-semibold text-gray-700 mb-3">
-              Arbeitet an
-            </p>
-            <ul className="list-none space-y-2">
-              {personAssignments.map((a) => {
-                const assignment = zuordnungen.find(z => z.id === a.assignmentId);
-                const stunden = assignment?.stunden || 0;
-                return (
-                  <li
-                    key={a.assignmentId}
-                    className="text-xs bg-gradient-to-r from-indigo-50 to-ard-blue-50 p-3 rounded-lg border border-indigo-100 hover:border-indigo-200 transition-colors"
-                  >
-                    <div className="flex justify-between items-center">
-                      <div className="flex flex-col">
-                        <span className="font-semibold text-gray-900">{a.produktName}</span>
-                        <span className="text-gray-600">als {a.rolleName}</span>
+          {/* Auslastungsanzeige */}
+          <WorkloadIndicator person={person} zuordnungen={zuordnungen} />
+
+          {/* Abwesenheiten anzeigen */}
+          {upcomingVacations.length > 0 && (
+            <div className="mb-4">
+              <p className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <span>🏖️</span>
+                Anstehende Abwesenheiten
+              </p>
+              <div className="space-y-2">
+                {upcomingVacations.slice(0, 3).map((vacation, index) => {
+                  const start = new Date(vacation.start);
+                  const end = new Date(vacation.end);
+                  const isCurrentVacation =
+                    new Date() >= start && new Date() <= end;
+
+                  return (
+                    <div
+                      key={index}
+                      className={`text-xs p-2 rounded border ${
+                        isCurrentVacation
+                          ? "bg-gradient-to-r from-red-50 to-red-100 border-red-200 text-red-800"
+                          : "bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-200 text-amber-800"
+                      }`}
+                    >
+                      <div className="font-semibold mb-1">
+                        {vacation.summary || "Abwesenheit"}
                       </div>
-                      {stunden > 0 && (
-                        <div className="bg-ard-blue-500 text-white px-2 py-1 rounded-md font-semibold">
-                          {stunden}h
-                        </div>
-                      )}
+                      <div className="text-xs opacity-75">
+                        {formatDate(vacation.start)} - {formatDate(vacation.end)}
+                      </div>
                     </div>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        )}
-      </div>
+                  );
+                })}
+                {upcomingVacations.length > 3 && (
+                  <div className="text-xs text-gray-500 italic mt-2">
+                    +{upcomingVacations.length - 3} weitere Abwesenheiten
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
-      <div className="mt-auto pt-4 flex justify-end space-x-2 border-t border-gray-100">
-        <button
-          onClick={() => onEdit(person)}
-          className="px-3 py-1.5 text-sm text-ard-blue-600 hover:text-ard-blue-700 hover:bg-ard-blue-50 font-medium rounded-lg transition-all duration-200"
-          title="Bearbeiten"
-        >
-          ✏️
-        </button>
-        <button
-          onClick={() => onDeleteInitiation(person)}
-          className="px-3 py-1.5 text-sm text-red-500 hover:text-red-600 hover:bg-red-50 font-medium rounded-lg transition-all duration-200"
-          title="Löschen"
-        >
-          🗑️
-        </button>
-      </div>
+          {skillIds && skillIds.length > 0 && (
+            <div className="mb-4">
+              <p className="text-sm font-semibold text-gray-700 mb-2">Skills</p>
+              <div className="flex flex-wrap gap-1">
+                {skillIds.map((id) => {
+                  const skill = allSkills.find((s) => s.id === id);
+                  if (!skill) return null;
+                  return (
+                    <button
+                      key={id}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSkillClick(skill.name);
+                      }}
+                      className="px-2 py-1 rounded text-xs font-semibold hover:scale-105 transition-all duration-200 shadow-sm border"
+                      style={{ 
+                        backgroundColor: skill.color, 
+                        color: "#1f2937",
+                        borderColor: skill.color
+                      }}
+                      title={`Nach Skill "${skill.name}" filtern`}
+                    >
+                      {skill.name}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {personAssignments.length > 0 && (
+            <div className="mb-4">
+              <p className="text-sm font-semibold text-gray-700 mb-2">
+                Arbeitet an
+              </p>
+              <ul className="list-none space-y-1">
+                {personAssignments.map((a) => {
+                  const assignment = zuordnungen.find(z => z.id === a.assignmentId);
+                  const stunden = assignment?.stunden || 0;
+                  return (
+                    <li
+                      key={a.assignmentId}
+                      className="text-xs bg-gradient-to-r from-indigo-50 to-ard-blue-50 p-2 rounded border border-indigo-100"
+                    >
+                      <div className="flex justify-between items-center">
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-gray-900">{a.produktName}</span>
+                          <span className="text-gray-600">als {a.rolleName}</span>
+                        </div>
+                        {stunden > 0 && (
+                          <div className="bg-ard-blue-500 text-white px-1.5 py-0.5 rounded text-xs font-semibold">
+                            {stunden}h
+                          </div>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex justify-end space-x-2 pt-2 border-t border-gray-100">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit(person);
+              }}
+              className="px-2 py-1 text-sm text-ard-blue-600 hover:text-ard-blue-700 hover:bg-ard-blue-50 font-medium rounded transition-all duration-200"
+              title="Bearbeiten"
+            >
+              ✏️
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDeleteInitiation(person);
+              }}
+              className="px-2 py-1 text-sm text-red-500 hover:text-red-600 hover:bg-red-50 font-medium rounded transition-all duration-200"
+              title="Löschen"
+            >
+              🗑️
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -704,6 +762,7 @@ const PersonenListe = ({
   onSkillClick,
 }) => {
   const { loading, error } = useData();
+  
   if (loading)
     return (
       <div className="flex justify-center py-10">
@@ -716,16 +775,58 @@ const PersonenListe = ({
     return (
       <p className="text-center text-gray-500 py-8">Keine Personen gefunden.</p>
     );
+
+  // Gruppiere Personen nach Kreisen
+  const groupedPersonen = personenToDisplay.reduce((groups, person) => {
+    const kreise = person.kategorien && person.kategorien.length > 0 
+      ? person.kategorien 
+      : ['Ohne Kreis'];
+    
+    // Person kann in mehreren Kreisen sein
+    kreise.forEach(kreis => {
+      if (!groups[kreis]) {
+        groups[kreis] = [];
+      }
+      groups[kreis].push(person);
+    });
+    
+    return groups;
+  }, {});
+
+  // Sortiere Gruppen: Erst die bekannten Kreise, dann "Ohne Kreis"
+  const sortedKreise = Object.keys(groupedPersonen).sort((a, b) => {
+    const order = ['Plattform', 'Datenprodukt', 'Governance', 'Ohne Kreis'];
+    const indexA = order.indexOf(a) !== -1 ? order.indexOf(a) : 999;
+    const indexB = order.indexOf(b) !== -1 ? order.indexOf(b) : 999;
+    return indexA - indexB;
+  });
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-      {personenToDisplay.map((person) => (
-        <PersonEintrag
-          key={person.id}
-          person={person}
-          onEdit={onEditPerson}
-          onDeleteInitiation={onDeleteInitiation}
-          onSkillClick={onSkillClick}
-        />
+    <div className="space-y-8">
+      {sortedKreise.map((kreis) => (
+        <div key={kreis} className="space-y-4">
+          {/* Kreis-Header */}
+          <div className="flex items-center gap-3">
+            <h2 className="text-xl font-bold text-gray-900">{kreis}</h2>
+            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700">
+              {groupedPersonen[kreis].length} Person{groupedPersonen[kreis].length !== 1 ? 'en' : ''}
+            </span>
+            <div className="flex-1 h-px bg-gray-200"></div>
+          </div>
+          
+          {/* Personen-Grid für diesen Kreis */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+            {groupedPersonen[kreis].map((person) => (
+              <PersonEintrag
+                key={`${kreis}-${person.id}`}
+                person={person}
+                onEdit={onEditPerson}
+                onDeleteInitiation={onDeleteInitiation}
+                onSkillClick={onSkillClick}
+              />
+            ))}
+          </div>
+        </div>
       ))}
     </div>
   );

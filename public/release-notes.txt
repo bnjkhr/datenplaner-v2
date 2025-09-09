@@ -1,37 +1,8 @@
-Version 2.0.0 - 10.07.2025
---------------------------
-* Stunden pro Woche in der Datenproduktverwaltung hinzugefügt
-* Stunden pro Woche in der Personenverwaltung hinzugefügt
-* Stunden pro Woche in der Zuordnung hinzugefügt
-* Stunden pro Woche in der Personverwaltung editierbar
-* globale Suche
-* moderne UI (huge changes!)
-* Link zur Notion-Seite für Fehler und Feature-Anfragen im Footer
-* aktuelle Abwesenheiten ganz oben
-
-
-Version 2.1.0 - 11.07.2025
---------------------------
-* Auswertungen: Stundenauslastung
-* Auswertungen: Skill-Analyse
-* Auswertungen: Tabellarische Übersicht der Auslastung
-* Auswertungen: Grafische Auswertungen  
-* Auswertungen: Sortierbar
-* Excel-Export: Alle neuen Werte eingefügt.
-* Read-Only Views für Confluence-Einbindung
-
-Version 2.2.0 - 14.07.2025
---------------------------
-* Confluence-View: Nur M13 Mitarbeiter
-* Confluence-View: Kategorien-Gruppierung
-* Confluence-View: Skills entfernt
-* Confluence-View: Angepasste Statistiken
-* Confluence-View: Titel aktualisiert
-* Kreise eingeführt
-* ARD Logo
-* Blau an ARD-Logo angepasst
-* Datenprodukte übersichtlicher dargestellt
-
 Version 2.3.0 - 08.09.2025
 --------------------------
 * Bei den Datenprodukte gibt es jetzt einen Button, der die E-Mail-Adressen aller Team-Mitglieder Outlook-konform kopiert. 
+
+Version 2.3.1 - 09.09.2025
+--------------------------
+* Kompaktere Darstellung von Personen und Datenproduktverwaltung
+* Automatisches Team-Erstellen über Rollen und Verfügbarkeiten 
