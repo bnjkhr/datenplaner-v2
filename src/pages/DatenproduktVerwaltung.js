@@ -47,6 +47,7 @@ export const DatenproduktVerwaltung = () => {
   const [recommendedTeam, setRecommendedTeam] = useState(null);
   const [showTeamSaveDialog, setShowTeamSaveDialog] = useState(false);
   const [newTeamName, setNewTeamName] = useState("");
+  const [selectedProduktForDetails, setSelectedProduktForDetails] = useState(null);
 
   useEffect(() => {
     if (editingProdukt) {
@@ -91,10 +92,16 @@ export const DatenproduktVerwaltung = () => {
     setEditingProdukt(produkt);
     setShowProduktForm(true);
   };
+
+  const handleShowDetails = (datenprodukt) => {
+    setSelectedProduktForDetails(datenprodukt);
+  };
+
   const handleDeleteDatenproduktInitiation = (produkt) => {
     setProduktToDelete(produkt);
     setShowDeleteModal(true);
   };
+
   const confirmDeleteDatenprodukt = async () => {
     if (produktToDelete) {
       await loescheDatenprodukt(produktToDelete.id);
@@ -153,7 +160,6 @@ export const DatenproduktVerwaltung = () => {
     setEditingAssignment(assignment);
   };
 
-
   const handleUpdateAssignment = async (updates) => {
     if (editingAssignment) {
       const success = await aktualisiereZuordnung(editingAssignment.id, updates);
@@ -167,7 +173,8 @@ export const DatenproduktVerwaltung = () => {
     personen.find((p) => p.id === personId)?.name || "...";
   const getRolleName = (rolleId) =>
     rollen.find((r) => r.id === rolleId)?.name || "...";
-
+  const getRoleColor = (rolleId) =>
+    rollen.find((r) => r.id === rolleId)?.color || "#6B7280";
 
   const copyTeamEmailsToClipboard = async (datenprodukt) => {
     const teamZuordnungen = zuordnungen.filter((z) => z.datenproduktId === datenprodukt.id);
@@ -320,407 +327,433 @@ export const DatenproduktVerwaltung = () => {
             </button>
           </div>
         </div>
-      {showProduktForm && (
-        <div
-          className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-40 p-4"
-          onClick={() => {
-            setShowProduktForm(false);
-            setEditingProdukt(null);
-          }}
-        >
+
+        {showProduktForm && (
           <div
-            className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-40 p-4"
+            onClick={() => {
+              setShowProduktForm(false);
+              setEditingProdukt(null);
+            }}
           >
-            <form onSubmit={handleProduktFormSubmit} className="space-y-4">
-              <h2 className="text-2xl font-semibold text-gray-700 mb-4">
-                {editingProdukt
-                  ? "Datenprodukt bearbeiten"
-                  : "Neues Datenprodukt erstellen"}
-              </h2>
-              {formError && (
-                <p className="text-red-500 text-sm mb-3">{formError}</p>
-              )}
-              <div>
-                <label htmlFor="dp-form-name" className="block text-sm">
-                  Name
-                </label>
-                <input
-                  id="dp-form-name"
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                  className="mt-1 block w-full border rounded-md p-2"
-                />
-              </div>
-              <div>
-                <label htmlFor="dp-form-beschreibung" className="block text-sm">
-                  Beschreibung
-                </label>
-                <textarea
-                  id="dp-form-beschreibung"
-                  value={beschreibung}
-                  onChange={(e) => setBeschreibung(e.target.value)}
-                  rows="3"
-                  className="mt-1 block w-full border rounded-md p-2"
-                ></textarea>
-              </div>
-              <div>
-                <label htmlFor="dp-form-status" className="block text-sm">
-                  Status
-                </label>
-                <select
-                  id="dp-form-status"
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value)}
-                  className="mt-1 block w-full border rounded-md p-2"
-                >
-                  {statusOptionen.map((opt) => (
-                    <option key={opt} value={opt}>
-                      {opt}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex justify-end space-x-3 pt-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowProduktForm(false);
-                    setEditingProdukt(null);
-                  }}
-                  className="px-4 py-2 border rounded-md"
-                >
-                  Abbrechen
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-md"
-                >
-                  {editingProdukt ? "Speichern" : "Erstellen"}
-                </button>
-              </div>
-            </form>
+            <div
+              className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <form onSubmit={handleProduktFormSubmit} className="space-y-4">
+                <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+                  {editingProdukt
+                    ? "Datenprodukt bearbeiten"
+                    : "Neues Datenprodukt erstellen"}
+                </h2>
+                {formError && (
+                  <p className="text-red-500 text-sm mb-3">{formError}</p>
+                )}
+                <div>
+                  <label htmlFor="dp-form-name" className="block text-sm">
+                    Name
+                  </label>
+                  <input
+                    id="dp-form-name"
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    className="mt-1 block w-full border rounded-md p-2"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="dp-form-beschreibung" className="block text-sm">
+                    Beschreibung
+                  </label>
+                  <textarea
+                    id="dp-form-beschreibung"
+                    value={beschreibung}
+                    onChange={(e) => setBeschreibung(e.target.value)}
+                    rows="3"
+                    className="mt-1 block w-full border rounded-md p-2"
+                  ></textarea>
+                </div>
+                <div>
+                  <label htmlFor="dp-form-status" className="block text-sm">
+                    Status
+                  </label>
+                  <select
+                    id="dp-form-status"
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                    className="mt-1 block w-full border rounded-md p-2"
+                  >
+                    {statusOptionen.map((opt) => (
+                      <option key={opt} value={opt}>
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex justify-end space-x-3 pt-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowProduktForm(false);
+                      setEditingProdukt(null);
+                    }}
+                    className="px-4 py-2 border rounded-md"
+                  >
+                    Abbrechen
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-indigo-600 text-white rounded-md"
+                  >
+                    {editingProdukt ? "Speichern" : "Erstellen"}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
-      )}
-      <ConfirmModal
-        isOpen={showDeleteModal}
-        title="Datenprodukt löschen"
-        message={`Möchten Sie "${produktToDelete?.name}" wirklich löschen?`}
-        onConfirm={confirmDeleteDatenprodukt}
-        onCancel={() => setShowDeleteModal(false)}
-      />
-      {datenprodukte.length === 0 && !loading && (
-        <p className="text-center text-gray-500 py-8">
-          Noch keine Datenprodukte erfasst.
-        </p>
-      )}
+        )}
+
+        <ConfirmModal
+          isOpen={showDeleteModal}
+          title="Datenprodukt löschen"
+          message={`Möchten Sie "${produktToDelete?.name}" wirklich löschen?`}
+          onConfirm={confirmDeleteDatenprodukt}
+          onCancel={() => setShowDeleteModal(false)}
+        />
+
+        {datenprodukte.length === 0 && !loading && (
+          <p className="text-center text-gray-500 py-8">
+            Noch keine Datenprodukte erfasst.
+          </p>
+        )}
+
         <DatenproduktListe
           datenprodukte={datenprodukte}
           zuordnungen={zuordnungen}
           getPersonName={getPersonName}
           getRolleName={getRolleName}
-          handleEditAssignment={handleEditAssignment}
-          entfernePersonVonDatenproduktRolle={entfernePersonVonDatenproduktRolle}
+          getRoleColor={getRoleColor}
           copyTeamEmailsToClipboard={copyTeamEmailsToClipboard}
           setSelectedProduktForAssignment={setSelectedProduktForAssignment}
           setAssignmentError={setAssignmentError}
-          setNotesProdukt={setNotesProdukt}
-          handleOpenProduktForm={handleOpenProduktForm}
-          handleDeleteDatenproduktInitiation={handleDeleteDatenproduktInitiation}
+          copySuccess={copySuccess}
+          onShowDetails={handleShowDetails}
+        />
+
+        <DatenproduktDetailsModal
+          datenprodukt={selectedProduktForDetails}
+          isOpen={!!selectedProduktForDetails}
+          onClose={() => setSelectedProduktForDetails(null)}
+          onEdit={handleOpenProduktForm}
+          onDelete={handleDeleteDatenproduktInitiation}
+          onShowNotes={setNotesProdukt}
+          onShowTeamAssignment={setSelectedProduktForAssignment}
+          setAssignmentError={setAssignmentError}
+          zuordnungen={zuordnungen}
+          getPersonName={getPersonName}
+          getRolleName={getRolleName}
+          getRoleColor={getRoleColor}
+          handleEditAssignment={handleEditAssignment}
+          entfernePersonVonDatenproduktRolle={entfernePersonVonDatenproduktRolle}
+          copyTeamEmailsToClipboard={copyTeamEmailsToClipboard}
           copySuccess={copySuccess}
         />
-      {selectedProduktForAssignment && (
-        <div
-          className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-50 p-4"
-          onClick={() => setSelectedProduktForAssignment(null)}
-        >
+
+        {selectedProduktForAssignment && (
           <div
-            className="bg-white rounded-lg shadow-xl w-full max-w-md p-6"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-50 p-4"
+            onClick={() => setSelectedProduktForAssignment(null)}
           >
-            <h3 className="text-xl font-semibold mb-4">
-              Team für "{selectedProduktForAssignment.name}" verwalten
-            </h3>
-            {assignmentError && (
-              <p className="text-red-500 text-sm mb-3">{assignmentError}</p>
-            )}
-            <form onSubmit={handleAssignRoleSubmit} className="space-y-4">
-              <div>
-                <label htmlFor="assign-person" className="block text-sm">
-                  Person
-                </label>
-                <select
-                  id="assign-person"
-                  value={assignPersonId}
-                  onChange={(e) => setAssignPersonId(e.target.value)}
-                  required
-                  className="mt-1 block w-full p-2 border rounded-md"
-                >
-                  <option value="">Person auswählen</option>
-                  {sortedPersonen.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label htmlFor="assign-role" className="block text-sm">
-                  Rolle
-                </label>
-                <select
-                  id="assign-role"
-                  value={assignRolleId}
-                  onChange={(e) => setAssignRolleId(e.target.value)}
-                  required
-                  className="mt-1 block w-full p-2 border rounded-md"
-                >
-                  <option value="">Rolle auswählen</option>
-                  {rollen.map((r) => (
-                    <option key={r.id} value={r.id}>
-                      {r.name}
-                    </option>
-                  ))}
-                </select>
-                <div className="mt-2 flex">
+            <div
+              className="bg-white rounded-lg shadow-xl w-full max-w-md p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-xl font-semibold mb-4">
+                Team für "{selectedProduktForAssignment.name}" verwalten
+              </h3>
+              {assignmentError && (
+                <p className="text-red-500 text-sm mb-3">{assignmentError}</p>
+              )}
+              <form onSubmit={handleAssignRoleSubmit} className="space-y-4">
+                <div>
+                  <label htmlFor="assign-person" className="block text-sm">
+                    Person
+                  </label>
+                  <select
+                    id="assign-person"
+                    value={assignPersonId}
+                    onChange={(e) => setAssignPersonId(e.target.value)}
+                    required
+                    className="mt-1 block w-full p-2 border rounded-md"
+                  >
+                    <option value="">Person auswählen</option>
+                    {sortedPersonen.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="assign-role" className="block text-sm">
+                    Rolle
+                  </label>
+                  <select
+                    id="assign-role"
+                    value={assignRolleId}
+                    onChange={(e) => setAssignRolleId(e.target.value)}
+                    required
+                    className="mt-1 block w-full p-2 border rounded-md"
+                  >
+                    <option value="">Rolle auswählen</option>
+                    {rollen.map((r) => (
+                      <option key={r.id} value={r.id}>
+                        {r.name}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="mt-2 flex">
+                    <input
+                      type="text"
+                      value={neueRolleName}
+                      onChange={(e) => setNeueRolleName(e.target.value)}
+                      placeholder="Neue Rolle"
+                      className="flex-grow p-2 border rounded-md"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleNeueRolleAnlegen}
+                      className="ml-2 px-3 py-2 bg-indigo-600 text-white rounded-md"
+                    >
+                      Hinzufügen
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <label htmlFor="assign-stunden" className="block text-sm">
+                    Stunden pro Woche
+                  </label>
                   <input
-                    type="text"
-                    value={neueRolleName}
-                    onChange={(e) => setNeueRolleName(e.target.value)}
-                    placeholder="Neue Rolle"
-                    className="flex-grow p-2 border rounded-md"
+                    id="assign-stunden"
+                    type="number"
+                    min="0"
+                    max="80"
+                    step="0.5"
+                    value={assignStunden}
+                    onChange={(e) => setAssignStunden(e.target.value)}
+                    placeholder="z.B. 20"
+                    className="mt-1 block w-full p-2 border rounded-md"
                   />
+                  <p className="mt-1 text-xs text-gray-500">Optional: Wochenstunden für diese Zuweisung</p>
+                </div>
+                <div className="flex justify-end space-x-3 pt-3">
                   <button
                     type="button"
-                    onClick={handleNeueRolleAnlegen}
-                    className="ml-2 px-3 py-2 bg-indigo-600 text-white rounded-md"
-                  >
-                    Hinzufügen
-                  </button>
-                </div>
-              </div>
-              <div>
-                <label htmlFor="assign-stunden" className="block text-sm">
-                  Stunden pro Woche
-                </label>
-                <input
-                  id="assign-stunden"
-                  type="number"
-                  min="0"
-                  max="80"
-                  step="0.5"
-                  value={assignStunden}
-                  onChange={(e) => setAssignStunden(e.target.value)}
-                  placeholder="z.B. 20"
-                  className="mt-1 block w-full p-2 border rounded-md"
-                />
-                <p className="mt-1 text-xs text-gray-500">Optional: Wochenstunden für diese Zuweisung</p>
-              </div>
-              <div className="flex justify-end space-x-3 pt-3">
-                <button
-                  type="button"
-                  onClick={() => setSelectedProduktForAssignment(null)}
-                  className="px-4 py-2 border rounded-md"
-                >
-                  Abbrechen
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-green-600 text-white rounded-md"
-                >
-                  Zuweisen
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-      <NotesModal
-        isOpen={!!notesProdukt}
-        initialNotes={notesProdukt?.notizen || ""}
-        onSave={handleSaveNotes}
-        onClose={() => setNotesProdukt(null)}
-      />
-      {editingAssignment && (
-        <EditAssignmentModal
-          assignment={editingAssignment}
-          rollen={rollen}
-          onSave={handleUpdateAssignment}
-          onClose={() => setEditingAssignment(null)}
-          getPersonName={getPersonName}
-        />
-      )}
-      
-      {/* Team Planner Modal */}
-      {showTeamPlanner && (
-        <div
-          className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-50 p-4"
-          onClick={handleCloseTeamPlanner}
-        >
-          <div
-            className="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-y-auto p-6"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">
-                  {teamPlanerProdukt 
-                    ? `Team planen für "${teamPlanerProdukt.name}"`
-                    : "Neues Team planen"
-                  }
-                </h2>
-                <p className="text-gray-600 mt-1">
-                  Wähle die benötigten Rollen und Stunden aus, um Teamvorschläge zu erhalten
-                </p>
-              </div>
-              <button
-                onClick={handleCloseTeamPlanner}
-                className="text-gray-400 hover:text-gray-600 text-2xl p-2 rounded-full hover:bg-gray-100 transition-colors"
-                title="Schließen"
-              >
-                ×
-              </button>
-            </div>
-
-            <div className="space-y-8">
-              <RoleRequirementsInput
-                onRequirementsChange={handleRoleRequirementsChange}
-                initialRequirements={roleRequirements}
-              />
-
-              {roleRequirements.length > 0 && (
-                <TeamRecommendationResults
-                  roleRequirements={roleRequirements}
-                  onTeamChange={handleTeamChange}
-                />
-              )}
-
-              {roleRequirements.length > 0 && (
-                <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
-                  <button
-                    onClick={handleCloseTeamPlanner}
-                    className="px-6 py-3 text-gray-600 hover:text-gray-800 font-medium rounded-lg transition-colors"
+                    onClick={() => setSelectedProduktForAssignment(null)}
+                    className="px-4 py-2 border rounded-md"
                   >
                     Abbrechen
                   </button>
                   <button
-                    onClick={handleCreateTeam}
-                    className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2"
+                    type="submit"
+                    className="px-4 py-2 bg-green-600 text-white rounded-md"
                   >
-                    <span className="text-lg">✨</span>
-                    Team anlegen
+                    Zuweisen
                   </button>
                 </div>
-              )}
+              </form>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Team Save Dialog */}
-      {showTeamSaveDialog && (
-        <div
-          className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-60 p-4"
-          onClick={handleCancelTeamSave}
-        >
+        <NotesModal
+          isOpen={!!notesProdukt}
+          initialNotes={notesProdukt?.notizen || ""}
+          onSave={handleSaveNotes}
+          onClose={() => setNotesProdukt(null)}
+        />
+
+        {editingAssignment && (
+          <EditAssignmentModal
+            assignment={editingAssignment}
+            rollen={rollen}
+            onSave={handleUpdateAssignment}
+            onClose={() => setEditingAssignment(null)}
+            getPersonName={getPersonName}
+          />
+        )}
+        
+        {/* Team Planner Modal */}
+        {showTeamPlanner && (
           <div
-            className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-50 p-4"
+            onClick={handleCloseTeamPlanner}
           >
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">
-              Neues Team erstellen
-            </h3>
-            <p className="text-gray-600 mb-4">
-              Gib einen Namen für das neue Datenprodukt ein. Das Team wird automatisch zugewiesen.
-            </p>
-            <div className="mb-6">
-              <label htmlFor="team-name" className="block text-sm font-medium text-gray-700 mb-2">
-                Datenprodukt-Name
-              </label>
-              <input
-                id="team-name"
-                type="text"
-                value={newTeamName}
-                onChange={(e) => setNewTeamName(e.target.value)}
-                placeholder="z.B. Marketing Analytics Team"
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                autoFocus
-                required
-              />
-            </div>
-            
-            {recommendedTeam && (
-              <div className="mb-6 bg-gray-50 p-4 rounded-lg">
-                <h4 className="font-medium text-gray-800 mb-2">Team-Übersicht</h4>
-                <div className="text-sm text-gray-600 space-y-1">
-                  {recommendedTeam.team.map((member, index) => (
-                    <div key={index} className="flex justify-between">
-                      <span>{member.personName}</span>
-                      <span>{member.rolleName} ({member.hours}h)</span>
-                    </div>
-                  ))}
+            <div
+              className="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-y-auto p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    {teamPlanerProdukt 
+                      ? `Team planen für "${teamPlanerProdukt.name}"`
+                      : "Neues Team planen"
+                    }
+                  </h2>
+                  <p className="text-gray-600 mt-1">
+                    Wähle die benötigten Rollen und Stunden aus, um Teamvorschläge zu erhalten
+                  </p>
                 </div>
+                <button
+                  onClick={handleCloseTeamPlanner}
+                  className="text-gray-400 hover:text-gray-600 text-2xl p-2 rounded-full hover:bg-gray-100 transition-colors"
+                  title="Schließen"
+                >
+                  ×
+                </button>
               </div>
-            )}
 
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={handleCancelTeamSave}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium rounded-lg transition-colors"
-              >
-                Abbrechen
-              </button>
-              <button
-                onClick={handleSaveNewTeam}
-                disabled={!newTeamName.trim()}
-                className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold py-2 px-6 rounded-lg shadow-lg hover:shadow-xl disabled:shadow-none transition-all duration-200 disabled:cursor-not-allowed"
-              >
-                Team erstellen
-              </button>
+              <div className="space-y-8">
+                <RoleRequirementsInput
+                  onRequirementsChange={handleRoleRequirementsChange}
+                  initialRequirements={roleRequirements}
+                />
+
+                {roleRequirements.length > 0 && (
+                  <TeamRecommendationResults
+                    roleRequirements={roleRequirements}
+                    onTeamChange={handleTeamChange}
+                  />
+                )}
+
+                {roleRequirements.length > 0 && (
+                  <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
+                    <button
+                      onClick={handleCloseTeamPlanner}
+                      className="px-6 py-3 text-gray-600 hover:text-gray-800 font-medium rounded-lg transition-colors"
+                    >
+                      Abbrechen
+                    </button>
+                    <button
+                      onClick={handleCreateTeam}
+                      className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2"
+                    >
+                      <span className="text-lg">✨</span>
+                      Team anlegen
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Success Overlay */}
-      {copySuccess && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
-          <div className="bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg animate-pulse">
-            <div className="flex items-center gap-2">
-              <span className="text-lg">✓</span>
-              <span>Adressen in die Zwischenablage kopiert</span>
+        {/* Team Save Dialog */}
+        {showTeamSaveDialog && (
+          <div
+            className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-60 p-4"
+            onClick={handleCancelTeamSave}
+          >
+            <div
+              className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                Neues Team erstellen
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Gib einen Namen für das neue Datenprodukt ein. Das Team wird automatisch zugewiesen.
+              </p>
+              <div className="mb-6">
+                <label htmlFor="team-name" className="block text-sm font-medium text-gray-700 mb-2">
+                  Datenprodukt-Name
+                </label>
+                <input
+                  id="team-name"
+                  type="text"
+                  value={newTeamName}
+                  onChange={(e) => setNewTeamName(e.target.value)}
+                  placeholder="z.B. Marketing Analytics Team"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  autoFocus
+                  required
+                />
+              </div>
+              
+              {recommendedTeam && (
+                <div className="mb-6 bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-medium text-gray-800 mb-2">Team-Übersicht</h4>
+                  <div className="text-sm text-gray-600 space-y-1">
+                    {recommendedTeam.team.map((member, index) => (
+                      <div key={index} className="flex justify-between">
+                        <span>{member.personName}</span>
+                        <span>{member.rolleName} ({member.hours}h)</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={handleCancelTeamSave}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium rounded-lg transition-colors"
+                >
+                  Abbrechen
+                </button>
+                <button
+                  onClick={handleSaveNewTeam}
+                  disabled={!newTeamName.trim()}
+                  className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold py-2 px-6 rounded-lg shadow-lg hover:shadow-xl disabled:shadow-none transition-all duration-200 disabled:cursor-not-allowed"
+                >
+                  Team erstellen
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+
+        {/* Success Overlay */}
+        {copySuccess && (
+          <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+            <div className="bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg animate-pulse">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">✓</span>
+                <span>Adressen in die Zwischenablage kopiert</span>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
-const DatenproduktKarte = ({ 
-  dp, 
-  zuordnungen, 
-  getPersonName, 
-  getRolleName, 
+const DatenproduktDetailsModal = ({
+  datenprodukt,
+  isOpen,
+  onClose,
+  onEdit,
+  onDelete,
+  onShowNotes,
+  onShowTeamAssignment,
+  setAssignmentError,
+  zuordnungen,
+  getPersonName,
+  getRolleName,
+  getRoleColor,
   handleEditAssignment,
   entfernePersonVonDatenproduktRolle,
   copyTeamEmailsToClipboard,
-  setSelectedProduktForAssignment,
-  setAssignmentError,
-  setNotesProdukt,
-  handleOpenProduktForm,
-  handleDeleteDatenproduktInitiation,
-  copySuccess 
+  copySuccess
 }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-  
-  const teamZuordnungen = zuordnungen.filter((z) => z.datenproduktId === dp.id);
-  
-  // Status-Indikator für kompakte Ansicht
+  if (!isOpen || !datenprodukt) return null;
+
+  const teamZuordnungen = zuordnungen.filter((z) => z.datenproduktId === datenprodukt.id);
+
+  // Status color helper
   const getStatusColor = (status) => {
     switch (status) {
       case 'Live': return 'bg-green-100 text-green-700 border-green-200';
@@ -733,30 +766,249 @@ const DatenproduktKarte = ({
   };
 
   return (
-    <div className="bg-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg border border-gray-200 hover:border-gray-300 overflow-hidden">
-      {/* Kompakte Ansicht */}
-      <div 
-        className="p-4 cursor-pointer"
-        onClick={() => setIsExpanded(!isExpanded)}
+    <div
+      className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-50 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
       >
-        {/* Name - eigene Zeile */}
-        <div className="mb-2">
-          <h3 className="font-semibold text-gray-900 text-lg">{dp.name}</h3>
+        <div className="p-4">
+          {/* Header */}
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex-1 min-w-0">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                {datenprodukt.name}
+              </h2>
+              {datenprodukt.beschreibung && (
+                <p className="text-gray-600 mb-3">
+                  {datenprodukt.beschreibung}
+                </p>
+              )}
+              <div className="flex items-center gap-3">
+                <span className={`inline-flex items-center px-3 py-1 rounded-lg text-sm font-semibold border ${getStatusColor(datenprodukt.status)}`}>
+                  {datenprodukt.status}
+                </span>
+                {datenprodukt.notizen && (
+                  <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-ard-blue-100 text-ard-blue-700">
+                    📝 Hat Notizen
+                  </span>
+                )}
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 transition-colors ml-4 flex-shrink-0"
+            >
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Team Management Section */}
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-base font-semibold text-gray-700">Team-Management</h3>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    copyTeamEmailsToClipboard(datenprodukt);
+                  }}
+                  className="inline-flex items-center px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                  title="E-Mail-Adressen kopieren"
+                  disabled={teamZuordnungen.length === 0}
+                >
+                  📧 E-Mails kopieren
+                </button>
+                <button
+                  onClick={() => {
+                    onShowTeamAssignment(datenprodukt);
+                    setAssignmentError("");
+                    onClose();
+                  }}
+                  className="inline-flex items-center px-3 py-1.5 text-sm bg-green-600 text-white hover:bg-green-700 rounded-lg transition-colors"
+                >
+                  👥 Person hinzufügen
+                </button>
+              </div>
+            </div>
+
+            {teamZuordnungen.length > 0 ? (
+              <div className="space-y-2">
+                {teamZuordnungen.map((zuordnung) => (
+                  <div
+                    key={zuordnung.id}
+                    className="py-3 px-1 flex items-center justify-between border-b border-gray-100 last:border-b-0"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-gray-900 text-sm">
+                          {getPersonName(zuordnung.personId)}
+                        </span>
+                        <span className="text-gray-600 text-xs">als</span>
+                        <span 
+                          className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium text-white"
+                          style={{ backgroundColor: getRoleColor(zuordnung.rolleId) }}
+                        >
+                          {getRolleName(zuordnung.rolleId)}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 ml-3">
+                      <span className="bg-ard-blue-500 text-white px-2 py-0.5 rounded text-xs font-medium whitespace-nowrap">
+                        {zuordnung.stunden || 0}h
+                      </span>
+                      <button
+                        onClick={() => {
+                          handleEditAssignment(zuordnung);
+                        }}
+                        className="text-ard-blue-500 hover:text-ard-blue-700 p-1.5 hover:bg-ard-blue-50 rounded-md transition-colors"
+                        title="Bearbeiten"
+                      >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => {
+                          entfernePersonVonDatenproduktRolle(zuordnung.id);
+                        }}
+                        className="text-red-500 hover:text-red-700 p-1.5 hover:bg-red-50 rounded-md transition-colors"
+                        title="Zuweisung entfernen"
+                      >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="text-4xl mb-2">👥</div>
+                <p className="font-medium">Kein Team zugewiesen</p>
+                <p className="text-sm mt-1">Füge Personen zu diesem Datenprodukt hinzu</p>
+              </div>
+            )}
+          </div>
+
+          {/* Notes Section */}
+          {datenprodukt.notizen && (
+            <div className="mb-4">
+              <h3 className="text-base font-semibold text-gray-700 mb-2">Notizen</h3>
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                <p className="text-gray-700 text-sm whitespace-pre-wrap">{datenprodukt.notizen}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+            <button
+              onClick={() => {
+                onShowNotes(datenprodukt);
+                onClose();
+              }}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                datenprodukt.notizen 
+                  ? "bg-ard-blue-500 text-white hover:bg-ard-blue-600" 
+                  : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
+              }`}
+            >
+              {datenprodukt.notizen ? "Notizen bearbeiten" : "Notizen hinzufügen"}
+            </button>
+            <button
+              onClick={() => {
+                onEdit(datenprodukt);
+                onClose();
+              }}
+              className="px-4 py-2 text-ard-blue-600 hover:text-ard-blue-700 hover:bg-ard-blue-50 font-medium rounded-lg transition-all duration-200"
+            >
+              Bearbeiten
+            </button>
+            <button
+              onClick={() => {
+                onDelete(datenprodukt);
+                onClose();
+              }}
+              className="px-4 py-2 text-red-500 hover:text-red-600 hover:bg-red-50 font-medium rounded-lg transition-all duration-200"
+            >
+              Löschen
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const DatenproduktKarte = ({ 
+  dp, 
+  zuordnungen, 
+  getPersonName, 
+  copyTeamEmailsToClipboard,
+  setSelectedProduktForAssignment,
+  setAssignmentError,
+  copySuccess,
+  onShowDetails
+}) => {
+  const teamZuordnungen = zuordnungen.filter((z) => z.datenproduktId === dp.id);
+  
+  // Status color helper for compact view
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'Live': return 'bg-green-100 text-green-700 border-green-200';
+      case 'In Entwicklung': return 'bg-blue-100 text-blue-700 border-blue-200';
+      case 'In Planung': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+      case 'Archiviert': return 'bg-gray-100 text-gray-700 border-gray-200';
+      case 'On Hold / Pausiert': return 'bg-red-100 text-red-700 border-red-200';
+      default: return 'bg-gray-100 text-gray-700 border-gray-200';
+    }
+  };
+
+  const getStatusDotColor = (status) => {
+    switch (status) {
+      case 'Live': return 'bg-green-500';
+      case 'In Entwicklung': return 'bg-blue-500';
+      case 'In Planung': return 'bg-yellow-500';
+      case 'Archiviert': return 'bg-gray-500';
+      case 'On Hold / Pausiert': return 'bg-red-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
+  return (
+    <div 
+      className="bg-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg border border-gray-200 hover:border-gray-300 overflow-hidden cursor-pointer"
+      onClick={() => onShowDetails(dp)}
+    >
+      <div className="p-4">
+        {/* Name - Header */}
+        <div className="mb-3">
+          <h3 className="font-semibold text-gray-900 text-lg mb-1">{dp.name}</h3>
+          {dp.beschreibung && (
+            <p className="text-sm text-gray-600 line-clamp-2">
+              {dp.beschreibung}
+            </p>
+          )}
         </div>
 
-        {/* Status und Buttons - zweite Zeile */}
-        <div className="flex items-center justify-between mb-3">
+        {/* Status and Quick Actions */}
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            {/* Status-Indikator */}
-            <div className={`flex-shrink-0 w-3 h-3 rounded-full ${getStatusColor(dp.status).replace('text-', 'bg-').replace('border-', '').split(' ')[0]}`}></div>
-            
-            {/* Status-Badge */}
-            <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-semibold ${getStatusColor(dp.status)}`}>
+            <div className={`w-2.5 h-2.5 rounded-full ${getStatusDotColor(dp.status)}`}></div>
+            <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold border ${getStatusColor(dp.status)}`}>
               {dp.status}
             </span>
+            {dp.notizen && (
+              <span className="text-xs text-ard-blue-600">📝</span>
+            )}
           </div>
           
-          {/* Action Buttons - Essentials */}
+          {/* Quick action buttons */}
           <div className="flex items-center gap-1">
             <button
               onClick={(e) => {
@@ -781,127 +1033,22 @@ const DatenproduktKarte = ({
             >
               <span className="text-sm">👥</span>
             </button>
-            
-            {/* Expand-Indikator */}
-            <div className={`text-gray-400 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
-            </div>
           </div>
         </div>
 
-        {/* Beschreibung - immer sichtbar */}
-        {dp.beschreibung && (
-          <div className="mb-3">
-            <p className="text-sm text-gray-600 line-clamp-3">
-              {dp.beschreibung}
-            </p>
-          </div>
-        )}
-
-        {/* Team-Info - kompakt */}
-        {teamZuordnungen.length > 0 && (
+        {/* Team Summary */}
+        {teamZuordnungen.length > 0 ? (
           <div className="text-xs text-gray-500">
-            <span className="font-medium">Team:</span> {teamZuordnungen.slice(0, 3).map(z => getPersonName(z.personId)).join(', ')}
+            <span className="font-medium">Team ({teamZuordnungen.length}):</span>{' '}
+            {teamZuordnungen.slice(0, 3).map(z => getPersonName(z.personId)).join(', ')}
             {teamZuordnungen.length > 3 && ` +${teamZuordnungen.length - 3} weitere`}
+          </div>
+        ) : (
+          <div className="text-xs text-gray-400 italic">
+            Kein Team zugewiesen
           </div>
         )}
       </div>
-
-      {/* Erweiterte Ansicht */}
-      {isExpanded && (
-        <div className="px-4 pb-4 border-t border-gray-100">
-          {/* Team Details */}
-          <div className="mb-4 mt-3">
-            <h4 className="text-sm font-semibold text-gray-700 mb-2">Team-Management</h4>
-            {teamZuordnungen.length > 0 ? (
-              <div className="space-y-1">
-                {teamZuordnungen.map((zuordnung) => (
-                  <div
-                    key={zuordnung.id}
-                    className="text-xs bg-gradient-to-r from-gray-50 to-gray-100 p-2 rounded border border-gray-200 flex items-center justify-between"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium text-gray-900 truncate">
-                        {getPersonName(zuordnung.personId)}
-                      </div>
-                      <div className="text-gray-600 text-xs truncate">
-                        {getRolleName(zuordnung.rolleId)}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1 ml-2">
-                      <span className="bg-ard-blue-500 text-white px-1.5 py-0.5 rounded text-xs font-medium whitespace-nowrap">
-                        {zuordnung.stunden || 0}h
-                      </span>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEditAssignment(zuordnung);
-                        }}
-                        className="text-ard-blue-500 hover:text-ard-blue-700 p-1 rounded transition-colors"
-                        title="Bearbeiten"
-                      >
-                        ✏️
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          entfernePersonVonDatenproduktRolle(zuordnung.id);
-                        }}
-                        className="text-red-500 hover:text-red-700 p-1 rounded transition-colors"
-                        title="Zuweisung entfernen"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-xs text-gray-500">Kein Team zugewiesen.</p>
-            )}
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex flex-wrap gap-2 justify-end pt-2 border-t border-gray-100">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setNotesProdukt(dp);
-              }}
-              className={`px-2 py-1 text-sm font-medium rounded transition-all duration-200 ${
-                dp.notizen 
-                  ? "bg-ard-blue-500 text-white hover:bg-ard-blue-600" 
-                  : "text-gray-400 hover:text-gray-600 hover:bg-gray-50"
-              }`}
-              title={dp.notizen ? "Notizen bearbeiten" : "Notizen hinzufügen"}
-            >
-              {dp.notizen ? "📝" : "📄"}
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleOpenProduktForm(dp);
-              }}
-              className="px-2 py-1 text-sm text-ard-blue-600 hover:text-ard-blue-700 hover:bg-ard-blue-50 font-medium rounded transition-all duration-200"
-              title="Bearbeiten"
-            >
-              ✏️
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDeleteDatenproduktInitiation(dp);
-              }}
-              className="px-2 py-1 text-sm text-red-500 hover:text-red-600 hover:bg-red-50 font-medium rounded transition-all duration-200"
-              title="Löschen"
-            >
-              🗑️
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
@@ -910,18 +1057,13 @@ const DatenproduktListe = ({
   datenprodukte,
   zuordnungen,
   getPersonName,
-  getRolleName,
-  handleEditAssignment,
-  entfernePersonVonDatenproduktRolle,
   copyTeamEmailsToClipboard,
   setSelectedProduktForAssignment,
   setAssignmentError,
-  setNotesProdukt,
-  handleOpenProduktForm,
-  handleDeleteDatenproduktInitiation,
-  copySuccess
+  copySuccess,
+  onShowDetails
 }) => {
-  // Gruppiere Datenprodukte nach Status
+  // Group data products by status
   const groupedProdukte = datenprodukte.reduce((groups, dp) => {
     const status = dp.status || 'Unbekannt';
     if (!groups[status]) {
@@ -931,7 +1073,7 @@ const DatenproduktListe = ({
     return groups;
   }, {});
 
-  // Sortiere Status-Gruppen nach Priorität
+  // Sort status groups by priority
   const statusOrder = ['Live', 'In Entwicklung', 'In Planung', 'On Hold / Pausiert', 'Archiviert'];
   const sortedStatus = Object.keys(groupedProdukte).sort((a, b) => {
     const indexA = statusOrder.indexOf(a) !== -1 ? statusOrder.indexOf(a) : 999;
@@ -954,7 +1096,7 @@ const DatenproduktListe = ({
     <div className="space-y-8">
       {sortedStatus.map((status) => (
         <div key={status} className="space-y-4">
-          {/* Status-Header */}
+          {/* Status Header */}
           <div className="flex items-center gap-3">
             <h2 className="text-xl font-bold text-gray-900">{status}</h2>
             <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-sm font-medium border ${getStatusColor(status)}`}>
@@ -963,7 +1105,7 @@ const DatenproduktListe = ({
             <div className="flex-1 h-px bg-gray-200"></div>
           </div>
           
-          {/* Datenprodukte-Grid für diesen Status */}
+          {/* Data Products Grid for this status */}
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
             {groupedProdukte[status].map((dp) => (
               <DatenproduktKarte
@@ -971,16 +1113,11 @@ const DatenproduktListe = ({
                 dp={dp}
                 zuordnungen={zuordnungen}
                 getPersonName={getPersonName}
-                getRolleName={getRolleName}
-                handleEditAssignment={handleEditAssignment}
-                entfernePersonVonDatenproduktRolle={entfernePersonVonDatenproduktRolle}
                 copyTeamEmailsToClipboard={copyTeamEmailsToClipboard}
                 setSelectedProduktForAssignment={setSelectedProduktForAssignment}
                 setAssignmentError={setAssignmentError}
-                setNotesProdukt={setNotesProdukt}
-                handleOpenProduktForm={handleOpenProduktForm}
-                handleDeleteDatenproduktInitiation={handleDeleteDatenproduktInitiation}
                 copySuccess={copySuccess}
+                onShowDetails={onShowDetails}
               />
             ))}
           </div>

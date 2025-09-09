@@ -44,8 +44,70 @@ const tagColors = [
   "#F5D0FE",
   "#FECDD3",
 ];
+
+const roleColors = [
+  "#EF4444", // red-500
+  "#F97316", // orange-500  
+  "#EAB308", // yellow-500
+  "#22C55E", // green-500
+  "#06B6D4", // cyan-500
+  "#3B82F6", // blue-500
+  "#8B5CF6", // violet-500
+  "#EC4899", // pink-500
+  "#10B981", // emerald-500
+  "#F59E0B", // amber-500
+  "#6366F1", // indigo-500
+  "#84CC16", // lime-500
+  "#14B8A6", // teal-500
+  "#F43F5E", // rose-500
+  "#8B5A2B", // brown-500
+  "#6B7280", // gray-500
+  // Erweiterte Palette mit helleren und dunkleren Varianten
+  "#DC2626", // red-600
+  "#EA580C", // orange-600
+  "#CA8A04", // yellow-600
+  "#16A34A", // green-600
+  "#0891B2", // cyan-600
+  "#2563EB", // blue-600
+  "#7C3AED", // violet-600
+  "#DB2777", // pink-600
+  "#059669", // emerald-600
+  "#D97706", // amber-600
+  "#4F46E5", // indigo-600
+  "#65A30D", // lime-600
+  "#0D9488", // teal-600
+  "#E11D48", // rose-600
+  "#7F4F24", // brown-600
+  "#4B5563", // gray-600
+  // Noch mehr Farben
+  "#B91C1C", // red-700
+  "#C2410C", // orange-700
+  "#A16207", // yellow-700
+  "#15803D", // green-700
+  "#0E7490", // cyan-700
+  "#1D4ED8", // blue-700
+  "#6D28D9", // violet-700
+  "#BE185D", // pink-700
+  "#047857", // emerald-700
+  "#B45309", // amber-700
+  "#3730A3", // indigo-700
+  "#4D7C0F", // lime-700
+  "#0F766E", // teal-700
+  "#BE123C", // rose-700
+  "#92400E", // brown-700
+  "#374151", // gray-700
+];
+
 const getRandomColor = () =>
   tagColors[Math.floor(Math.random() * tagColors.length)];
+
+const getRandomRoleColor = (existingColors = []) => {
+  const availableColors = roleColors.filter(color => !existingColors.includes(color));
+  if (availableColors.length === 0) {
+    return roleColors[Math.floor(Math.random() * roleColors.length)];
+  }
+  return availableColors[Math.floor(Math.random() * availableColors.length)];
+};
 
 export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
   const [personen, setPersonen] = useState([]);
@@ -220,6 +282,36 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
     });
     return () => unsubscribes.forEach((unsub) => unsub());
   }, [getCollectionPath]);
+
+  // Migration: Rollen ohne Farbe mit Farben versorgen
+  useEffect(() => {
+    if (loading || isReadOnly || rollen.length === 0) return;
+    
+    const rollenOhneFarbe = rollen.filter(rolle => !rolle.color);
+    if (rollenOhneFarbe.length === 0) return;
+
+    const migrateRoleColors = async () => {
+      const existingColors = rollen.map(r => r.color).filter(Boolean);
+      const batch = writeBatch(db);
+
+      rollenOhneFarbe.forEach((rolle, index) => {
+        const color = getRandomRoleColor([...existingColors, ...rollenOhneFarbe.slice(0, index).map((_, i) => roleColors[i % roleColors.length])]);
+        existingColors.push(color);
+        
+        const rolleRef = doc(db, getCollectionPath("rollen"), rolle.id);
+        batch.update(rolleRef, { color });
+      });
+
+      try {
+        await batch.commit();
+        console.log(`${rollenOhneFarbe.length} Rollen mit Farben versorgt`);
+      } catch (error) {
+        console.error('Fehler beim Migrieren der Rollen-Farben:', error);
+      }
+    };
+
+    migrateRoleColors();
+  }, [rollen, loading, isReadOnly, getCollectionPath]);
 
   const preventWriteActions =
     (func) =>
@@ -469,8 +561,12 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
   const fuegeRolleHinzu = preventWriteActions(async (rollenName) => {
     if (!rollenName?.trim()) return null;
     try {
+      const existingColors = rollen.map(r => r.color).filter(Boolean);
+      const newColor = getRandomRoleColor(existingColors);
+      
       const docRef = await addDoc(collection(db, getCollectionPath("rollen")), {
         name: rollenName.trim(),
+        color: newColor,
       });
       recordLastChange("Neue Rolle angelegt");
       return docRef.id;
@@ -481,12 +577,15 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
     }
   });
 
-  const aktualisiereRolle = preventWriteActions(async (rolleId, rollenName) => {
+  const aktualisiereRolle = preventWriteActions(async (rolleId, rollenName, color = null) => {
     if (!rollenName?.trim()) return false;
     try {
-      await updateDoc(doc(db, getCollectionPath("rollen"), rolleId), {
-        name: rollenName.trim(),
-      });
+      const updateData = { name: rollenName.trim() };
+      if (color !== null) {
+        updateData.color = color;
+      }
+      
+      await updateDoc(doc(db, getCollectionPath("rollen"), rolleId), updateData);
       recordLastChange("Rolle geändert");
       return true;
     } catch (e) {

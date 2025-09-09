@@ -119,107 +119,110 @@ export const SkillsVerwaltung = () => {
                         Noch keine Skills angelegt.
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {skills.map((skill) => {
-                            const skillPersons = getSkillPersons(skill.id);
-                            
-                            return (
-                                <div key={skill.id} className="bg-white shadow-md rounded-xl border border-gray-100 p-4 hover:shadow-lg transition-all duration-200">
-                                    <div className="flex items-center justify-between mb-3">
-                                        <div className="flex items-center gap-3">
-                                            {editingSkill?.id === skill.id ? (
-                                                <input 
-                                                    type="color" 
-                                                    value={editingSkill.color} 
-                                                    onChange={(e) => setEditingSkill({...editingSkill, color: e.target.value})} 
-                                                    className="w-6 h-6 p-0 border border-gray-200 rounded cursor-pointer" 
-                                                />
-                                            ) : (
-                                                <div 
-                                                    className="w-6 h-6 rounded border border-gray-200 shadow-sm flex-shrink-0" 
-                                                    style={{ backgroundColor: skill.color }}
-                                                ></div>
-                                            )}
-                                            
-                                            {editingSkill?.id === skill.id ? (
-                                                <input 
-                                                    type="text" 
-                                                    value={editingSkill.name} 
-                                                    onChange={(e) => setEditingSkill({...editingSkill, name: e.target.value})} 
-                                                    className="flex-grow px-2 py-1 text-sm border border-ard-blue-300 rounded focus:ring-1 focus:ring-ard-blue-500 focus:border-ard-blue-500" 
-                                                    autoFocus 
-                                                />
-                                            ) : (
-                                                <span className="font-semibold text-gray-900 text-sm">{skill.name}</span>
-                                            )}
-                                        </div>
+                    <div className="bg-white shadow-sm rounded-lg border border-gray-100 overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm">
+                                <thead className="bg-gray-50 border-b border-gray-200">
+                                    <tr>
+                                        <th className="px-4 py-2 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">Skill</th>
+                                        <th className="px-4 py-2 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">Personen</th>
+                                        <th className="px-4 py-2 text-center text-xs font-semibold text-gray-900 uppercase tracking-wider">Anzahl</th>
+                                        <th className="px-4 py-2 text-center text-xs font-semibold text-gray-900 uppercase tracking-wider">Aktionen</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-100">
+                                    {skills.map((skill) => {
+                                        const skillPersons = getSkillPersons(skill.id);
                                         
-                                        <div className="flex gap-1">
-                                            {editingSkill?.id === skill.id ? (
-                                                <>
-                                                    <button 
-                                                        onClick={handleUpdateSkill} 
-                                                        className="p-1 text-green-600 hover:text-green-700 hover:bg-green-50 rounded transition-all"
-                                                        title="Speichern"
-                                                    >
-                                                        ✓
-                                                    </button>
-                                                    <button 
-                                                        onClick={() => setEditingSkill(null)} 
-                                                        className="p-1 text-gray-600 hover:text-gray-700 hover:bg-gray-50 rounded transition-all"
-                                                        title="Abbrechen"
-                                                    >
-                                                        ✕
-                                                    </button>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <button 
-                                                        onClick={() => setEditingSkill({ ...skill })} 
-                                                        className="p-1 text-ard-blue-600 hover:text-ard-blue-700 hover:bg-ard-blue-50 rounded transition-all"
-                                                        title="Bearbeiten"
-                                                    >
-                                                        ✏️
-                                                    </button>
-                                                    <button 
-                                                        onClick={() => handleDeleteInitiation(skill)} 
-                                                        className="p-1 text-red-500 hover:text-red-600 hover:bg-red-50 rounded transition-all"
-                                                        title="Löschen"
-                                                    >
-                                                        🗑️
-                                                    </button>
-                                                </>
-                                            )}
-                                        </div>
-                                    </div>
-                                    
-                                    <div className="border-t border-gray-100 pt-3">
-                                        <div className="flex items-center justify-between mb-2">
-                                            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                                                Personen ({skillPersons.length})
-                                            </span>
-                                        </div>
-                                        
-                                        {skillPersons.length > 0 ? (
-                                            <div className="flex flex-wrap gap-1">
-                                                {skillPersons.map((person) => (
-                                                    <span 
-                                                        key={person.id}
-                                                        className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
-                                                    >
-                                                        {person.name}
+                                        return (
+                                            <tr key={skill.id} className="hover:bg-gray-25 transition-colors">
+                                                <td className="px-4 py-3">
+                                                    {editingSkill?.id === skill.id ? (
+                                                        <input 
+                                                            type="text" 
+                                                            value={editingSkill.name} 
+                                                            onChange={(e) => setEditingSkill({...editingSkill, name: e.target.value})} 
+                                                            className="block w-full px-2 py-1 text-sm border border-ard-blue-300 rounded focus:ring-1 focus:ring-ard-blue-500 focus:border-ard-blue-500" 
+                                                            autoFocus 
+                                                        />
+                                                    ) : (
+                                                        <span className="font-medium text-gray-900 text-sm">{skill.name}</span>
+                                                    )}
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    {skillPersons.length > 0 ? (
+                                                        <div className="flex flex-wrap gap-1">
+                                                            {skillPersons.map((person) => (
+                                                                <span 
+                                                                    key={person.id}
+                                                                    className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
+                                                                    style={{ 
+                                                                        backgroundColor: skill.color, 
+                                                                        color: '#1f2937'
+                                                                    }}
+                                                                >
+                                                                    {person.name}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-xs text-gray-400 italic">
+                                                            Niemand zugewiesen
+                                                        </span>
+                                                    )}
+                                                </td>
+                                                <td className="px-4 py-3 text-center">
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
+                                                        {skillPersons.length}
                                                     </span>
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <span className="text-xs text-gray-400 italic">
-                                                Niemand zugewiesen
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-                            );
-                        })}
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    <div className="flex items-center justify-center gap-1">
+                                                        {editingSkill?.id === skill.id ? (
+                                                            <>
+                                                                <button 
+                                                                    onClick={handleUpdateSkill} 
+                                                                    className="p-1.5 text-green-600 hover:text-green-700 hover:bg-green-50 rounded transition-all text-sm"
+                                                                    title="Speichern"
+                                                                >
+                                                                    ✓
+                                                                </button>
+                                                                <button 
+                                                                    onClick={() => setEditingSkill(null)} 
+                                                                    className="p-1.5 text-gray-600 hover:text-gray-700 hover:bg-gray-50 rounded transition-all text-sm"
+                                                                    title="Abbrechen"
+                                                                >
+                                                                    ✕
+                                                                </button>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <button 
+                                                                    onClick={() => setEditingSkill({ ...skill })} 
+                                                                    className="p-1.5 text-ard-blue-600 hover:text-ard-blue-700 hover:bg-ard-blue-50 rounded transition-all text-sm"
+                                                                    title="Bearbeiten"
+                                                                >
+                                                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                                      <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                                                    </svg>
+                                                                </button>
+                                                                <button 
+                                                                    onClick={() => handleDeleteInitiation(skill)} 
+                                                                    className="p-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 rounded transition-all text-sm"
+                                                                    title="Löschen"
+                                                                >
+                                                                    🗑️
+                                                                </button>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 )}
 

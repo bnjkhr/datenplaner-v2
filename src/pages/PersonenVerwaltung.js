@@ -192,20 +192,19 @@ const PersonEintrag = ({
   onEdit,
   onDeleteInitiation,
   onSkillClick,
+  onShowDetails,
 }) => {
   const { name, email, skillIds, msTeamsLink, wochenstunden, isM13, kategorien } = person;
-  const {
-    datenprodukte,
-    zuordnungen,
-    rollen,
-    skills: allSkills,
-    vacations,
-  } = useData();
+  const { vacations, zuordnungen } = useData();
 
-  const [isExpanded, setIsExpanded] = useState(false);
+  // Kreis-Indikator für kompakte Ansicht
+  const getKreisIndicator = () => {
+    if (!kategorien || kategorien.length === 0) return null;
+    return kategorien.map(k => k.charAt(0)).join('');
+  };
 
-  // Verbesserte Abwesenheits-Logik mit mehreren Matching-Strategien
-  const getPersonVacations = () => {
+  // Prüfe ob Person aktuell abwesend ist (vereinfacht für Kachel)
+  const isCurrentlyAbsent = () => {
     const today = new Date();
     const searchKeys = [
       name.toLowerCase(),
@@ -214,85 +213,27 @@ const PersonEintrag = ({
       email?.split("@")[0]?.toLowerCase(),
     ].filter(Boolean);
 
-    let personVacations = [];
-
-    // Durchsuche alle möglichen Schlüssel
     for (const key of searchKeys) {
       if (vacations[key]) {
-        personVacations = [...personVacations, ...vacations[key]];
+        const hasCurrentVacation = vacations[key].some((vacation) => {
+          const start = new Date(vacation.start);
+          const end = new Date(vacation.end);
+          return today >= start && today <= end;
+        });
+        if (hasCurrentVacation) return true;
       }
     }
-
-    // Entferne Duplikate und filtere zukünftige/aktuelle Abwesenheiten
-    const uniqueVacations = personVacations.filter((vacation, index, self) => {
-      const vacationEnd = new Date(vacation.end);
-      const isUnique =
-        self.findIndex(
-          (v) => v.start === vacation.start && v.end === vacation.end
-        ) === index;
-
-      return isUnique && vacationEnd >= today;
-    });
-
-    return uniqueVacations.sort(
-      (a, b) => new Date(a.start) - new Date(b.start)
-    );
-  };
-
-  const upcomingVacations = getPersonVacations();
-
-  // Formatiere Datum für Anzeige
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("de-DE", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "2-digit",
-    });
-  };
-
-  // Prüfe ob Person aktuell abwesend ist
-  const isCurrentlyAbsent = () => {
-    const now = new Date();
-    return upcomingVacations.some((vacation) => {
-      const start = new Date(vacation.start);
-      const end = new Date(vacation.end);
-      return now >= start && now <= end;
-    });
-  };
-
-  const personAssignments = zuordnungen
-    .filter((z) => z.personId === person.id)
-    .map((assignment) => {
-      const produkt = datenprodukte.find(
-        (dp) => dp.id === assignment.datenproduktId
-      );
-      const rolleInProdukt = rollen.find((r) => r.id === assignment.rolleId);
-      return {
-        produktName: produkt?.name || "...",
-        rolleName: rolleInProdukt?.name || "...",
-        assignmentId: assignment.id,
-      };
-    })
-    .filter((a) => a.produktName !== "...");
-
-  // Kreis-Indikator für kompakte Ansicht
-  const getKreisIndicator = () => {
-    if (!kategorien || kategorien.length === 0) return null;
-    return kategorien.map(k => k.charAt(0)).join('');
+    return false;
   };
 
   return (
     <div
-      className={`bg-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg border border-gray-200 hover:border-gray-300 overflow-hidden ${
+      className={`bg-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg border border-gray-200 hover:border-gray-300 overflow-hidden cursor-pointer ${
         isCurrentlyAbsent() ? "bg-gradient-to-br from-red-50 to-red-100/30 border-red-200" : ""
       }`}
+      onClick={() => onShowDetails(person)}
     >
-      {/* Kompakte Ansicht */}
-      <div 
-        className="p-4 cursor-pointer flex items-center justify-between"
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
+      <div className="p-4 flex items-center justify-between">
         <div className="flex items-center gap-3 flex-1 min-w-0">
           {/* Kreis-Indikator */}
           {getKreisIndicator() && (
@@ -312,80 +253,208 @@ const PersonEintrag = ({
               )}
             </div>
             
-            {/* Arbeitet an - kompakt */}
-            {personAssignments.length > 0 && (
-              <div className="text-xs text-gray-500 truncate mt-1">
-                Arbeitet an: {personAssignments.slice(0, 2).map(a => a.produktName).join(', ')}
-                {personAssignments.length > 2 && ` +${personAssignments.length - 2}`}
-              </div>
+            {/* Teams Link unter dem Namen */}
+            {msTeamsLink && (
+              <a
+                href={msTeamsLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-gray-500 hover:text-ard-blue-600 transition-colors mt-0.5 block"
+                onClick={(e) => e.stopPropagation()}
+              >
+                Nachricht in Teams senden
+              </a>
             )}
+            
+            {/* Auslastungsbalken - kompakt */}
+            <div className="mt-2">
+              {(() => {
+                const verfügbareStunden = wochenstunden || 31;
+                const gebuchteStunden = zuordnungen
+                  .filter(z => z.personId === person.id)
+                  .reduce((sum, z) => sum + (z.stunden || 0), 0);
+                const auslastung = verfügbareStunden > 0 ? (gebuchteStunden / verfügbareStunden) * 100 : 0;
+                const isUnderbooked = auslastung < 20;
+                
+                let barColor = "bg-gradient-to-r from-emerald-400 to-emerald-500";
+                if (isUnderbooked) {
+                  barColor = "bg-gradient-to-r from-red-400 to-red-500";
+                } else if (auslastung > 100) {
+                  barColor = "bg-gradient-to-r from-amber-400 to-orange-500";
+                }
+                
+                return (
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                      <div 
+                        className={`h-full rounded-full transition-all duration-300 ${barColor}`}
+                        style={{ width: `${Math.min(auslastung, 100)}%` }}
+                      />
+                    </div>
+                    <span className="text-xs text-gray-500 font-medium min-w-0 flex-shrink-0">
+                      {Math.round(auslastung)}%
+                    </span>
+                  </div>
+                );
+              })()}
+            </div>
           </div>
         </div>
         
-        {/* Teams Button - immer sichtbar */}
-        <div className="flex items-center gap-2">
-          {msTeamsLink && (
-            <a
-              href={msTeamsLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center w-7 h-7 bg-ard-blue-100 hover:bg-ard-blue-200 rounded-md transition-colors"
-              title="Chat in MS Teams starten"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <span className="text-sm">💬</span>
-            </a>
-          )}
-          
-          {/* Expand-Indikator */}
-          <div className={`text-gray-400 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-            </svg>
-          </div>
+        {/* Details-Indikator */}
+        <div className="text-gray-400">
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+          </svg>
         </div>
       </div>
+    </div>
+  );
+};
 
-      {/* Erweiterte Ansicht */}
-      {isExpanded && (
-        <div className="px-4 pb-4 border-t border-gray-100">
-          {email && (
-            <div className="mb-3 mt-3">
-              <a
-                href={`mailto:${email}`}
-                className="text-sm text-gray-600 hover:text-ard-blue-600 break-all transition-colors"
-              >
-                {email}
-              </a>
+const PersonDetailsModal = ({ person, isOpen, onClose, onEdit, onDeleteInitiation, onSkillClick }) => {
+  const {
+    datenprodukte,
+    zuordnungen,
+    rollen,
+    skills: allSkills,
+    vacations,
+  } = useData();
+
+  if (!isOpen || !person) return null;
+
+  const { name, email, skillIds, msTeamsLink, wochenstunden, isM13, kategorien } = person;
+
+  // Verbesserte Abwesenheits-Logik
+  const getPersonVacations = () => {
+    const today = new Date();
+    const searchKeys = [
+      name.toLowerCase(),
+      name.toLowerCase().replace(/\s+/g, ""),
+      email?.toLowerCase(),
+      email?.split("@")[0]?.toLowerCase(),
+    ].filter(Boolean);
+
+    let personVacations = [];
+
+    for (const key of searchKeys) {
+      if (vacations[key]) {
+        personVacations = [...personVacations, ...vacations[key]];
+      }
+    }
+
+    const uniqueVacations = personVacations.filter((vacation, index, self) => {
+      const vacationEnd = new Date(vacation.end);
+      const isUnique =
+        self.findIndex(
+          (v) => v.start === vacation.start && v.end === vacation.end
+        ) === index;
+
+      return isUnique && vacationEnd >= today;
+    });
+
+    return uniqueVacations.sort(
+      (a, b) => new Date(a.start) - new Date(b.start)
+    );
+  };
+
+  const upcomingVacations = getPersonVacations();
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("de-DE", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "2-digit",
+    });
+  };
+
+  const personAssignments = zuordnungen
+    .filter((z) => z.personId === person.id)
+    .map((assignment) => {
+      const produkt = datenprodukte.find(
+        (dp) => dp.id === assignment.datenproduktId
+      );
+      const rolleInProdukt = rollen.find((r) => r.id === assignment.rolleId);
+      return {
+        produktName: produkt?.name || "...",
+        rolleName: rolleInProdukt?.name || "...",
+        rolleColor: rolleInProdukt?.color || "#6B7280",
+        assignmentId: assignment.id,
+      };
+    })
+    .filter((a) => a.produktName !== "...");
+
+  return (
+    <div
+      className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-50 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">
+                {name}
+                {email && (
+                  <span className="text-lg font-normal text-gray-600 ml-2">
+                    (<a
+                      href={`mailto:${email}`}
+                      className="hover:text-ard-blue-600 transition-colors"
+                    >
+                      {email}
+                    </a>)
+                  </span>
+                )}
+              </h2>
+              {msTeamsLink && (
+                <a
+                  href={msTeamsLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-gray-500 hover:text-ard-blue-600 transition-colors mt-0.5 block"
+                >
+                  Nachricht in Teams senden
+                </a>
+              )}
             </div>
-          )}
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
+          </div>
 
-          {/* Wochenstunden anzeigen */}
           {wochenstunden && (
-            <div className="mb-3">
-              <span className="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-gradient-to-r from-ard-blue-50 to-ard-blue-100 text-ard-blue-700 border border-ard-blue-200">
+            <div className="mb-4">
+              <span className="inline-flex items-center px-3 py-1 rounded-lg text-sm font-semibold bg-gradient-to-r from-ard-blue-50 to-ard-blue-100 text-ard-blue-700 border border-ard-blue-200">
                 ⏰ {wochenstunden}h/Woche
               </span>
             </div>
           )}
 
-          {/* M13 und Kategorien anzeigen */}
           {(isM13 || (kategorien && kategorien.length > 0)) && (
-            <div className="mb-3">
+            <div className="mb-4">
               <div className="flex flex-wrap gap-2">
                 {isM13 && (
-                  <span className="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-gradient-to-r from-green-50 to-green-100 text-green-700 border border-green-200">
+                  <span className="inline-flex items-center px-3 py-1 rounded-lg text-sm font-semibold bg-gradient-to-r from-green-50 to-green-100 text-green-700 border border-green-200">
                     ✓ M13
                   </span>
                 )}
                 {kategorien && kategorien.map((kategorie) => (
                   <button
                     key={kategorie}
-                    onClick={(e) => {
-                      e.stopPropagation();
+                    onClick={() => {
                       onSkillClick(kategorie);
+                      onClose();
                     }}
-                    className="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-gradient-to-r from-purple-50 to-purple-100 text-purple-700 border border-purple-200 hover:from-purple-100 hover:to-purple-200 hover:scale-105 transition-all duration-200 cursor-pointer"
+                    className="inline-flex items-center px-3 py-1 rounded-lg text-sm font-semibold bg-gradient-to-r from-purple-50 to-purple-100 text-purple-700 border border-purple-200 hover:from-purple-100 hover:to-purple-200 hover:scale-105 transition-all duration-200 cursor-pointer"
                     title={`Nach Kreis "${kategorie}" filtern`}
                   >
                     {kategorie}
@@ -395,18 +464,16 @@ const PersonEintrag = ({
             </div>
           )}
 
-          {/* Auslastungsanzeige */}
           <WorkloadIndicator person={person} zuordnungen={zuordnungen} />
 
-          {/* Abwesenheiten anzeigen */}
           {upcomingVacations.length > 0 && (
-            <div className="mb-4">
-              <p className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+            <div className="mb-6">
+              <p className="text-lg font-semibold text-gray-700 mb-3 flex items-center gap-2">
                 <span>🏖️</span>
                 Anstehende Abwesenheiten
               </p>
-              <div className="space-y-2">
-                {upcomingVacations.slice(0, 3).map((vacation, index) => {
+              <div className="space-y-3">
+                {upcomingVacations.slice(0, 5).map((vacation, index) => {
                   const start = new Date(vacation.start);
                   const end = new Date(vacation.end);
                   const isCurrentVacation =
@@ -415,7 +482,7 @@ const PersonEintrag = ({
                   return (
                     <div
                       key={index}
-                      className={`text-xs p-2 rounded border ${
+                      className={`p-3 rounded-lg border ${
                         isCurrentVacation
                           ? "bg-gradient-to-r from-red-50 to-red-100 border-red-200 text-red-800"
                           : "bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-200 text-amber-800"
@@ -424,15 +491,15 @@ const PersonEintrag = ({
                       <div className="font-semibold mb-1">
                         {vacation.summary || "Abwesenheit"}
                       </div>
-                      <div className="text-xs opacity-75">
+                      <div className="text-sm opacity-75">
                         {formatDate(vacation.start)} - {formatDate(vacation.end)}
                       </div>
                     </div>
                   );
                 })}
-                {upcomingVacations.length > 3 && (
-                  <div className="text-xs text-gray-500 italic mt-2">
-                    +{upcomingVacations.length - 3} weitere Abwesenheiten
+                {upcomingVacations.length > 5 && (
+                  <div className="text-sm text-gray-500 italic">
+                    +{upcomingVacations.length - 5} weitere Abwesenheiten
                   </div>
                 )}
               </div>
@@ -440,20 +507,20 @@ const PersonEintrag = ({
           )}
 
           {skillIds && skillIds.length > 0 && (
-            <div className="mb-4">
-              <p className="text-sm font-semibold text-gray-700 mb-2">Skills</p>
-              <div className="flex flex-wrap gap-1">
+            <div className="mb-6">
+              <p className="text-lg font-semibold text-gray-700 mb-3">Skills</p>
+              <div className="flex flex-wrap gap-2">
                 {skillIds.map((id) => {
                   const skill = allSkills.find((s) => s.id === id);
                   if (!skill) return null;
                   return (
                     <button
                       key={id}
-                      onClick={(e) => {
-                        e.stopPropagation();
+                      onClick={() => {
                         onSkillClick(skill.name);
+                        onClose();
                       }}
-                      className="px-2 py-1 rounded text-xs font-semibold hover:scale-105 transition-all duration-200 shadow-sm border"
+                      className="px-3 py-2 rounded-lg text-sm font-semibold hover:scale-105 transition-all duration-200 shadow-sm border"
                       style={{ 
                         backgroundColor: skill.color, 
                         color: "#1f2937",
@@ -470,62 +537,67 @@ const PersonEintrag = ({
           )}
 
           {personAssignments.length > 0 && (
-            <div className="mb-4">
-              <p className="text-sm font-semibold text-gray-700 mb-2">
+            <div className="mb-6">
+              <p className="text-lg font-semibold text-gray-700 mb-3">
                 Arbeitet an
               </p>
-              <ul className="list-none space-y-1">
+              <div className="space-y-2">
                 {personAssignments.map((a) => {
                   const assignment = zuordnungen.find(z => z.id === a.assignmentId);
                   const stunden = assignment?.stunden || 0;
                   return (
-                    <li
+                    <div
                       key={a.assignmentId}
-                      className="text-xs bg-gradient-to-r from-indigo-50 to-ard-blue-50 p-2 rounded border border-indigo-100"
+                      className="bg-gradient-to-r from-indigo-50 to-ard-blue-50 p-3 rounded-lg border border-indigo-100"
                     >
                       <div className="flex justify-between items-center">
                         <div className="flex flex-col">
                           <span className="font-semibold text-gray-900">{a.produktName}</span>
-                          <span className="text-gray-600">als {a.rolleName}</span>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-gray-600 text-sm">als</span>
+                            <span 
+                              className="inline-flex items-center px-2 py-1 rounded text-sm font-medium text-white"
+                              style={{ backgroundColor: a.rolleColor }}
+                            >
+                              {a.rolleName}
+                            </span>
+                          </div>
                         </div>
                         {stunden > 0 && (
-                          <div className="bg-ard-blue-500 text-white px-1.5 py-0.5 rounded text-xs font-semibold">
+                          <div className="bg-ard-blue-500 text-white px-3 py-1 rounded text-sm font-semibold">
                             {stunden}h
                           </div>
                         )}
                       </div>
-                    </li>
+                    </div>
                   );
                 })}
-              </ul>
+              </div>
             </div>
           )}
 
-          {/* Action Buttons */}
-          <div className="flex justify-end space-x-2 pt-2 border-t border-gray-100">
+          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
             <button
-              onClick={(e) => {
-                e.stopPropagation();
+              onClick={() => {
                 onEdit(person);
+                onClose();
               }}
-              className="px-2 py-1 text-sm text-ard-blue-600 hover:text-ard-blue-700 hover:bg-ard-blue-50 font-medium rounded transition-all duration-200"
-              title="Bearbeiten"
+              className="px-4 py-2 text-ard-blue-600 hover:text-ard-blue-700 hover:bg-ard-blue-50 font-medium rounded-lg transition-all duration-200"
             >
-              ✏️
+              Bearbeiten
             </button>
             <button
-              onClick={(e) => {
-                e.stopPropagation();
+              onClick={() => {
                 onDeleteInitiation(person);
+                onClose();
               }}
-              className="px-2 py-1 text-sm text-red-500 hover:text-red-600 hover:bg-red-50 font-medium rounded transition-all duration-200"
-              title="Löschen"
+              className="px-4 py-2 text-red-500 hover:text-red-600 hover:bg-red-50 font-medium rounded-lg transition-all duration-200"
             >
-              🗑️
+              Löschen
             </button>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };
@@ -760,6 +832,7 @@ const PersonenListe = ({
   onEditPerson,
   onDeleteInitiation,
   onSkillClick,
+  onShowDetails,
 }) => {
   const { loading, error } = useData();
   
@@ -815,7 +888,7 @@ const PersonenListe = ({
           </div>
           
           {/* Personen-Grid für diesen Kreis */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
             {groupedPersonen[kreis].map((person) => (
               <PersonEintrag
                 key={`${kreis}-${person.id}`}
@@ -823,6 +896,7 @@ const PersonenListe = ({
                 onEdit={onEditPerson}
                 onDeleteInitiation={onDeleteInitiation}
                 onSkillClick={onSkillClick}
+                onShowDetails={onShowDetails}
               />
             ))}
           </div>
@@ -837,6 +911,8 @@ const PersonenVerwaltung = () => {
   const [editingPerson, setEditingPerson] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [personToDelete, setPersonToDelete] = useState(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [personToShowDetails, setPersonToShowDetails] = useState(null);
   const { personen, skills, datenprodukte, zuordnungen, rollen, loeschePerson, vacations } = useData();
   const [searchTerm, setSearchTerm] = useState("");
   const [showExcelModal, setShowExcelModal] = useState(false);
@@ -1093,6 +1169,16 @@ const PersonenVerwaltung = () => {
   const handleSkillClick = (skillName) => {
     setSearchTerm(skillName);
   };
+  
+  const handleShowDetails = (person) => {
+    setPersonToShowDetails(person);
+    setShowDetailsModal(true);
+  };
+  
+  const handleCloseDetails = () => {
+    setShowDetailsModal(false);
+    setPersonToShowDetails(null);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-ard-blue-50/30">
@@ -1184,6 +1270,7 @@ const PersonenVerwaltung = () => {
         onEditPerson={handleEditPerson}
         onDeleteInitiation={handleDeleteInitiation}
         onSkillClick={handleSkillClick}
+        onShowDetails={handleShowDetails}
       />
       <ConfirmModal
         isOpen={showDeleteModal}
@@ -1200,6 +1287,14 @@ const PersonenVerwaltung = () => {
           onClose={() => setShowExcelModal(false)}
         />
       )}
+      <PersonDetailsModal
+        person={personToShowDetails}
+        isOpen={showDetailsModal}
+        onClose={handleCloseDetails}
+        onEdit={handleEditPerson}
+        onDeleteInitiation={handleDeleteInitiation}
+        onSkillClick={handleSkillClick}
+      />
       </div>
     </div>
   );
