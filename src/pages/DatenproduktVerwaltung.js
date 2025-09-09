@@ -736,80 +736,85 @@ const DatenproduktKarte = ({
     <div className="bg-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg border border-gray-200 hover:border-gray-300 overflow-hidden">
       {/* Kompakte Ansicht */}
       <div 
-        className="p-4 cursor-pointer flex items-center justify-between"
+        className="p-4 cursor-pointer"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <div className="flex items-center gap-3 flex-1 min-w-0">
-          {/* Status-Indikator */}
-          <div className={`flex-shrink-0 w-3 h-3 rounded-full ${getStatusColor(dp.status).replace('text-', 'bg-').replace('border-', '').split(' ')[0]}`}></div>
-          
-          {/* Name und Team-Info */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-gray-900 truncate">{dp.name}</h3>
-              <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold ${getStatusColor(dp.status)}`}>
-                {dp.status}
-              </span>
-            </div>
+        {/* Name - eigene Zeile */}
+        <div className="mb-2">
+          <h3 className="font-semibold text-gray-900 text-lg">{dp.name}</h3>
+        </div>
+
+        {/* Status und Buttons - zweite Zeile */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            {/* Status-Indikator */}
+            <div className={`flex-shrink-0 w-3 h-3 rounded-full ${getStatusColor(dp.status).replace('text-', 'bg-').replace('border-', '').split(' ')[0]}`}></div>
             
-            {/* Team-Info - kompakt */}
-            {teamZuordnungen.length > 0 && (
-              <div className="text-xs text-gray-500 truncate mt-1">
-                Team: {teamZuordnungen.slice(0, 2).map(z => getPersonName(z.personId)).join(', ')}
-                {teamZuordnungen.length > 2 && ` +${teamZuordnungen.length - 2}`}
-              </div>
-            )}
+            {/* Status-Badge */}
+            <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-semibold ${getStatusColor(dp.status)}`}>
+              {dp.status}
+            </span>
+          </div>
+          
+          {/* Action Buttons - Essentials */}
+          <div className="flex items-center gap-1">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                copyTeamEmailsToClipboard(dp);
+              }}
+              className="inline-flex items-center justify-center w-7 h-7 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+              title="E-Mail-Adressen kopieren"
+              disabled={teamZuordnungen.length === 0}
+            >
+              <span className="text-sm">📧</span>
+            </button>
+            
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedProduktForAssignment(dp);
+                setAssignmentError("");
+              }}
+              className="inline-flex items-center justify-center w-7 h-7 text-green-600 hover:bg-green-50 rounded-md transition-colors"
+              title="Team zuweisen"
+            >
+              <span className="text-sm">👥</span>
+            </button>
+            
+            {/* Expand-Indikator */}
+            <div className={`text-gray-400 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </div>
           </div>
         </div>
-        
-        {/* Action Buttons - Essentials */}
-        <div className="flex items-center gap-1">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              copyTeamEmailsToClipboard(dp);
-            }}
-            className="inline-flex items-center justify-center w-7 h-7 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-            title="E-Mail-Adressen kopieren"
-            disabled={teamZuordnungen.length === 0}
-          >
-            <span className="text-sm">📧</span>
-          </button>
-          
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setSelectedProduktForAssignment(dp);
-              setAssignmentError("");
-            }}
-            className="inline-flex items-center justify-center w-7 h-7 text-green-600 hover:bg-green-50 rounded-md transition-colors"
-            title="Team zuweisen"
-          >
-            <span className="text-sm">👥</span>
-          </button>
-          
-          {/* Expand-Indikator */}
-          <div className={`text-gray-400 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-            </svg>
+
+        {/* Beschreibung - immer sichtbar */}
+        {dp.beschreibung && (
+          <div className="mb-3">
+            <p className="text-sm text-gray-600 line-clamp-3">
+              {dp.beschreibung}
+            </p>
           </div>
-        </div>
+        )}
+
+        {/* Team-Info - kompakt */}
+        {teamZuordnungen.length > 0 && (
+          <div className="text-xs text-gray-500">
+            <span className="font-medium">Team:</span> {teamZuordnungen.slice(0, 3).map(z => getPersonName(z.personId)).join(', ')}
+            {teamZuordnungen.length > 3 && ` +${teamZuordnungen.length - 3} weitere`}
+          </div>
+        )}
       </div>
 
       {/* Erweiterte Ansicht */}
       {isExpanded && (
         <div className="px-4 pb-4 border-t border-gray-100">
-          {/* Beschreibung */}
-          <div className="mb-3 mt-3">
-            <p className="text-sm text-gray-600">
-              {dp.beschreibung || "Keine Beschreibung"}
-            </p>
-          </div>
-
           {/* Team Details */}
-          <div className="mb-4">
-            <h4 className="text-sm font-semibold text-gray-700 mb-2">Team</h4>
+          <div className="mb-4 mt-3">
+            <h4 className="text-sm font-semibold text-gray-700 mb-2">Team-Management</h4>
             {teamZuordnungen.length > 0 ? (
               <div className="space-y-1">
                 {teamZuordnungen.map((zuordnung) => (
@@ -959,7 +964,7 @@ const DatenproduktListe = ({
           </div>
           
           {/* Datenprodukte-Grid für diesen Status */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
             {groupedProdukte[status].map((dp) => (
               <DatenproduktKarte
                 key={dp.id}
