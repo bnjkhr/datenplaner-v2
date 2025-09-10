@@ -5,24 +5,116 @@ import { ConfirmModal } from "../components/ui/ConfirmModal";
 import { TagInput } from "../components/ui/TagInput";
 import { ExcelUploadModal } from "../components/ExcelUploadModal";
 
+// CSS Keyframes for search animations
+const searchAnimationStyles = `
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideInScale {
+    0% {
+      opacity: 0;
+      transform: translateY(-20px) scale(0.9);
+    }
+    50% {
+      opacity: 1;
+      transform: translateY(-10px) scale(1.02);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+`;
 
-// Comprehensive Search Component with Autocomplete
-const GlobalSearch = ({ searchTerm, setSearchTerm, suggestions, onSuggestionClick }) => {
+// Inject styles into document
+if (typeof document !== 'undefined') {
+  const existingStyles = document.getElementById('search-animation-styles');
+  if (!existingStyles) {
+    const styleSheet = document.createElement('style');
+    styleSheet.id = 'search-animation-styles';
+    styleSheet.textContent = searchAnimationStyles;
+    document.head.appendChild(styleSheet);
+  }
+}
+
+
+// Universal Search Component - Fixed to top-right with overlay
+const UniversalSearch = ({ searchTerm, setSearchTerm, suggestions, onSuggestionClick }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [activeSuggestion, setActiveSuggestion] = useState(-1);
   const searchRef = useRef(null);
-  const suggestionsRef = useRef(null);
+  const inputRef = useRef(null);
+
+  const handleExpand = () => {
+    setIsExpanded(true);
+    setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    }, 100);
+  };
+
+  // Global keyboard shortcut handler
+  useEffect(() => {
+    const handleGlobalKeyDown = (event) => {
+      // CMD+F (Mac) or Ctrl+F (Windows/Linux)
+      if ((event.metaKey || event.ctrlKey) && event.key === 'f') {
+        event.preventDefault();
+        handleExpand();
+      }
+    };
+
+    document.addEventListener('keydown', handleGlobalKeyDown);
+    return () => document.removeEventListener('keydown', handleGlobalKeyDown);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
         setShowSuggestions(false);
         setActiveSuggestion(-1);
+        // Auto-collapse if no search term
+        if (!searchTerm) {
+          setIsExpanded(false);
+        }
       }
     };
+
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [searchTerm]);
+
+  const handleCollapse = () => {
+    setSearchTerm('');
+    setShowSuggestions(false);
+    setActiveSuggestion(-1);
+    setIsExpanded(false);
+  };
+
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    setShowSuggestions(value.length > 0 && suggestions.length > 0);
+    setActiveSuggestion(-1);
+  };
 
   const handleKeyDown = (e) => {
     if (e.key === 'ArrowDown') {
@@ -41,14 +133,10 @@ const GlobalSearch = ({ searchTerm, setSearchTerm, suggestions, onSuggestionClic
     } else if (e.key === 'Escape') {
       setShowSuggestions(false);
       setActiveSuggestion(-1);
+      if (!searchTerm) {
+        setIsExpanded(false);
+      }
     }
-  };
-
-  const handleInputChange = (e) => {
-    const value = e.target.value;
-    setSearchTerm(value);
-    setShowSuggestions(value.length > 0 && suggestions.length > 0);
-    setActiveSuggestion(-1);
   };
 
   const handleSuggestionClick = (suggestion) => {
@@ -59,76 +147,166 @@ const GlobalSearch = ({ searchTerm, setSearchTerm, suggestions, onSuggestionClic
 
   return (
     <div className="relative" ref={searchRef}>
-      <div className="relative">
-        <input
-          type="text"
-          placeholder="Suche nach Namen, Skills, Datenprodukten..."
-          value={searchTerm}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-          onFocus={() => setShowSuggestions(searchTerm.length > 0 && suggestions.length > 0)}
-          className="flex-grow px-4 py-3 pr-10 border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-ard-blue-500 focus:border-ard-blue-500 transition-all w-full"
-        />
-        <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-          {searchTerm ? (
-            <button
-              onClick={() => {
-                setSearchTerm('');
-                setShowSuggestions(false);
-                setActiveSuggestion(-1);
-              }}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              ✕
-            </button>
-          ) : (
-            <div className="text-gray-400">🔍</div>
-          )}
-        </div>
-      </div>
-
-      {showSuggestions && suggestions.length > 0 && (
-        <div 
-          ref={suggestionsRef}
-          className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-xl max-h-64 overflow-y-auto"
+      {!isExpanded ? (
+        // Collapsed state: just the search icon
+        <button
+          onClick={handleExpand}
+          className="w-12 h-12 flex items-center justify-center bg-white border border-gray-200 rounded-xl shadow-sm hover:bg-gray-50 hover:shadow-md transition-all duration-200"
+          title={`Universelle Suche öffnen (${navigator.userAgent.includes('Mac') ? '⌘+F' : 'Strg+F'})`}
         >
-          {suggestions.map((suggestion, index) => (
-            <div
-              key={`${suggestion.type}-${suggestion.id || index}`}
-              onClick={() => handleSuggestionClick(suggestion)}
-              className={`px-4 py-3 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0 ${
-                index === activeSuggestion 
-                  ? 'bg-ard-blue-50 text-ard-blue-900' 
-                  : 'hover:bg-gray-50'
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="font-medium text-gray-900">{suggestion.name}</div>
-                  <div className="text-sm text-gray-600 flex items-center gap-2">
-                    <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
-                      suggestion.type === 'person' ? 'bg-ard-blue-100 text-ard-blue-700' :
-                      suggestion.type === 'skill' ? 'bg-green-100 text-green-700' :
-                      suggestion.type === 'datenprodukt' ? 'bg-purple-100 text-purple-700' :
-                      'bg-gray-100 text-gray-700'
-                    }`}>
-                      {suggestion.type === 'person' ? 'Person' :
-                       suggestion.type === 'skill' ? 'Skill' :
-                       suggestion.type === 'datenprodukt' ? 'Datenprodukt' :
-                       suggestion.type}
-                    </span>
-                    {suggestion.details && <span>{suggestion.details}</span>}
-                  </div>
-                </div>
-                {suggestion.matchedField && (
-                  <div className="text-xs text-gray-500 italic">
-                    in {suggestion.matchedField}
-                  </div>
+          <span className="text-xl">🔍</span>
+        </button>
+      ) : (
+        <>
+          {/* Backdrop overlay */}
+          <div 
+            className="fixed inset-0 bg-black/20 z-40 transition-opacity duration-300"
+            onClick={handleCollapse}
+            style={{
+              animation: 'fadeIn 0.3s ease-out'
+            }}
+          />
+          
+          {/* Search overlay */}
+          <div 
+            className="absolute top-0 right-0 z-50 w-96 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden"
+            style={{
+              marginTop: '0px',
+              animation: 'slideInScale 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+              transformOrigin: 'top right'
+            }}
+          >
+            {/* Search input */}
+            <div className="p-4">
+              <div className="relative">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  placeholder={`Suche nach Namen, Skills, Datenprodukten... (${navigator.userAgent.includes('Mac') ? '⌘+F' : 'Strg+F'})`}
+                  value={searchTerm}
+                  onChange={handleInputChange}
+                  onKeyDown={handleKeyDown}
+                  onFocus={() => setShowSuggestions(searchTerm.length > 0 && suggestions.length > 0)}
+                  className={`w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-ard-blue-500 focus:border-ard-blue-500 transition-all ${
+                    searchTerm ? 'pr-20' : 'pr-10'
+                  }`}
+                />
+                {searchTerm && (
+                  <button
+                    onClick={() => {
+                      setSearchTerm('');
+                      setShowSuggestions(false);
+                      setActiveSuggestion(-1);
+                    }}
+                    className="absolute inset-y-0 right-10 flex items-center pr-3 text-gray-400 hover:text-gray-600 transition-colors"
+                    title="Suchtext löschen"
+                  >
+                    ✕
+                  </button>
                 )}
+                <button
+                  onClick={handleCollapse}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 transition-colors"
+                  title="Suche schließen"
+                >
+                  ✕
+                </button>
               </div>
             </div>
-          ))}
-        </div>
+
+            {/* Search results */}
+            {showSuggestions && suggestions.length > 0 && (
+              <div 
+                className="border-t border-gray-200 max-h-96 overflow-y-auto"
+                style={{
+                  animation: 'fadeInUp 0.3s ease-out 0.1s both'
+                }}
+              >
+                <div className="p-2">
+                  <div className="text-xs text-gray-500 px-2 pb-2 font-medium">
+                    {suggestions.length} Ergebnis{suggestions.length !== 1 ? 'se' : ''} gefunden
+                  </div>
+                  {suggestions.map((suggestion, index) => (
+                    <div
+                      key={`${suggestion.type}-${suggestion.id || index}`}
+                      onClick={() => handleSuggestionClick(suggestion)}
+                      className={`px-3 py-3 cursor-pointer transition-colors rounded-lg mb-1 ${
+                        index === activeSuggestion 
+                          ? 'bg-ard-blue-50 text-ard-blue-900' 
+                          : 'hover:bg-gray-50'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-gray-900 truncate">{suggestion.name}</div>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
+                              suggestion.type === 'person' ? 'bg-ard-blue-100 text-ard-blue-700' :
+                              suggestion.type === 'skill' ? 'bg-green-100 text-green-700' :
+                              suggestion.type === 'datenprodukt' ? 'bg-purple-100 text-purple-700' :
+                              'bg-gray-100 text-gray-700'
+                            }`}>
+                              {suggestion.type === 'person' ? 'Person' :
+                               suggestion.type === 'skill' ? 'Skill' :
+                               suggestion.type === 'datenprodukt' ? 'Produkt' :
+                               suggestion.type}
+                            </span>
+                            {suggestion.details && (
+                              <span className="text-xs text-gray-500 truncate">{suggestion.details}</span>
+                            )}
+                          </div>
+                          {suggestion.matchedField && (
+                            <div className="text-xs text-gray-400 mt-1 italic">
+                              gefunden in {suggestion.matchedField}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Empty state or no results */}
+            {searchTerm && suggestions.length === 0 && (
+              <div 
+                className="border-t border-gray-200 p-6 text-center"
+                style={{
+                  animation: 'fadeInUp 0.3s ease-out 0.1s both'
+                }}
+              >
+                <div className="text-gray-400 text-sm">
+                  <div className="text-2xl mb-2">🔍</div>
+                  <div>Keine Ergebnisse für "{searchTerm}"</div>
+                  <div className="text-xs mt-1">Versuche es mit anderen Suchbegriffen</div>
+                </div>
+              </div>
+            )}
+
+            {/* Quick tips when empty */}
+            {!searchTerm && (
+              <div 
+                className="border-t border-gray-200 p-4"
+                style={{
+                  animation: 'fadeInUp 0.4s ease-out 0.2s both'
+                }}
+              >
+                <div className="text-xs text-gray-500 space-y-2">
+                  <div className="font-medium">Schnelle Suche:</div>
+                  <div className="space-y-1">
+                    <div>• Nach Personennamen suchen</div>
+                    <div>• Skills finden (z.B. "React", "Python")</div>
+                    <div>• Datenprodukte durchsuchen</div>
+                    <div>• Nach Rollen filtern</div>
+                    <div>• "M13" für M13-Status</div>
+                    <div className="pt-1 text-gray-400">• Tastenkürzel: {navigator.userAgent.includes('Mac') ? '⌘+F' : 'Strg+F'}</div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </>
       )}
     </div>
   );
@@ -1184,8 +1362,8 @@ const PersonenVerwaltung = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-ard-blue-50/30">
       <div className="container mx-auto px-6 py-8">
         <div className="mb-8">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            <div>
+          <div className="flex items-start justify-between gap-6">
+            <div className="flex-1">
               <h1 className="text-4xl font-bold text-gray-900 mb-2">Personenverwaltung</h1>
               <p className="text-gray-600">Verwalte dein Team und überwache die Arbeitsauslastung</p>
               {currentlyAbsentPeople.length > 0 && (
@@ -1205,45 +1383,49 @@ const PersonenVerwaltung = () => {
               )}
             </div>
             
-            <div className="flex flex-col sm:flex-row gap-3 lg:flex-1 lg:max-w-2xl lg:ml-8">
-              <div className="flex-1">
-                <GlobalSearch
-                  searchTerm={searchTerm}
-                  setSearchTerm={setSearchTerm}
-                  suggestions={suggestions}
-                  onSuggestionClick={handleSuggestionClick}
-                />
-              </div>
+            <div className="flex items-center gap-3">
+              <UniversalSearch
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                suggestions={suggestions}
+                onSuggestionClick={handleSuggestionClick}
+              />
               
-              <div className="flex gap-3">
-                {searchTerm && (
-                  <button
-                    onClick={() => setSearchTerm("")}
-                    className="px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-all duration-200 whitespace-nowrap"
-                  >
-                    Filter löschen
-                  </button>
-                )}
-                <button
-                  onClick={handleAddNewPerson}
-                  className="bg-gradient-to-r from-ard-blue-600 to-ard-blue-700 hover:from-ard-blue-700 hover:to-ard-blue-800 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2 whitespace-nowrap"
-                >
-                  <span className="text-lg">+</span>
-                  Neue Person
-                </button>
-                <button
-                  onClick={() => setShowExcelModal(true)}
-                  className="bg-white hover:bg-gray-50 text-gray-700 font-semibold py-3 px-6 rounded-xl shadow-md hover:shadow-lg border border-gray-200 transition-all duration-200 whitespace-nowrap"
-                >
-                  Excel Upload
-                </button>
-              </div>
+              <button
+                onClick={handleAddNewPerson}
+                className="bg-white hover:bg-gray-50 text-ard-blue-700 font-semibold py-3 px-6 rounded-xl shadow-md hover:shadow-lg border border-gray-200 transition-all duration-200 whitespace-nowrap"
+              >
+                + Neue Person
+              </button>
+              
+              <button
+                onClick={() => setShowExcelModal(true)}
+                className="bg-white hover:bg-gray-50 text-gray-700 font-semibold py-3 px-6 rounded-xl shadow-md hover:shadow-lg border border-gray-200 transition-all duration-200 whitespace-nowrap"
+              >
+                Excel Upload
+              </button>
             </div>
           </div>
           
-          {debouncedSearchTerm && (
-            <div className="mt-4 text-sm text-gray-600">
-              {filteredPersonen.length} Person{filteredPersonen.length !== 1 ? 'en' : ''} gefunden für "{debouncedSearchTerm}"
+          {(debouncedSearchTerm || searchTerm) && (
+            <div className="mt-4 flex items-center justify-between">
+              <div className="text-sm text-gray-600">
+                {debouncedSearchTerm ? (
+                  <>
+                    {filteredPersonen.length} Person{filteredPersonen.length !== 1 ? 'en' : ''} gefunden für "{debouncedSearchTerm}"
+                  </>
+                ) : (
+                  'Suche läuft...'
+                )}
+              </div>
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm("")}
+                  className="px-3 py-1.5 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-all duration-200"
+                >
+                  Filter löschen
+                </button>
+              )}
             </div>
           )}
         </div>

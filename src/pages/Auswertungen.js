@@ -30,6 +30,7 @@ export const Auswertungen = () => {
   const [filterDatenprodukt, setFilterDatenprodukt] = useState("");
   const [filterRolle, setFilterRolle] = useState("");
   const [selectedKategorie, setSelectedKategorie] = useState("alle");
+  const [filterM13, setFilterM13] = useState("alle");
 
   if (loading)
     return (
@@ -135,7 +136,8 @@ export const Auswertungen = () => {
       auslastung: Math.round(auslastung * 10) / 10, // Runde auf 1 Dezimalstelle
       status: auslastung > 100 ? 'overbooked' : 
               auslastung < 20 ? 'underbooked' : 'normal',
-      kategorien: person.kategorien || []
+      kategorien: person.kategorien || [],
+      isM13: person.isM13 || false
     };
   }).sort((a, b) => b.auslastung - a.auslastung); // Sortiert von hoch zu niedrig
 
@@ -212,6 +214,12 @@ export const Auswertungen = () => {
         if (!hasRole) return false;
       }
 
+      // Filter by M13 status
+      if (filterM13 !== "alle") {
+        if (filterM13 === "m13" && !person.isM13) return false;
+        if (filterM13 === "nicht-m13" && person.isM13) return false;
+      }
+
       return true;
     });
   };
@@ -237,6 +245,7 @@ export const Auswertungen = () => {
 
       return {
         Name: person.name,
+        'M13 Status': person.isM13 ? 'Ja' : 'Nein',
         'Verfügbare Stunden': person.verfügbareStunden,
         'Gebuchte Stunden': person.gebuchteStunden,
         'Auslastung (%)': person.auslastung,
@@ -309,11 +318,13 @@ export const Auswertungen = () => {
 
       return {
         Name: p.name,
+        'M13 Status': p.isM13 ? 'Ja' : 'Nein',
         Email: p.email || '',
         'Wochenstunden': p.wochenstunden || 31,
         'Gebuchte Stunden': totalStunden,
         'Auslastung (%)': p.wochenstunden > 0 ? Math.round((totalStunden / p.wochenstunden) * 100 * 10) / 10 : 0,
         Skills: personSkills,
+        Kategorien: p.kategorien?.join(', ') || 'Keine Kategorien',
         'Erstellt am': p.erstelltAm ? new Date(p.erstelltAm).toLocaleDateString('de-DE') : '',
         'Letzte Änderung': p.letzteAenderung ? new Date(p.letzteAenderung).toLocaleDateString('de-DE') : ''
       };
@@ -384,7 +395,7 @@ export const Auswertungen = () => {
             {/* Filter Controls */}
             <div className="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
               <h3 className="text-sm font-semibold text-gray-700 mb-3">Filter</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
                 
                 {/* Kreis Filter */}
                 <div>
@@ -399,6 +410,20 @@ export const Auswertungen = () => {
                     <option value="Datenprodukt">📊 Datenprodukt</option>
                     <option value="Governance">⚖️ Governance</option>
                     <option value="Ohne Kategorie">❓ Ohne Kreis</option>
+                  </select>
+                </div>
+
+                {/* M13 Filter */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">M13 Status</label>
+                  <select
+                    value={filterM13}
+                    onChange={(e) => setFilterM13(e.target.value)}
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-ard-blue-500 focus:border-ard-blue-500"
+                  >
+                    <option value="alle">Alle</option>
+                    <option value="m13">✅ Nur M13</option>
+                    <option value="nicht-m13">❌ Nicht M13</option>
                   </select>
                 </div>
                 
@@ -465,10 +490,11 @@ export const Auswertungen = () => {
               </div>
               
               {/* Clear filters button */}
-              {(selectedKategorie !== "alle" || filterAuslastung !== "alle" || filterSkill || filterDatenprodukt || filterRolle) && (
+              {(selectedKategorie !== "alle" || filterM13 !== "alle" || filterAuslastung !== "alle" || filterSkill || filterDatenprodukt || filterRolle) && (
                 <button
                   onClick={() => {
                     setSelectedKategorie("alle");
+                    setFilterM13("alle");
                     setFilterAuslastung("alle");
                     setFilterSkill("");
                     setFilterDatenprodukt("");
@@ -507,9 +533,16 @@ export const Auswertungen = () => {
                       }`}
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <h3 className="font-semibold text-gray-900 text-sm truncate">{person.name}</h3>
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <h3 className="font-semibold text-gray-900 text-sm truncate">{person.name}</h3>
+                          {person.isM13 && (
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700 border border-green-200 flex-shrink-0">
+                              M13
+                            </span>
+                          )}
+                        </div>
                         <span 
-                          className={`text-xs font-bold px-2 py-1 rounded-full ${
+                          className={`text-xs font-bold px-2 py-1 rounded-full flex-shrink-0 ${
                             person.status === 'overbooked' 
                               ? 'bg-orange-200 text-orange-800' 
                               : person.status === 'underbooked'

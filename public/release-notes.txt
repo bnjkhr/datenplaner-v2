@@ -7,3 +7,10 @@ Version 2.3.1 - 09.09.2025
 * Kompaktere Darstellung von Personen und Datenproduktverwaltung
 * Automatisches Team-Erstellen über Rollen und Verfügbarkeiten 
 * Rollen kompakter und mit Farbcodierung
+* Modal statt ausklappen auf den einzelnen Seiten
+* neue Farbcodierungen
+
+Version 2.3.2 - 10.09.2025
+--------------------------
+* Auswertungen: Neuer Filter M13 ja / nein
+* Suchfeld angepasst
