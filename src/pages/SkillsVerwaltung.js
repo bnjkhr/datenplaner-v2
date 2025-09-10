@@ -106,7 +106,7 @@ export const SkillsVerwaltung = () => {
                         </div>
                         <button 
                             type="submit" 
-                            className="px-4 py-2 bg-gradient-to-r from-ard-blue-600 to-ard-blue-700 hover:from-ard-blue-700 hover:to-ard-blue-800 text-white rounded-lg shadow-md font-medium transition-all duration-200 flex items-center gap-2 whitespace-nowrap"
+                            className="px-4 py-2 bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 rounded-lg shadow-md font-medium transition-all duration-200 flex items-center gap-2 whitespace-nowrap"
                         >
                             <span className="text-lg">+</span>
                             Hinzufügen

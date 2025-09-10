@@ -168,7 +168,7 @@ export const RollenVerwaltung = () => {
                         </div>
                         <button 
                             type="submit" 
-                            className="px-4 py-2 bg-gradient-to-r from-ard-blue-600 to-ard-blue-700 hover:from-ard-blue-700 hover:to-ard-blue-800 text-white rounded-lg shadow-md font-medium transition-all duration-200 flex items-center gap-2 whitespace-nowrap"
+                            className="px-4 py-2 bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 rounded-lg shadow-md font-medium transition-all duration-200 flex items-center gap-2 whitespace-nowrap"
                         >
                             <span className="text-lg">+</span>
                             Hinzufügen
@@ -289,7 +289,7 @@ const RolleDetailsModal = ({ rolle, isOpen, onClose, onEdit, onDeleteInitiation,
                     <div className="flex gap-2 mb-6">
                         <button
                             onClick={() => onEdit(rolle)}
-                            className="px-4 py-2 bg-ard-blue-600 hover:bg-ard-blue-700 text-white rounded-lg transition-colors"
+                            className="px-4 py-2 bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 rounded-lg transition-colors"
                         >
                             Bearbeiten
                         </button>

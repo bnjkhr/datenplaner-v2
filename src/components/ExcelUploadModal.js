@@ -180,7 +180,7 @@ alert("Fehler beim Parsen:\n" + err.message);
           <button
             onClick={handleUpload}
             disabled={parsedData.length === 0 || isUploading}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-md shadow-sm hover:bg-indigo-700 disabled:bg-indigo-300 disabled:cursor-not-allowed"
+            className="px-4 py-2 bg-green-600 text-white rounded-md shadow-sm hover:bg-green-700 disabled:bg-green-300 disabled:cursor-not-allowed"
           >
             {isUploading
   ? "Importiere..."

@@ -996,7 +996,7 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
         )}
         <button
           type="submit"
-          className="px-6 py-3 bg-gradient-to-r from-ard-blue-600 to-ard-blue-700 hover:from-ard-blue-700 hover:to-ard-blue-800 text-white rounded-xl shadow-lg font-semibold transition-all duration-200"
+          className="px-6 py-3 bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 rounded-xl shadow-lg font-semibold transition-all duration-200"
         >
           {personToEdit ? "Speichern" : "Hinzufügen"}
         </button>
@@ -1400,7 +1400,7 @@ const PersonenVerwaltung = () => {
               
               <button
                 onClick={() => setShowExcelModal(true)}
-                className="bg-white hover:bg-gray-50 text-gray-700 font-semibold py-3 px-6 rounded-xl shadow-md hover:shadow-lg border border-gray-200 transition-all duration-200 whitespace-nowrap"
+                className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 whitespace-nowrap"
               >
                 Excel Upload
               </button>

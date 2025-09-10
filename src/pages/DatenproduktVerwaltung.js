@@ -320,7 +320,7 @@ export const DatenproduktVerwaltung = () => {
             </button>
             <button
               onClick={() => handleOpenProduktForm()}
-              className="bg-gradient-to-r from-ard-blue-600 to-ard-blue-700 hover:from-ard-blue-700 hover:to-ard-blue-800 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2"
+              className="bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2"
             >
               <span className="text-lg">+</span>
               Neues Datenprodukt
@@ -1211,7 +1211,7 @@ const EditAssignmentModal = ({ assignment, rollen, onSave, onClose, getPersonNam
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-ard-blue-600 text-white rounded-md"
+              className="px-4 py-2 bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 rounded-md"
             >
               Speichern
             </button>
