@@ -471,6 +471,11 @@ export const TeamRecommendationResults = ({
                         <span className="font-medium text-gray-900">
                           {candidate.person.name}
                         </span>
+                        {candidate.person.isM13 && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700 border border-green-200">
+                            M13
+                          </span>
+                        )}
                       </div>
                       <div className="flex items-center gap-2">
                         {cidx === 0 && !isSelected && (
