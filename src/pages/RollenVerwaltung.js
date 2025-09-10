@@ -4,12 +4,14 @@ import { ConfirmModal } from '../components/ui/ConfirmModal';
 import { ColorPicker } from '../components/ui/ColorPicker';
 
 export const RollenVerwaltung = () => {
-    const { rollen, personen, datenprodukte, zuordnungen, fuegeRolleHinzu, aktualisiereRolle, loescheRolle, loading, error, setError } = useData();
+    const { rollen, personen, datenprodukte, zuordnungen, fuegeRolleHinzu, aktualisiereRolle, loescheRolle, fixDuplicateRoleColors, loading, error, setError } = useData();
     const [neueRolleName, setNeueRolleName] = useState('');
     const [editingRolle, setEditingRolle] = useState(null);
     const [rolleToDelete, setRolleToDelete] = useState(null);
     const [showDetailsModal, setShowDetailsModal] = useState(false);
     const [rolleToShowDetails, setRolleToShowDetails] = useState(null);
+    const [isFixingColors, setIsFixingColors] = useState(false);
+    const [fixColorMessage, setFixColorMessage] = useState('');
 
     const handleAddRolle = async (e) => {
         e.preventDefault();
@@ -57,6 +59,28 @@ export const RollenVerwaltung = () => {
         setShowDetailsModal(false);
     };
 
+    const handleFixDuplicateColors = async () => {
+        setIsFixingColors(true);
+        setFixColorMessage('');
+        const result = await fixDuplicateRoleColors();
+        setIsFixingColors(false);
+        if (result) {
+            setFixColorMessage(result.message);
+            setTimeout(() => setFixColorMessage(''), 5000);
+        }
+    };
+
+    const hasDuplicateColors = () => {
+        const colorCounts = {};
+        const rolesWithColors = rollen.filter(r => r.color);
+        
+        rolesWithColors.forEach(role => {
+            colorCounts[role.color] = (colorCounts[role.color] || 0) + 1;
+        });
+        
+        return Object.values(colorCounts).some(count => count > 1);
+    };
+
     if (loading) {
         return (
             <div className="flex justify-center py-10">
@@ -80,6 +104,49 @@ export const RollenVerwaltung = () => {
                             <button onClick={() => setError(null)} className="text-red-600 hover:text-red-800 font-bold ml-4">
                                 ✕
                             </button>
+                        </div>
+                    </div>
+                )}
+
+                {hasDuplicateColors() && (
+                    <div className="bg-gradient-to-r from-yellow-50 to-yellow-100 border border-yellow-200 text-yellow-800 px-6 py-4 rounded-xl mb-6" role="alert">
+                        <div className="flex justify-between items-center">
+                            <div className="flex items-center gap-3">
+                                <span className="text-xl">⚠️</span>
+                                <div>
+                                    <div className="font-semibold">Doppelte Rollenfarben erkannt</div>
+                                    <div className="text-sm text-yellow-700">Mehrere Rollen verwenden dieselbe Farbe. Klicke hier, um automatisch eindeutige Farben zuzuweisen.</div>
+                                </div>
+                            </div>
+                            <button 
+                                onClick={handleFixDuplicateColors}
+                                disabled={isFixingColors}
+                                className="bg-yellow-600 hover:bg-yellow-700 disabled:bg-yellow-400 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+                            >
+                                {isFixingColors ? (
+                                    <>
+                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                        Wird behoben...
+                                    </>
+                                ) : (
+                                    <>
+                                        <span>🎨</span>
+                                        Farben korrigieren
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {fixColorMessage && (
+                    <div className="bg-gradient-to-r from-green-50 to-green-100 border border-green-200 text-green-800 px-6 py-4 rounded-xl mb-6" role="alert">
+                        <div className="flex items-center gap-3">
+                            <span className="text-xl">✅</span>
+                            <div>
+                                <div className="font-semibold">Rollenfarben korrigiert</div>
+                                <div className="text-sm text-green-700">{fixColorMessage}</div>
+                            </div>
                         </div>
                     </div>
                 )}

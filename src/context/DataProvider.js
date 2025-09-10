@@ -612,6 +612,65 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
     }
   });
 
+  const fixDuplicateRoleColors = preventWriteActions(async () => {
+    try {
+      // Find roles with duplicate colors
+      const colorCounts = {};
+      const rolesWithColors = rollen.filter(r => r.color);
+      
+      rolesWithColors.forEach(role => {
+        if (colorCounts[role.color]) {
+          colorCounts[role.color].push(role);
+        } else {
+          colorCounts[role.color] = [role];
+        }
+      });
+
+      // Find duplicates
+      const duplicateGroups = Object.values(colorCounts).filter(group => group.length > 1);
+      
+      if (duplicateGroups.length === 0) {
+        console.log('Keine doppelten Rollenfarben gefunden');
+        return { success: true, message: 'Alle Rollenfarben sind bereits eindeutig.' };
+      }
+
+      const batch = writeBatch(db);
+      let totalFixed = 0;
+      
+      // For each group of duplicates, keep the first role and reassign colors to others
+      for (const duplicateGroup of duplicateGroups) {
+        const [, ...reassignRoles] = duplicateGroup;
+        const usedColors = rollen.map(r => r.color).filter(Boolean);
+        
+        for (let i = 0; i < reassignRoles.length; i++) {
+          const role = reassignRoles[i];
+          const newColor = getRandomRoleColor(usedColors);
+          usedColors.push(newColor);
+          
+          const roleRef = doc(db, getCollectionPath("rollen"), role.id);
+          batch.update(roleRef, { color: newColor });
+          totalFixed++;
+        }
+      }
+
+      await batch.commit();
+      recordLastChange("Doppelte Rollenfarben behoben");
+      console.log(`${totalFixed} Rollen-Farben korrigiert`);
+      
+      return { 
+        success: true, 
+        message: `${totalFixed} doppelte Rollenfarben wurden korrigiert.` 
+      };
+    } catch (error) {
+      console.error('Fehler beim Beheben doppelter Rollenfarben:', error);
+      setError(`Fehler beim Beheben doppelter Rollenfarben: ${error.code}`);
+      return { 
+        success: false, 
+        message: 'Fehler beim Beheben der doppelten Rollenfarben.' 
+      };
+    }
+  });
+
   const fuegeSkillHinzu = preventWriteActions(async (skillName, color) => {
     if (!skillName?.trim()) return null;
     const colorToUse = color || getRandomColor();
@@ -689,6 +748,7 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
         fuegeRolleHinzu,
         aktualisiereRolle,
         loescheRolle,
+        fixDuplicateRoleColors,
         fuegeSkillHinzu,
         aktualisiereSkill,
         loescheSkill,
