@@ -10,6 +10,7 @@ import { RollenVerwaltung } from "./pages/RollenVerwaltung";
 import { SkillsVerwaltung } from "./pages/SkillsVerwaltung"; // NEU
 import { useData } from "./context/DataProvider";
 import { ReleaseNotesModal } from "./components/ui/ReleaseNotesModal";
+import CalendarWarningBanner from "./components/CalendarWarningBanner";
 
 const AppFooter = ({ user }) => {
   const { lastChange } = useData();
@@ -53,6 +54,7 @@ export const MainAppContent = ({ user }) => {
   const [currentPage, setCurrentPage] = useState("personen");
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const [showReleaseNotesModal, setShowReleaseNotesModal] = useState(false);
+  const { calendarError } = useData();
 
   const handleLogout = async () => {
     try {
@@ -123,6 +125,7 @@ export const MainAppContent = ({ user }) => {
           </div>
         </nav>
       </header>
+      <CalendarWarningBanner show={calendarError} />
       <main className="py-4 flex-grow">
         {currentPage === "personen" && <PersonenVerwaltung />}
         {currentPage === "datenprodukte" && <DatenproduktVerwaltung />}

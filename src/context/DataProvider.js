@@ -120,6 +120,7 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
   const [error, setError] = useState(null);
   const [lastChange, setLastChange] = useState(null);
   const [vacations, setVacations] = useState({});
+  const [calendarError, setCalendarError] = useState(false);
   
   // Multi-Tenancy: Wähle entsprechenden Tenant oder fallback zu appId
   const currentTenantId = tenantId || (isFeatureEnabled(FEATURE_FLAGS.MULTI_TENANCY) ? defaultTenantId : appId);
@@ -232,9 +233,11 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
         console.log('🗂️ Final mapping:', mapping);
         console.log('🗂️ Mapping keys:', Object.keys(mapping));
         setVacations(mapping);
+        setCalendarError(false);
       } catch (error) {
         console.error('❌ Calendar loading error:', error);
         setVacations({});
+        setCalendarError(true);
       }
     };
     loadVacations();
@@ -756,6 +759,7 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
         error,
         setError,
         lastChange,
+        calendarError,
         // Multi-Tenancy Informationen
         currentTenantId,
         isMultiTenancy,
