@@ -14,3 +14,4 @@ Version 2.3.2 - 10.09.2025
 --------------------------
 * Auswertungen: Neuer Filter M13 ja / nein
 * Suchfeld angepasst
+* Hinweis wenn Kalender offline
