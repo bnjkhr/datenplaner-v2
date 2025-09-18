@@ -153,26 +153,19 @@ export const getAllFeatureFlags = () => {
  */
 export const debugFeatureFlags = (flagName = null) => {
   if (process.env.NODE_ENV !== 'development') {
-    return;
+    return [];
   }
-  
+
   const config = flagName ? { [flagName]: getFeatureConfig()[flagName] } : getFeatureConfig();
-  
-  console.group('🏁 Feature Flags Debug');
-  Object.entries(config).forEach(([key, value]) => {
-    const enabled = isFeatureEnabled(key);
-    const beta = isFeatureBeta(key);
-    const deps = areDependenciesSatisfied(key);
-    
-    console.log(`${key}:`, {
-      status: value.status,
-      enabled,
-      beta,
-      dependenciesSatisfied: deps,
-      description: value.description
-    });
-  });
-  console.groupEnd();
+
+  return Object.entries(config).map(([key, value]) => ({
+    flag: key,
+    status: value.status,
+    enabled: isFeatureEnabled(key),
+    beta: isFeatureBeta(key),
+    dependenciesSatisfied: areDependenciesSatisfied(key),
+    description: value.description
+  }));
 };
 
 // Export für einfache Verwendung

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   getAllFeatureFlags, 
   isFeatureEnabled, 
@@ -14,29 +14,73 @@ import {
 export const FeatureFlagManager = () => {
   const [flags, setFlags] = useState({});
   const [isVisible, setIsVisible] = useState(false);
+  const [showDebugInfo, setShowDebugInfo] = useState(false);
+  const [debugInfo, setDebugInfo] = useState([]);
+
+  const loadFlags = useCallback(() => {
+    const allFlags = getAllFeatureFlags();
+    setFlags(allFlags);
+  }, []);
 
   useEffect(() => {
-    const loadFlags = () => {
-      const allFlags = getAllFeatureFlags();
-      setFlags(allFlags);
+    loadFlags();
+  }, [loadFlags]);
+
+  useEffect(() => {
+    if (!showDebugInfo) {
+      return;
+    }
+
+    const info = debugFeatureFlags();
+    setDebugInfo(info);
+  }, [showDebugInfo, flags, debugFeatureFlags]);
+
+  useEffect(() => {
+    if (!isVisible) {
+      return;
+    }
+    loadFlags();
+  }, [isVisible, loadFlags]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return undefined;
+    }
+
+    const handleStorageChange = (event) => {
+      if (!event?.key) {
+        loadFlags();
+        return;
+      }
+
+      if (event.key.startsWith('REACT_APP_') && event.key.endsWith('_STATUS')) {
+        loadFlags();
+      }
     };
 
-    loadFlags();
-    
-    // Reload flags when localStorage changes (for hot reloading)
-    const interval = setInterval(loadFlags, 1000);
-    return () => clearInterval(interval);
-  }, []);
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [loadFlags]);
 
   // Nur in Development-Umgebung anzeigen
   if (process.env.NODE_ENV !== 'development') {
     return null;
   }
 
+  const handleClose = () => {
+    setIsVisible(false);
+    setShowDebugInfo(false);
+  };
+
+  const handleOpen = () => {
+    setShowDebugInfo(false);
+    setIsVisible(true);
+  };
+
   const handleToggleFlag = (flagName) => {
     const currentStatus = flags[flagName]?.status || FEATURE_STATUS.DISABLED;
-    const newStatus = currentStatus === FEATURE_STATUS.ENABLED ? 
-      FEATURE_STATUS.DISABLED : 
+    const newStatus = currentStatus === FEATURE_STATUS.ENABLED ?
+      FEATURE_STATUS.DISABLED :
       FEATURE_STATUS.ENABLED;
     
     // Setze Umgebungsvariable temporär (nur für Development)
@@ -53,8 +97,15 @@ export const FeatureFlagManager = () => {
     window.location.reload();
   };
 
-  const handleDebugFlags = () => {
-    debugFeatureFlags();
+  const handleToggleDebugInfo = () => {
+    if (showDebugInfo) {
+      setShowDebugInfo(false);
+      return;
+    }
+
+    const info = debugFeatureFlags();
+    setDebugInfo(info);
+    setShowDebugInfo(true);
   };
 
   const getStatusColor = (status) => {
@@ -89,7 +140,7 @@ export const FeatureFlagManager = () => {
     return (
       <div className="fixed bottom-4 right-4 z-50">
         <button
-          onClick={() => setIsVisible(true)}
+          onClick={handleOpen}
           className="bg-purple-600 hover:bg-purple-700 text-white p-3 rounded-full shadow-lg transition-colors"
           title="Feature Flags öffnen"
         >
@@ -111,14 +162,21 @@ export const FeatureFlagManager = () => {
           </h3>
           <div className="flex gap-2">
             <button
-              onClick={handleDebugFlags}
-              className="text-sm text-blue-600 hover:text-blue-800"
-              title="Debug-Informationen in Console ausgeben"
+              onClick={loadFlags}
+              className="text-sm text-gray-500 hover:text-gray-700"
+              title="Feature-Flags aktualisieren"
+            >
+              🔄
+            </button>
+            <button
+              onClick={handleToggleDebugInfo}
+              className={`text-sm ${showDebugInfo ? 'text-purple-600' : 'text-blue-600'} hover:text-purple-700`}
+              title={showDebugInfo ? 'Debug-Informationen verbergen' : 'Debug-Informationen anzeigen'}
             >
               🐛
             </button>
             <button
-              onClick={() => setIsVisible(false)}
+              onClick={handleClose}
               className="text-gray-400 hover:text-gray-600"
             >
               ✕
@@ -175,7 +233,48 @@ export const FeatureFlagManager = () => {
             </div>
           ))}
         </div>
-        
+
+        {showDebugInfo && (
+          <div className="mt-4 border-t border-gray-200 pt-3">
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="text-sm font-semibold text-gray-900">Debug-Informationen</h4>
+              <button
+                onClick={() => setShowDebugInfo(false)}
+                className="text-gray-400 hover:text-gray-600 text-sm"
+                title="Debug-Informationen verbergen"
+              >
+                ✕
+              </button>
+            </div>
+            {debugInfo.length > 0 ? (
+              <div className="space-y-2">
+                {debugInfo.map((info) => (
+                  <div key={info.flag} className="bg-gray-50 rounded-md p-2">
+                    <div className="text-xs font-semibold text-gray-800">{info.flag}</div>
+                    <dl className="mt-1 grid grid-cols-2 gap-x-2 gap-y-1 text-xs text-gray-600">
+                      <dt>Status</dt>
+                      <dd className="text-right text-gray-800 font-medium">{info.status}</dd>
+                      <dt>Aktiv</dt>
+                      <dd className="text-right">{info.enabled ? 'Ja' : 'Nein'}</dd>
+                      <dt>Beta</dt>
+                      <dd className="text-right">{info.beta ? 'Ja' : 'Nein'}</dd>
+                      <dt>Abhängigkeiten</dt>
+                      <dd className="text-right">{info.dependenciesSatisfied ? 'Erfüllt' : 'Offen'}</dd>
+                    </dl>
+                    {info.description && (
+                      <p className="mt-2 text-[11px] text-gray-500">{info.description}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-xs text-gray-500">
+                Keine Debug-Informationen verfügbar.
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="mt-4 pt-3 border-t border-gray-200">
           <div className="text-xs text-gray-500 text-center">
             💡 Änderungen erfordern Seiten-Reload

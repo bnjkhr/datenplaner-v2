@@ -96,7 +96,6 @@ export const TenantAuswahl = ({ onTenantChange }) => {
                 <button
                   onClick={() => {
                     // TODO: Implementiere Tenant-Management Modal
-                    console.log('Tenant-Management öffnen');
                     setIsOpen(false);
                   }}
                   className="w-full text-left px-3 py-2 rounded-md text-sm text-gray-600 hover:bg-gray-50 flex items-center gap-2"

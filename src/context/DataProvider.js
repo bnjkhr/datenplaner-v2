@@ -188,23 +188,15 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
         url = `https://corsproxy.io/?${encodeURIComponent(confluenceCalendarUrl)}`;
       }
       
-      console.log('🔍 Calendar URL:', url);
-      console.log('🔍 calendarProxyUrl:', calendarProxyUrl);
-      console.log('🔍 confluenceCalendarUrl:', confluenceCalendarUrl);
-      console.log('🔍 NODE_ENV:', process.env.NODE_ENV);
-      
       if (!url) {
-        console.log('❌ No calendar URL configured');
+        setVacations({});
+        setCalendarError(true);
         return;
       }
-      
+
       try {
-        console.log('📅 Fetching calendar from:', url);
         const events = await fetchCalendarEvents(url);
-        console.log('📊 Events received:', events.length, events);
-        
         const upcoming = events.filter((ev) => new Date(ev.end) >= new Date());
-        console.log('📅 Upcoming events:', upcoming.length);
 
         const mapping = {};
         upcoming.forEach((ev) => {
@@ -230,8 +222,6 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
           });
         });
         
-        console.log('🗂️ Final mapping:', mapping);
-        console.log('🗂️ Mapping keys:', Object.keys(mapping));
         setVacations(mapping);
         setCalendarError(false);
       } catch (error) {
@@ -307,7 +297,6 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
 
       try {
         await batch.commit();
-        console.log(`${rollenOhneFarbe.length} Rollen mit Farben versorgt`);
       } catch (error) {
         console.error('Fehler beim Migrieren der Rollen-Farben:', error);
       }
@@ -633,7 +622,6 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
       const duplicateGroups = Object.values(colorCounts).filter(group => group.length > 1);
       
       if (duplicateGroups.length === 0) {
-        console.log('Keine doppelten Rollenfarben gefunden');
         return { success: true, message: 'Alle Rollenfarben sind bereits eindeutig.' };
       }
 
@@ -658,10 +646,9 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
 
       await batch.commit();
       recordLastChange("Doppelte Rollenfarben behoben");
-      console.log(`${totalFixed} Rollen-Farben korrigiert`);
-      
-      return { 
-        success: true, 
+
+      return {
+        success: true,
         message: `${totalFixed} doppelte Rollenfarben wurden korrigiert.` 
       };
     } catch (error) {
