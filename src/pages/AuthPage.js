@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { auth } from '../firebase/config';
+import { auth, analytics } from '../firebase/config';
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
+import { logEvent } from 'firebase/analytics';
 import { ErrorOverlay } from '../components/ui/ErrorOverlay';
 
 const AuthPage = () => {
@@ -13,9 +14,24 @@ const AuthPage = () => {
   const handleLogin = async () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
+
+      // Analytics Event für erfolgreichen Login
+      if (analytics) {
+        logEvent(analytics, 'login', {
+          method: 'email'
+        });
+      }
     } catch (err) {
       setError(err.message);
       setMessage('');
+
+      // Analytics Event für fehlgeschlagenen Login
+      if (analytics) {
+        logEvent(analytics, 'login_failed', {
+          method: 'email',
+          error_code: err.code
+        });
+      }
     }
   };
 

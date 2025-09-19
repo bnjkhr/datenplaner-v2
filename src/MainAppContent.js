@@ -1,7 +1,8 @@
 // src/MainAppContent.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { signOut } from "firebase/auth";
-import { auth } from "./firebase/config";
+import { auth, analytics } from "./firebase/config";
+import { logEvent } from "firebase/analytics";
 import { ChangePasswordModal } from "./components/auth/ChangePasswordModal";
 import PersonenVerwaltung from "./pages/PersonenVerwaltung";
 import { DatenproduktVerwaltung } from "./pages/DatenproduktVerwaltung";
@@ -55,6 +56,25 @@ export const MainAppContent = ({ user }) => {
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const [showReleaseNotesModal, setShowReleaseNotesModal] = useState(false);
   const { calendarError } = useData();
+
+  // Analytics für Seitenaufrufe
+  useEffect(() => {
+    if (analytics) {
+      logEvent(analytics, 'page_view', {
+        page_title: 'Datenplaner',
+        page_location: window.location.href
+      });
+    }
+  }, []);
+
+  // Analytics für Seitenwechsel
+  useEffect(() => {
+    if (analytics) {
+      logEvent(analytics, 'screen_view', {
+        screen_name: currentPage
+      });
+    }
+  }, [currentPage]);
 
   const handleLogout = async () => {
     try {
