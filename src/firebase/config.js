@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-import { getAnalytics, isSupported } from "firebase/analytics";
+import { getAnalytics, isSupported, setUserId } from "firebase/analytics";
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -65,6 +65,13 @@ if (typeof window !== 'undefined') {
     }
   });
 }
+
+// Helper-Funktion zum Setzen der Analytics User ID
+export const setAnalyticsUserId = (userId) => {
+  if (analytics) {
+    setUserId(analytics, userId);
+  }
+};
 
 // Exportiere die Instanzen zur Verwendung in anderen Dateien
 export { auth, db, analytics };

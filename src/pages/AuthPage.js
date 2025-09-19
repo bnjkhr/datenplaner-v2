@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { auth, analytics } from '../firebase/config';
+import { auth, analytics, setAnalyticsUserId } from '../firebase/config';
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { logEvent } from 'firebase/analytics';
 import { ErrorOverlay } from '../components/ui/ErrorOverlay';
@@ -13,12 +13,17 @@ const AuthPage = () => {
 
   const handleLogin = async () => {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
 
-      // Analytics Event für erfolgreichen Login
+      // Setze Analytics User ID für personalisierte Verfolgung
+      setAnalyticsUserId(userCredential.user.uid);
+
+      // Analytics Event für erfolgreichen Login mit User-Info
       if (analytics) {
         logEvent(analytics, 'login', {
-          method: 'email'
+          method: 'email',
+          user_email: userCredential.user.email,
+          user_id: userCredential.user.uid
         });
       }
     } catch (err) {
@@ -29,7 +34,8 @@ const AuthPage = () => {
       if (analytics) {
         logEvent(analytics, 'login_failed', {
           method: 'email',
-          error_code: err.code
+          error_code: err.code,
+          attempted_email: email
         });
       }
     }
