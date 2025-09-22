@@ -1377,7 +1377,7 @@ const PersonenVerwaltung = () => {
               <p className="text-gray-600">Verwalte dein Team und überwache die Arbeitsauslastung</p>
               {currentlyAbsentPeople.length > 0 && (
                 <div className="mt-3 flex items-start gap-2 flex-wrap">
-                  <span className="text-2xl">🏖️</span>
+                  <span className="text-4xl">🏖️</span>
                   {currentlyAbsentPeople.map((person, index) => (
                     <span key={person.id} className="inline-flex items-center gap-1">
                       <button
