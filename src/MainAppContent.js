@@ -56,7 +56,20 @@ export const MainAppContent = ({ user }) => {
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const [showReleaseNotesModal, setShowReleaseNotesModal] = useState(false);
   const [showBurgerMenu, setShowBurgerMenu] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const { calendarError } = useData();
+
+  // Check for mobile screen size
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Analytics für Seitenaufrufe
   useEffect(() => {
@@ -136,12 +149,17 @@ export const MainAppContent = ({ user }) => {
       };
     }, [showBurgerMenu]);
 
+    const handleNavigation = (pageName) => {
+      setCurrentPage(pageName);
+      setShowBurgerMenu(false);
+    };
+
     return (
       <div className="relative" ref={menuRef}>
         <button
           onClick={() => setShowBurgerMenu(!showBurgerMenu)}
           className="p-2 rounded-lg text-gray-600 hover:text-gray-800 hover:bg-gray-100 transition-all"
-          title="Benutzermenü"
+          title={isMobile ? "Menü" : "Benutzermenü"}
         >
           <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
@@ -149,8 +167,63 @@ export const MainAppContent = ({ user }) => {
         </button>
 
         {showBurgerMenu && (
-          <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
+          <div className={`absolute right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 z-50 ${isMobile ? 'w-56' : 'w-48'}`}>
             <div className="py-2">
+              {isMobile && (
+                <>
+                  <button
+                    onClick={() => handleNavigation("personen")}
+                    className={`w-full px-4 py-2 text-left text-sm font-semibold transition-colors ${
+                      currentPage === "personen"
+                        ? "bg-ard-blue-50 text-ard-blue-700"
+                        : "text-gray-700 hover:bg-gray-100"
+                    }`}
+                  >
+                    Personen
+                  </button>
+                  <button
+                    onClick={() => handleNavigation("datenprodukte")}
+                    className={`w-full px-4 py-2 text-left text-sm font-semibold transition-colors ${
+                      currentPage === "datenprodukte"
+                        ? "bg-ard-blue-50 text-ard-blue-700"
+                        : "text-gray-700 hover:bg-gray-100"
+                    }`}
+                  >
+                    Datenprodukte
+                  </button>
+                  <button
+                    onClick={() => handleNavigation("rollen")}
+                    className={`w-full px-4 py-2 text-left text-sm font-semibold transition-colors ${
+                      currentPage === "rollen"
+                        ? "bg-ard-blue-50 text-ard-blue-700"
+                        : "text-gray-700 hover:bg-gray-100"
+                    }`}
+                  >
+                    Rollen
+                  </button>
+                  <button
+                    onClick={() => handleNavigation("skills")}
+                    className={`w-full px-4 py-2 text-left text-sm font-semibold transition-colors ${
+                      currentPage === "skills"
+                        ? "bg-ard-blue-50 text-ard-blue-700"
+                        : "text-gray-700 hover:bg-gray-100"
+                    }`}
+                  >
+                    Skills
+                  </button>
+                  <button
+                    onClick={() => handleNavigation("auswertungen")}
+                    className={`w-full px-4 py-2 text-left text-sm font-semibold transition-colors ${
+                      currentPage === "auswertungen"
+                        ? "bg-ard-blue-50 text-ard-blue-700"
+                        : "text-gray-700 hover:bg-gray-100"
+                    }`}
+                  >
+                    Auswertungen
+                  </button>
+                  <div className="border-t border-gray-100 my-1"></div>
+                </>
+              )}
               <button
                 onClick={() => {
                   setShowChangePasswordModal(true);
@@ -189,25 +262,29 @@ export const MainAppContent = ({ user }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-ard-blue-50/30 font-sans flex flex-col">
       <header className="bg-white/80 backdrop-blur-md shadow-lg border-b border-gray-100 sticky top-0 z-30">
-        <nav className="container mx-auto px-6 py-4">
-          <div className="flex flex-wrap justify-between items-center gap-4">
-            <div className="flex items-center gap-3">
-              <img 
-                src="/ard-logo.svg" 
-                alt="ARD Logo" 
-                className="h-8 w-auto"
+        <nav className="container mx-auto px-4 sm:px-6 py-4">
+          <div className="flex justify-between items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+              <img
+                src="/ard-logo.svg"
+                alt="ARD Logo"
+                className="h-6 sm:h-8 w-auto flex-shrink-0"
               />
-              <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-ard-blue-500 to-ard-blue-600 bg-clip-text text-transparent">
-                Datenprodukt Planer
+              <div className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-ard-blue-500 to-ard-blue-600 bg-clip-text text-transparent truncate">
+                {isMobile ? "Datenplaner" : "Datenprodukt Planer"}
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-1 sm:gap-2">
-              <NavLink pageName="personen">Personen</NavLink>
-              <NavLink pageName="datenprodukte">Datenprodukte</NavLink>
-              <NavLink pageName="rollen">Rollen</NavLink>
-              <NavLink pageName="skills">Skills</NavLink>
-              <NavLink pageName="auswertungen">Auswertungen</NavLink>
-              <div className="w-px h-6 bg-gray-300 mx-2"></div>
+              {!isMobile && (
+                <>
+                  <NavLink pageName="personen">Personen</NavLink>
+                  <NavLink pageName="datenprodukte">Datenprodukte</NavLink>
+                  <NavLink pageName="rollen">Rollen</NavLink>
+                  <NavLink pageName="skills">Skills</NavLink>
+                  <NavLink pageName="auswertungen">Auswertungen</NavLink>
+                  <div className="w-px h-6 bg-gray-300 mx-2"></div>
+                </>
+              )}
               <BurgerMenu />
             </div>
           </div>
