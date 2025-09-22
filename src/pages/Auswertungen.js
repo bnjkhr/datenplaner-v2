@@ -376,7 +376,7 @@ export const Auswertungen = () => {
       <div className="container mx-auto px-6 py-8">
         <div className="flex flex-wrap justify-between items-center mb-8 gap-4">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">Auswertungen</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Auswertungen</h1>
             <p className="text-gray-600">Analysiere deine Teams und Datenprodukte</p>
           </div>
           <button

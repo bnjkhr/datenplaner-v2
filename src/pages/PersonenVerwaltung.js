@@ -1373,11 +1373,11 @@ const PersonenVerwaltung = () => {
         <div className="mb-8">
           <div className="flex items-start justify-between gap-6">
             <div className="flex-1">
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">Personenverwaltung</h1>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Personenverwaltung</h1>
               <p className="text-gray-600">Verwalte dein Team und überwache die Arbeitsauslastung</p>
               {currentlyAbsentPeople.length > 0 && (
                 <div className="mt-3 flex items-start gap-2 flex-wrap">
-                  <span className="text-4xl">🏖️</span>
+                  <span className="text-5xl">🏖️</span>
                   {currentlyAbsentPeople.map((person, index) => (
                     <span key={person.id} className="inline-flex items-center gap-1">
                       <button
