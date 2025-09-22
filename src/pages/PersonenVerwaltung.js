@@ -1371,9 +1371,13 @@ const PersonenVerwaltung = () => {
                   <span className="text-sm text-gray-600">Aktuell abwesend:</span>
                   {currentlyAbsentPeople.map((person, index) => (
                     <span key={person.id} className="inline-flex items-center gap-1">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700 border border-red-200">
+                      <button
+                        onClick={() => handleShowDetails(person)}
+                        className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700 border border-red-200 hover:bg-red-200 hover:scale-105 transition-all duration-200 cursor-pointer"
+                        title={`Profil von ${person.name} anzeigen`}
+                      >
                         {person.name}
-                      </span>
+                      </button>
                       {index < currentlyAbsentPeople.length - 1 && (
                         <span className="text-gray-400"> </span>
                       )}
