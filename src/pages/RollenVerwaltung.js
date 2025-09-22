@@ -469,7 +469,7 @@ const RolleKarte = ({
                             />
                         ) : (
                             <div className="flex-1 min-w-0">
-                                <h3 className="font-semibold text-gray-900 truncate">{rolle.name}</h3>
+                                <h3 className="font-semibold text-gray-900 break-words leading-tight">{rolle.name}</h3>
                                 <div className="text-xs text-gray-500 mt-1">
                                     {assignedPeople.length} Person{assignedPeople.length !== 1 ? 'en' : ''} zugewiesen
                                 </div>
@@ -553,7 +553,7 @@ const RollenListe = ({
     onShowDetails
 }) => {
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
             {rollen.map((rolle) => (
                 <RolleKarte
                     key={rolle.id}
