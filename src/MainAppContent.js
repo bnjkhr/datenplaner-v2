@@ -1,7 +1,7 @@
 // src/MainAppContent.js
 import React, { useState, useEffect } from "react";
 import { signOut } from "firebase/auth";
-import { auth, analytics } from "./firebase/config";
+import { auth, waitForAnalytics } from "./firebase/config";
 import { logEvent } from "firebase/analytics";
 import { ChangePasswordModal } from "./components/auth/ChangePasswordModal";
 import PersonenVerwaltung from "./pages/PersonenVerwaltung";
@@ -59,21 +59,37 @@ export const MainAppContent = ({ user }) => {
 
   // Analytics für Seitenaufrufe
   useEffect(() => {
-    if (analytics) {
-      logEvent(analytics, 'page_view', {
-        page_title: 'Datenplaner',
-        page_location: window.location.href
-      });
-    }
+    let cancelled = false;
+
+    waitForAnalytics().then((instance) => {
+      if (!cancelled && instance) {
+        logEvent(instance, 'page_view', {
+          page_title: 'Datenplaner',
+          page_location: window.location.href
+        });
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Analytics für Seitenwechsel
   useEffect(() => {
-    if (analytics) {
-      logEvent(analytics, 'screen_view', {
-        screen_name: currentPage
-      });
-    }
+    let cancelled = false;
+
+    waitForAnalytics().then((instance) => {
+      if (!cancelled && instance) {
+        logEvent(instance, 'screen_view', {
+          screen_name: currentPage
+        });
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, [currentPage]);
 
   const handleLogout = async () => {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { auth, analytics, setAnalyticsUserId } from '../firebase/config';
+import { auth, setAnalyticsUserId, waitForAnalytics } from '../firebase/config';
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { logEvent } from 'firebase/analytics';
 import { ErrorOverlay } from '../components/ui/ErrorOverlay';
@@ -16,26 +16,28 @@ const AuthPage = () => {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
 
       // Setze Analytics User ID für personalisierte Verfolgung
-      setAnalyticsUserId(userCredential.user.uid);
+      await setAnalyticsUserId(userCredential.user.uid);
 
-      // Analytics Event für erfolgreichen Login mit User-Info
-      if (analytics) {
-        logEvent(analytics, 'login', {
+      const analyticsInstance = await waitForAnalytics();
+      if (analyticsInstance) {
+        logEvent(analyticsInstance, 'login', {
           method: 'email',
           user_email: userCredential.user.email,
-          user_id: userCredential.user.uid
+          user_id: userCredential.user.uid,
+          login_timestamp: Date.now()
         });
       }
     } catch (err) {
       setError(err.message);
       setMessage('');
 
-      // Analytics Event für fehlgeschlagenen Login
-      if (analytics) {
-        logEvent(analytics, 'login_failed', {
+      const analyticsInstance = await waitForAnalytics();
+      if (analyticsInstance) {
+        logEvent(analyticsInstance, 'login_failed', {
           method: 'email',
           error_code: err.code,
-          attempted_email: email
+          attempted_email: email,
+          login_timestamp: Date.now()
         });
       }
     }
