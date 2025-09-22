@@ -1270,11 +1270,11 @@ const PersonenVerwaltung = () => {
 
   const filteredPersonen = getFilteredPersonen();
 
-  // Function to get currently absent people
+  // Function to get currently absent people with their vacation end dates
   const getCurrentlyAbsentPeople = () => {
     const today = new Date();
-    
-    return personen.filter(person => {
+
+    return personen.map(person => {
       const searchKeys = [
         person.name.toLowerCase(),
         person.name.toLowerCase().replace(/\s+/g, ""),
@@ -1291,7 +1291,7 @@ const PersonenVerwaltung = () => {
         }
       }
 
-      // Remove duplicates and check if currently absent
+      // Remove duplicates and find current vacation
       const uniqueVacations = personVacations.filter((vacation, index, self) => {
         const vacationEnd = new Date(vacation.end);
         const isUnique =
@@ -1302,13 +1302,22 @@ const PersonenVerwaltung = () => {
         return isUnique && vacationEnd >= today;
       });
 
-      // Check if person is currently absent
-      return uniqueVacations.some((vacation) => {
+      // Find current vacation and its end date
+      const currentVacation = uniqueVacations.find((vacation) => {
         const start = new Date(vacation.start);
         const end = new Date(vacation.end);
         return today >= start && today <= end;
       });
-    });
+
+      if (currentVacation) {
+        return {
+          ...person,
+          vacationEndDate: currentVacation.end
+        };
+      }
+
+      return null;
+    }).filter(Boolean);
   };
 
   const currentlyAbsentPeople = getCurrentlyAbsentPeople();
@@ -1367,16 +1376,24 @@ const PersonenVerwaltung = () => {
               <h1 className="text-4xl font-bold text-gray-900 mb-2">Personenverwaltung</h1>
               <p className="text-gray-600">Verwalte dein Team und überwache die Arbeitsauslastung</p>
               {currentlyAbsentPeople.length > 0 && (
-                <div className="mt-3 flex items-center gap-2 flex-wrap">
-                  <span className="text-sm text-gray-600">Aktuell abwesend:</span>
+                <div className="mt-3 flex items-start gap-2 flex-wrap">
+                  <span className="text-sm text-gray-600 mt-1">Aktuell abwesend:</span>
                   {currentlyAbsentPeople.map((person, index) => (
                     <span key={person.id} className="inline-flex items-center gap-1">
                       <button
                         onClick={() => handleShowDetails(person)}
-                        className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700 border border-red-200 hover:bg-red-200 hover:scale-105 transition-all duration-200 cursor-pointer"
+                        className="inline-flex flex-col items-center px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-red-100 text-red-700 border border-red-200 hover:bg-red-200 hover:scale-105 transition-all duration-200 cursor-pointer"
                         title={`Profil von ${person.name} anzeigen`}
                       >
-                        {person.name}
+                        <span>{person.name}</span>
+                        {person.vacationEndDate && (
+                          <span className="text-[10px] opacity-75 font-normal mt-0.5">
+                            bis zum {new Date(person.vacationEndDate).toLocaleDateString("de-DE", {
+                              day: "2-digit",
+                              month: "2-digit"
+                            })}
+                          </span>
+                        )}
                       </button>
                       {index < currentlyAbsentPeople.length - 1 && (
                         <span className="text-gray-400"> </span>
