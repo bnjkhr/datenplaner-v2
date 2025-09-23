@@ -371,14 +371,22 @@ const PersonEintrag = ({
   onDeleteInitiation,
   onSkillClick,
   onShowDetails,
+  sortBy,
 }) => {
-  const { name, email, skillIds, msTeamsLink, wochenstunden, isM13, kategorien } = person;
+  const { name, email, msTeamsLink, wochenstunden, kategorien } = person;
   const { vacations, zuordnungen } = useData();
 
   // Kreis-Indikator für kompakte Ansicht
   const getKreisIndicator = () => {
     if (!kategorien || kategorien.length === 0) return null;
     return kategorien.map(k => k.charAt(0)).join('');
+  };
+
+  // Anzahl Datenprodukte berechnen
+  const getDataProductCount = () => {
+    const personAssignments = zuordnungen.filter(z => z.personId === person.id);
+    const uniqueDataProducts = new Set(personAssignments.map(z => z.datenproduktId));
+    return uniqueDataProducts.size;
   };
 
   // Prüfe ob Person aktuell abwesend ist (vereinfacht für Kachel)
@@ -419,14 +427,20 @@ const PersonEintrag = ({
               {getKreisIndicator()}
             </div>
           )}
-          
+
           {/* Name und Status */}
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <h3 className="font-semibold text-gray-900 truncate">{name}</h3>
               {isCurrentlyAbsent() && (
                 <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-red-500 text-white">
                   Abwesend
+                </span>
+              )}
+              {/* Datenprodukte-Tag bei entsprechender Sortierung */}
+              {sortBy === 'datenprodukte' && getDataProductCount() > 0 && (
+                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-indigo-100 text-indigo-700 border border-indigo-200">
+                  📊 {getDataProductCount()} Produkt{getDataProductCount() !== 1 ? 'e' : ''}
                 </span>
               )}
             </div>
@@ -1012,8 +1026,80 @@ const PersonenListe = ({
   onSkillClick,
   onShowDetails,
 }) => {
-  const { loading, error } = useData();
-  
+  const { loading, error, zuordnungen, vacations } = useData();
+  const [sortBy, setSortBy] = useState('name'); // 'name', 'auslastung', 'abwesenheit', 'datenprodukte'
+
+  // Funktion um Auslastung zu berechnen
+  const calculateAuslastung = (person) => {
+    const verfügbareStunden = person.wochenstunden || 31;
+    const gebuchteStunden = zuordnungen
+      .filter(z => z.personId === person.id)
+      .reduce((sum, z) => sum + (z.stunden || 0), 0);
+    return verfügbareStunden > 0 ? (gebuchteStunden / verfügbareStunden) * 100 : 0;
+  };
+
+  // Funktion um nächste Abwesenheit zu ermitteln
+  const getNextAbsenceDate = (person) => {
+    const today = new Date();
+    const searchKeys = [
+      person.name.toLowerCase(),
+      person.name.toLowerCase().replace(/\s+/g, ""),
+      person.email?.toLowerCase(),
+      person.email?.split("@")[0]?.toLowerCase(),
+    ].filter(Boolean);
+
+    let personVacations = [];
+    for (const key of searchKeys) {
+      if (vacations[key]) {
+        personVacations = [...personVacations, ...vacations[key]];
+      }
+    }
+
+    // Remove duplicates and filter for future vacations
+    const uniqueFutureVacations = personVacations
+      .filter((vacation, index, self) =>
+        self.findIndex(v => v.start === vacation.start && v.end === vacation.end) === index
+      )
+      .filter(vacation => new Date(vacation.start) > today)
+      .sort((a, b) => new Date(a.start) - new Date(b.start));
+
+    return uniqueFutureVacations.length > 0 ? new Date(uniqueFutureVacations[0].start) : null;
+  };
+
+  // Funktion um Anzahl Datenprodukte zu berechnen
+  const getDataProductCount = (person) => {
+    const personAssignments = zuordnungen.filter(z => z.personId === person.id);
+    const uniqueDataProducts = new Set(personAssignments.map(z => z.datenproduktId));
+    return uniqueDataProducts.size;
+  };
+
+  // Funktion um Personen zu sortieren
+  const getSortedPersonen = (personen) => {
+    switch (sortBy) {
+      case 'auslastung':
+        return [...personen].sort((a, b) => calculateAuslastung(b) - calculateAuslastung(a)); // Höchste zuerst
+      case 'abwesenheit':
+        return [...personen].sort((a, b) => {
+          const aNext = getNextAbsenceDate(a);
+          const bNext = getNextAbsenceDate(b);
+          // Personen mit anstehender Abwesenheit zuerst, dann nach Datum sortiert
+          if (aNext && !bNext) return -1;
+          if (!aNext && bNext) return 1;
+          if (aNext && bNext) return aNext - bNext; // Frühere Abwesenheit zuerst
+          return a.name.localeCompare(b.name); // Gleiche Bedingung -> alphabetisch
+        });
+      case 'datenprodukte':
+        return [...personen].sort((a, b) => {
+          const aCount = getDataProductCount(a);
+          const bCount = getDataProductCount(b);
+          if (aCount !== bCount) return bCount - aCount; // Höhere Anzahl zuerst
+          return a.name.localeCompare(b.name); // Bei gleicher Anzahl alphabetisch
+        });
+      default: // 'name'
+        return [...personen].sort((a, b) => a.name.localeCompare(b.name)); // Alphabetisch
+    }
+  };
+
   if (loading)
     return (
       <div className="flex justify-center py-10">
@@ -1027,12 +1113,12 @@ const PersonenListe = ({
       <p className="text-center text-gray-500 py-8">Keine Personen gefunden.</p>
     );
 
-  // Gruppiere Personen nach Kreisen
+  // Gruppiere Personen nach Kreisen und sortiere innerhalb der Gruppen
   const groupedPersonen = personenToDisplay.reduce((groups, person) => {
-    const kreise = person.kategorien && person.kategorien.length > 0 
-      ? person.kategorien 
+    const kreise = person.kategorien && person.kategorien.length > 0
+      ? person.kategorien
       : ['Ohne Kreis'];
-    
+
     // Person kann in mehreren Kreisen sein
     kreise.forEach(kreis => {
       if (!groups[kreis]) {
@@ -1040,9 +1126,14 @@ const PersonenListe = ({
       }
       groups[kreis].push(person);
     });
-    
+
     return groups;
   }, {});
+
+  // Sortiere Personen innerhalb jeder Gruppe
+  Object.keys(groupedPersonen).forEach(kreis => {
+    groupedPersonen[kreis] = getSortedPersonen(groupedPersonen[kreis]);
+  });
 
   // Sortiere Gruppen: Erst die bekannten Kreise, dann "Ohne Kreis"
   const sortedKreise = Object.keys(groupedPersonen).sort((a, b) => {
@@ -1062,6 +1153,56 @@ const PersonenListe = ({
             <span className="inline-flex items-center px-2.5 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700">
               {groupedPersonen[kreis].length} Person{groupedPersonen[kreis].length !== 1 ? 'en' : ''}
             </span>
+
+            {/* Sortierungs-Buttons */}
+            <div className="flex items-center gap-1 ml-4 flex-wrap">
+              <span className="text-xs text-gray-500 mr-1">Sortieren:</span>
+              <button
+                onClick={() => setSortBy('name')}
+                className={`px-2 py-1 text-xs font-medium rounded transition-all ${
+                  sortBy === 'name'
+                    ? 'bg-ard-blue-100 text-ard-blue-700 border border-ard-blue-200'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+                title="Nach Namen sortieren"
+              >
+                Name
+              </button>
+              <button
+                onClick={() => setSortBy('auslastung')}
+                className={`px-2 py-1 text-xs font-medium rounded transition-all ${
+                  sortBy === 'auslastung'
+                    ? 'bg-ard-blue-100 text-ard-blue-700 border border-ard-blue-200'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+                title="Nach Auslastung sortieren (höchste zuerst)"
+              >
+                Auslastung
+              </button>
+              <button
+                onClick={() => setSortBy('abwesenheit')}
+                className={`px-2 py-1 text-xs font-medium rounded transition-all ${
+                  sortBy === 'abwesenheit'
+                    ? 'bg-ard-blue-100 text-ard-blue-700 border border-ard-blue-200'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+                title="Nach anstehender Abwesenheit sortieren"
+              >
+                Abwesenheit
+              </button>
+              <button
+                onClick={() => setSortBy('datenprodukte')}
+                className={`px-2 py-1 text-xs font-medium rounded transition-all ${
+                  sortBy === 'datenprodukte'
+                    ? 'bg-ard-blue-100 text-ard-blue-700 border border-ard-blue-200'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+                title="Nach Anzahl Datenprodukte sortieren (mehr zuerst)"
+              >
+                Datenprodukte
+              </button>
+            </div>
+
             <div className="flex-1 h-px bg-gray-200"></div>
           </div>
           
@@ -1075,6 +1216,7 @@ const PersonenListe = ({
                 onDeleteInitiation={onDeleteInitiation}
                 onSkillClick={onSkillClick}
                 onShowDetails={onShowDetails}
+                sortBy={sortBy}
               />
             ))}
           </div>
@@ -1394,7 +1536,7 @@ const PersonenVerwaltung = () => {
                     <div className="space-y-2">
                       <span className="text-sm text-gray-600 font-medium">Abwesend:</span>
                       <div className="flex flex-wrap gap-2">
-                        {currentlyAbsentPeople.map((person, index) => (
+                        {currentlyAbsentPeople.map((person) => (
                           <button
                             key={person.id}
                             onClick={() => handleShowDetails(person)}
