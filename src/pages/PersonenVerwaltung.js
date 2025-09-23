@@ -372,6 +372,7 @@ const PersonEintrag = ({
   onSkillClick,
   onShowDetails,
   sortBy,
+  getNextAbsenceInfo,
 }) => {
   const { name, email, msTeamsLink, wochenstunden, kategorien } = person;
   const { vacations, zuordnungen } = useData();
@@ -444,6 +445,22 @@ const PersonEintrag = ({
                 </span>
               )}
             </div>
+
+            {/* Abwesenheits-Info bei Sortierung nach Abwesenheit */}
+            {sortBy === 'abwesenheit' && (() => {
+              const nextAbsenceInfo = getNextAbsenceInfo(person);
+              if (nextAbsenceInfo) {
+                return (
+                  <div className="text-xs text-gray-500 mt-1">
+                    Abwesend ab {nextAbsenceInfo.startDate.toLocaleDateString("de-DE", {
+                      day: "2-digit",
+                      month: "2-digit"
+                    })}
+                  </div>
+                );
+              }
+              return null;
+            })()}
             
             {/* Teams Link unter dem Namen */}
             {msTeamsLink && (
@@ -1066,11 +1083,46 @@ const PersonenListe = ({
     return uniqueFutureVacations.length > 0 ? new Date(uniqueFutureVacations[0].start) : null;
   };
 
+
   // Funktion um Anzahl Datenprodukte zu berechnen
   const getDataProductCount = (person) => {
     const personAssignments = zuordnungen.filter(z => z.personId === person.id);
     const uniqueDataProducts = new Set(personAssignments.map(z => z.datenproduktId));
     return uniqueDataProducts.size;
+  };
+
+  // Funktion um nächste Abwesenheit mit Details zu ermitteln
+  const getNextAbsenceInfo = (person) => {
+    const today = new Date();
+    const searchKeys = [
+      person.name.toLowerCase(),
+      person.name.toLowerCase().replace(/\s+/g, ""),
+      person.email?.toLowerCase(),
+      person.email?.split("@")[0]?.toLowerCase(),
+    ].filter(Boolean);
+
+    let personVacations = [];
+    for (const key of searchKeys) {
+      if (vacations[key]) {
+        personVacations = [...personVacations, ...vacations[key]];
+      }
+    }
+
+    // Remove duplicates and filter for future vacations
+    const uniqueFutureVacations = personVacations
+      .filter((vacation, index, self) =>
+        self.findIndex(v => v.start === vacation.start && v.end === vacation.end) === index
+      )
+      .filter(vacation => new Date(vacation.start) > today)
+      .sort((a, b) => new Date(a.start) - new Date(b.start));
+
+    if (uniqueFutureVacations.length > 0) {
+      return {
+        startDate: new Date(uniqueFutureVacations[0].start),
+        endDate: new Date(uniqueFutureVacations[0].end)
+      };
+    }
+    return null;
   };
 
   // Funktion um Personen zu sortieren
@@ -1217,6 +1269,7 @@ const PersonenListe = ({
                 onSkillClick={onSkillClick}
                 onShowDetails={onShowDetails}
                 sortBy={sortBy}
+                getNextAbsenceInfo={getNextAbsenceInfo}
               />
             ))}
           </div>
