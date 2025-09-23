@@ -12,6 +12,7 @@ import { SkillsVerwaltung } from "./pages/SkillsVerwaltung"; // NEU
 import { useData } from "./context/DataProvider";
 import { ReleaseNotesModal } from "./components/ui/ReleaseNotesModal";
 import CalendarWarningBanner from "./components/CalendarWarningBanner";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 const AppFooter = ({ user }) => {
   const { lastChange } = useData();
