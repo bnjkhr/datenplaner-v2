@@ -439,8 +439,8 @@ const PersonEintrag = ({
               )}
               {/* Datenprodukte-Tag bei entsprechender Sortierung */}
               {sortBy === 'datenprodukte' && getDataProductCount() > 0 && (
-                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-indigo-100 text-indigo-700 border border-indigo-200">
-                  📊 {getDataProductCount()} Produkt{getDataProductCount() !== 1 ? 'e' : ''}
+                <span className="inline-flex items-center px-1 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-700 border border-indigo-200">
+                  {getDataProductCount()}
                 </span>
               )}
             </div>
