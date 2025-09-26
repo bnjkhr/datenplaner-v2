@@ -55,64 +55,29 @@ if (typeof document !== 'undefined') {
 }
 
 
-// Universal Search Component - Fixed to top-right with overlay
-const UniversalSearch = ({ searchTerm, setSearchTerm, suggestions, onSuggestionClick }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+// Simple Search Component
+const SimpleSearch = ({ searchTerm, setSearchTerm, suggestions, onSuggestionClick }) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [activeSuggestion, setActiveSuggestion] = useState(-1);
   const searchRef = useRef(null);
   const inputRef = useRef(null);
-
-  const handleExpand = () => {
-    setIsExpanded(true);
-    setTimeout(() => {
-      if (inputRef.current) {
-        inputRef.current.focus();
-      }
-    }, 100);
-  };
-
-  // Global keyboard shortcut handler
-  useEffect(() => {
-    const handleGlobalKeyDown = (event) => {
-      // CMD+F (Mac) or Ctrl+F (Windows/Linux)
-      if ((event.metaKey || event.ctrlKey) && event.key === 'f') {
-        event.preventDefault();
-        handleExpand();
-      }
-    };
-
-    document.addEventListener('keydown', handleGlobalKeyDown);
-    return () => document.removeEventListener('keydown', handleGlobalKeyDown);
-  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
         setShowSuggestions(false);
         setActiveSuggestion(-1);
-        // Auto-collapse if no search term
-        if (!searchTerm) {
-          setIsExpanded(false);
-        }
       }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [searchTerm]);
-
-  const handleCollapse = () => {
-    setSearchTerm('');
-    setShowSuggestions(false);
-    setActiveSuggestion(-1);
-    setIsExpanded(false);
-  };
+  }, []);
 
   const handleInputChange = (e) => {
     const value = e.target.value;
     setSearchTerm(value);
-    setShowSuggestions(value.length > 0 && suggestions.length > 0);
+    setShowSuggestions(value.length > 0);
     setActiveSuggestion(-1);
   };
 
@@ -127,15 +92,12 @@ const UniversalSearch = ({ searchTerm, setSearchTerm, suggestions, onSuggestionC
       e.preventDefault();
       if (activeSuggestion >= 0 && suggestions[activeSuggestion]) {
         onSuggestionClick(suggestions[activeSuggestion]);
-        setShowSuggestions(false);
         setActiveSuggestion(-1);
+        setShowSuggestions(false);
       }
     } else if (e.key === 'Escape') {
       setShowSuggestions(false);
       setActiveSuggestion(-1);
-      if (!searchTerm) {
-        setIsExpanded(false);
-      }
     }
   };
 
@@ -143,170 +105,97 @@ const UniversalSearch = ({ searchTerm, setSearchTerm, suggestions, onSuggestionC
     onSuggestionClick(suggestion);
     setShowSuggestions(false);
     setActiveSuggestion(-1);
+    // Keep focus on input
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
   };
 
   return (
-    <div className="relative" ref={searchRef}>
-      {!isExpanded ? (
-        // Collapsed state: just the search icon
-        <button
-          onClick={handleExpand}
-          className="w-12 h-12 flex items-center justify-center bg-white border border-gray-200 rounded-xl shadow-sm hover:bg-gray-50 hover:shadow-md transition-all duration-200"
-          title={`Universelle Suche öffnen (${navigator.userAgent.includes('Mac') ? '⌘+F' : 'Strg+F'})`}
-        >
-          <span className="text-xl">🔍</span>
-        </button>
-      ) : (
-        <>
-          {/* Backdrop overlay */}
-          <div 
-            className="fixed inset-0 bg-black/20 z-40 transition-opacity duration-300"
-            onClick={handleCollapse}
-            style={{
-              animation: 'fadeIn 0.3s ease-out'
+    <div className="relative w-full max-w-xs" ref={searchRef}>
+      <div className="relative">
+        <input
+          ref={inputRef}
+          type="text"
+          placeholder="Suche nach Namen, Skills, Datenprodukten..."
+          value={searchTerm}
+          onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
+          onFocus={() => setShowSuggestions(searchTerm.length > 0)}
+          className={`w-full px-4 py-3 pl-10 border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-ard-blue-500 focus:border-ard-blue-500 transition-all ${
+            searchTerm ? 'pr-10' : 'pr-4'
+          }`}
+        />
+        {/* Search icon */}
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <span className="text-gray-400">🔍</span>
+        </div>
+        {/* Clear button */}
+        {searchTerm && (
+          <button
+            onClick={() => {
+              setSearchTerm('');
+              setShowSuggestions(false);
+              setActiveSuggestion(-1);
             }}
-          />
-          
-          {/* Search overlay */}
-          <div 
-            className="absolute top-0 right-0 z-50 w-96 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden"
-            style={{
-              marginTop: '0px',
-              animation: 'slideInScale 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-              transformOrigin: 'top right'
-            }}
+            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+            title="Suche löschen"
           >
-            {/* Search input */}
-            <div className="p-4">
-              <div className="relative">
-                <input
-                  ref={inputRef}
-                  type="text"
-                  placeholder={`Suche nach Namen, Skills, Datenprodukten... (${navigator.userAgent.includes('Mac') ? '⌘+F' : 'Strg+F'})`}
-                  value={searchTerm}
-                  onChange={handleInputChange}
-                  onKeyDown={handleKeyDown}
-                  onFocus={() => setShowSuggestions(searchTerm.length > 0 && suggestions.length > 0)}
-                  className={`w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-ard-blue-500 focus:border-ard-blue-500 transition-all ${
-                    searchTerm ? 'pr-20' : 'pr-10'
-                  }`}
-                />
-                {searchTerm && (
-                  <button
-                    onClick={() => {
-                      setSearchTerm('');
-                      setShowSuggestions(false);
-                      setActiveSuggestion(-1);
-                    }}
-                    className="absolute inset-y-0 right-10 flex items-center pr-3 text-gray-400 hover:text-gray-600 transition-colors"
-                    title="Suchtext löschen"
-                  >
-                    ✕
-                  </button>
-                )}
-                <button
-                  onClick={handleCollapse}
-                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 transition-colors"
-                  title="Suche schließen"
-                >
-                  ✕
-                </button>
-              </div>
+            ✕
+          </button>
+        )}
+      </div>
+
+      {/* Search suggestions dropdown */}
+      {showSuggestions && suggestions.length > 0 && (
+        <div className="absolute z-50 w-full mt-2 bg-white rounded-lg shadow-lg border border-gray-200 max-h-96 overflow-y-auto">
+          <div className="p-2">
+            <div className="text-xs text-gray-500 px-2 pb-2 font-medium">
+              {suggestions.length} Ergebnis{suggestions.length !== 1 ? 'se' : ''} gefunden
             </div>
-
-            {/* Search results */}
-            {showSuggestions && suggestions.length > 0 && (
-              <div 
-                className="border-t border-gray-200 max-h-96 overflow-y-auto"
-                style={{
-                  animation: 'fadeInUp 0.3s ease-out 0.1s both'
+            {suggestions.map((suggestion, index) => (
+              <div
+                key={`${suggestion.type}-${suggestion.id || index}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSuggestionClick(suggestion);
                 }}
+                className={`px-3 py-3 cursor-pointer transition-colors rounded-lg mb-1 ${
+                  index === activeSuggestion
+                    ? 'bg-ard-blue-50 text-ard-blue-900'
+                    : 'hover:bg-gray-50'
+                }`}
               >
-                <div className="p-2">
-                  <div className="text-xs text-gray-500 px-2 pb-2 font-medium">
-                    {suggestions.length} Ergebnis{suggestions.length !== 1 ? 'se' : ''} gefunden
-                  </div>
-                  {suggestions.map((suggestion, index) => (
-                    <div
-                      key={`${suggestion.type}-${suggestion.id || index}`}
-                      onClick={() => handleSuggestionClick(suggestion)}
-                      className={`px-3 py-3 cursor-pointer transition-colors rounded-lg mb-1 ${
-                        index === activeSuggestion 
-                          ? 'bg-ard-blue-50 text-ard-blue-900' 
-                          : 'hover:bg-gray-50'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium text-gray-900 truncate">{suggestion.name}</div>
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
-                              suggestion.type === 'person' ? 'bg-ard-blue-100 text-ard-blue-700' :
-                              suggestion.type === 'skill' ? 'bg-green-100 text-green-700' :
-                              suggestion.type === 'datenprodukt' ? 'bg-purple-100 text-purple-700' :
-                              'bg-gray-100 text-gray-700'
-                            }`}>
-                              {suggestion.type === 'person' ? 'Person' :
-                               suggestion.type === 'skill' ? 'Skill' :
-                               suggestion.type === 'datenprodukt' ? 'Produkt' :
-                               suggestion.type}
-                            </span>
-                            {suggestion.details && (
-                              <span className="text-xs text-gray-500 truncate">{suggestion.details}</span>
-                            )}
-                          </div>
-                          {suggestion.matchedField && (
-                            <div className="text-xs text-gray-400 mt-1 italic">
-                              gefunden in {suggestion.matchedField}
-                            </div>
-                          )}
-                        </div>
-                      </div>
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-gray-900 truncate">{suggestion.name}</div>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
+                        suggestion.type === 'person' ? 'bg-ard-blue-100 text-ard-blue-700' :
+                        suggestion.type === 'skill' ? 'bg-green-100 text-green-700' :
+                        suggestion.type === 'datenprodukt' ? 'bg-purple-100 text-purple-700' :
+                        'bg-gray-100 text-gray-700'
+                      }`}>
+                        {suggestion.type === 'person' ? 'Person' :
+                         suggestion.type === 'skill' ? 'Skill' :
+                         suggestion.type === 'datenprodukt' ? 'Produkt' :
+                         suggestion.type}
+                      </span>
+                      {suggestion.details && (
+                        <span className="text-xs text-gray-500 truncate">{suggestion.details}</span>
+                      )}
                     </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Empty state or no results */}
-            {searchTerm && suggestions.length === 0 && (
-              <div 
-                className="border-t border-gray-200 p-6 text-center"
-                style={{
-                  animation: 'fadeInUp 0.3s ease-out 0.1s both'
-                }}
-              >
-                <div className="text-gray-400 text-sm">
-                  <div className="text-2xl mb-2">🔍</div>
-                  <div>Keine Ergebnisse für "{searchTerm}"</div>
-                  <div className="text-xs mt-1">Versuche es mit anderen Suchbegriffen</div>
-                </div>
-              </div>
-            )}
-
-            {/* Quick tips when empty */}
-            {!searchTerm && (
-              <div 
-                className="border-t border-gray-200 p-4"
-                style={{
-                  animation: 'fadeInUp 0.4s ease-out 0.2s both'
-                }}
-              >
-                <div className="text-xs text-gray-500 space-y-2">
-                  <div className="font-medium">Schnelle Suche:</div>
-                  <div className="space-y-1">
-                    <div>• Nach Personennamen suchen</div>
-                    <div>• Skills finden (z.B. "React", "Python")</div>
-                    <div>• Datenprodukte durchsuchen</div>
-                    <div>• Nach Rollen filtern</div>
-                    <div>• "M13" für M13-Status</div>
-                    <div className="pt-1 text-gray-400">• Tastenkürzel: {navigator.userAgent.includes('Mac') ? '⌘+F' : 'Strg+F'}</div>
+                    {suggestion.matchedField && (
+                      <div className="text-xs text-gray-400 mt-1 italic">
+                        gefunden in {suggestion.matchedField}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
-            )}
+            ))}
           </div>
-        </>
+        </div>
       )}
     </div>
   );
@@ -660,8 +549,9 @@ const PersonDetailsModal = ({ person, isOpen, onClose, onEdit, onDeleteInitiatio
                   <button
                     key={kategorie}
                     onClick={() => {
-                      onSkillClick(kategorie);
                       onClose();
+                      // Use setTimeout to ensure modal is closed before setting search term
+                      setTimeout(() => onSkillClick(kategorie), 10);
                     }}
                     className="inline-flex items-center px-3 py-1 rounded-lg text-sm font-semibold bg-gradient-to-r from-purple-50 to-purple-100 text-purple-700 border border-purple-200 hover:from-purple-100 hover:to-purple-200 hover:scale-105 transition-all duration-200 cursor-pointer"
                     title={`Nach Kreis "${kategorie}" filtern`}
@@ -726,8 +616,9 @@ const PersonDetailsModal = ({ person, isOpen, onClose, onEdit, onDeleteInitiatio
                     <button
                       key={id}
                       onClick={() => {
-                        onSkillClick(skill.name);
                         onClose();
+                        // Use setTimeout to ensure modal is closed before setting search term
+                        setTimeout(() => onSkillClick(skill.name), 10);
                       }}
                       className="px-3 py-2 rounded-lg text-sm font-semibold hover:scale-105 transition-all duration-200 shadow-sm border"
                       style={{ 
@@ -1290,19 +1181,6 @@ const PersonenVerwaltung = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showExcelModal, setShowExcelModal] = useState(false);
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
-  const [isMobile, setIsMobile] = useState(false);
-
-  // Check for mobile screen size
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
 
   // Debouncing for search
   useEffect(() => {
@@ -1532,6 +1410,8 @@ const PersonenVerwaltung = () => {
 
   const handleSuggestionClick = (suggestion) => {
     setSearchTerm(suggestion.name);
+    // Note: The search term persists and filters the results accordingly
+    // The search remains active until manually cleared with the X button
   };
 
   const handleAddNewPerson = () => {
@@ -1579,88 +1459,69 @@ const PersonenVerwaltung = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-ard-blue-50/30">
       <div className="container mx-auto px-6 py-8">
         <div className="mb-8">
-          <div className="flex items-start justify-between gap-6">
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Personenverwaltung</h1>
-              <p className="text-gray-600">Verwalte dein Team und überwache die Arbeitsauslastung</p>
+          <div className="flex flex-col gap-4">
+            <div className="flex items-start justify-between gap-6">
+              <div className="flex-1">
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">Personenverwaltung</h1>
+                <p className="text-gray-600">Verwalte dein Team und überwache die Arbeitsauslastung</p>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <SimpleSearch
+                  searchTerm={searchTerm}
+                  setSearchTerm={setSearchTerm}
+                  suggestions={suggestions}
+                  onSuggestionClick={handleSuggestionClick}
+                />
+
+                <button
+                  onClick={handleAddNewPerson}
+                  className="bg-white hover:bg-gray-50 text-ard-blue-700 font-semibold py-3 px-6 rounded-xl shadow-md hover:shadow-lg border border-gray-200 transition-all duration-200 whitespace-nowrap"
+                >
+                  + Neue Person
+                </button>
+
+                <button
+                  onClick={() => setShowExcelModal(true)}
+                  className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 whitespace-nowrap"
+                >
+                  Excel Upload
+                </button>
+              </div>
+            </div>
+
+            {/* Search bar and absent people indicator */}
+            <div className="flex items-center justify-between gap-4">
+              {/* Absent people indicator */}
               {currentlyAbsentPeople.length > 0 && (
-                <div className="mt-3">
-                  {isMobile ? (
-                    <div className="space-y-2">
-                      <span className="text-sm text-gray-600 font-medium">Abwesend:</span>
-                      <div className="flex flex-wrap gap-2">
-                        {currentlyAbsentPeople.map((person) => (
-                          <button
-                            key={person.id}
-                            onClick={() => handleShowDetails(person)}
-                            className="inline-flex flex-col items-center px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-red-100 text-red-700 border border-red-200 hover:bg-red-200 hover:scale-105 transition-all duration-200 cursor-pointer"
-                            title={`Profil von ${person.name} anzeigen`}
-                          >
-                            <span>{person.name}</span>
-                            {person.vacationEndDate && (
-                              <span className="text-[10px] opacity-75 font-normal mt-0.5">
-                                bis zum {new Date(person.vacationEndDate).toLocaleDateString("de-DE", {
-                                  day: "2-digit",
-                                  month: "2-digit"
-                                })}
-                              </span>
-                            )}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex items-start gap-2 flex-wrap">
-                      <span className="text-5xl">🏖️</span>
-                      {currentlyAbsentPeople.map((person, index) => (
-                        <span key={person.id} className="inline-flex items-center gap-1">
-                          <button
-                            onClick={() => handleShowDetails(person)}
-                            className="inline-flex flex-col items-center px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-red-100 text-red-700 border border-red-200 hover:bg-red-200 hover:scale-105 transition-all duration-200 cursor-pointer"
-                            title={`Profil von ${person.name} anzeigen`}
-                          >
-                            <span>{person.name}</span>
-                            {person.vacationEndDate && (
-                              <span className="text-[10px] opacity-75 font-normal mt-0.5">
-                                bis zum {new Date(person.vacationEndDate).toLocaleDateString("de-DE", {
-                                  day: "2-digit",
-                                  month: "2-digit"
-                                })}
-                              </span>
-                            )}
-                          </button>
-                          {index < currentlyAbsentPeople.length - 1 && (
-                            <span className="text-gray-400"> </span>
-                          )}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-sm text-gray-600 font-medium">Abwesend:</span>
+                  <span className="text-2xl">🏖️</span>
+                  {currentlyAbsentPeople.slice(0, 5).map((person) => (
+                    <button
+                      key={person.id}
+                      onClick={() => handleShowDetails(person)}
+                      className="inline-flex flex-col items-center px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-red-100 text-red-700 border border-red-200 hover:bg-red-200 hover:scale-105 transition-all duration-200 cursor-pointer"
+                      title={`Profil von ${person.name} anzeigen`}
+                    >
+                      <span>{person.name}</span>
+                      {person.vacationEndDate && (
+                        <span className="text-[10px] opacity-75 font-normal mt-0.5">
+                          bis {new Date(person.vacationEndDate).toLocaleDateString("de-DE", {
+                            day: "2-digit",
+                            month: "2-digit"
+                          })}
                         </span>
-                      ))}
-                    </div>
+                      )}
+                    </button>
+                  ))}
+                  {currentlyAbsentPeople.length > 5 && (
+                    <span className="text-xs text-gray-500">+{currentlyAbsentPeople.length - 5} weitere</span>
                   )}
                 </div>
               )}
-            </div>
-            
-            <div className="flex items-center gap-3">
-              <UniversalSearch
-                searchTerm={searchTerm}
-                setSearchTerm={setSearchTerm}
-                suggestions={suggestions}
-                onSuggestionClick={handleSuggestionClick}
-              />
-              
-              <button
-                onClick={handleAddNewPerson}
-                className="bg-white hover:bg-gray-50 text-ard-blue-700 font-semibold py-3 px-6 rounded-xl shadow-md hover:shadow-lg border border-gray-200 transition-all duration-200 whitespace-nowrap"
-              >
-                + Neue Person
-              </button>
-              
-              <button
-                onClick={() => setShowExcelModal(true)}
-                className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 whitespace-nowrap"
-              >
-                Excel Upload
-              </button>
+
+              <div className="flex-1"></div>
             </div>
           </div>
           
