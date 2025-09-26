@@ -4,7 +4,7 @@ import { ConfirmModal } from '../components/ui/ConfirmModal';
 import { ColorPicker } from '../components/ui/ColorPicker';
 
 export const RollenVerwaltung = () => {
-    const { rollen, personen, datenprodukte, zuordnungen, fuegeRolleHinzu, aktualisiereRolle, loescheRolle, fixDuplicateRoleColors, loading, error, setError } = useData();
+    const { rollen, personen, zuordnungen, fuegeRolleHinzu, aktualisiereRolle, loescheRolle, fixDuplicateRoleColors, loading, error, setError } = useData();
     const [neueRolleName, setNeueRolleName] = useState('');
     const [editingRolle, setEditingRolle] = useState(null);
     const [rolleToDelete, setRolleToDelete] = useState(null);
@@ -163,7 +163,7 @@ export const RollenVerwaltung = () => {
                                 value={neueRolleName} 
                                 onChange={(e) => setNeueRolleName(e.target.value)} 
                                 placeholder="z.B. Data Scientist" 
-                                className="block w-full px-3 py-2 border border-gray-200 rounded-lg shadow-sm focus:ring-2 focus:ring-ard-ard-blue-500 focus:border-ard-ard-blue-500 transition-all"
+                                className="block w-full px-3 py-2 border border-gray-200 rounded-lg shadow-sm focus:ring-2 focus:ring-ard-blue-500 focus:border-ard-blue-500 transition-all"
                             />
                         </div>
                         <button 
