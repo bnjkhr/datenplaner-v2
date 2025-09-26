@@ -266,11 +266,6 @@ export const MainAppContent = ({ user }) => {
         <nav className="container mx-auto px-4 sm:px-6 py-4">
           <div className="flex justify-between items-center gap-4">
             <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-              <img
-                src="/ard-logo.svg"
-                alt="ARD Logo"
-                className="h-6 sm:h-8 w-auto flex-shrink-0"
-              />
               <div className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-ard-blue-500 to-ard-blue-600 bg-clip-text text-transparent truncate">
                 {isMobile ? "Datenplaner" : "Datenprodukt Planer"}
               </div>
