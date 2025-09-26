@@ -364,38 +364,40 @@ const PersonEintrag = ({
               </a>
             )}
             
-            {/* Auslastungsbalken - kompakt */}
-            <div className="mt-2">
-              {(() => {
-                const verfügbareStunden = wochenstunden || 31;
-                const gebuchteStunden = zuordnungen
-                  .filter(z => z.personId === person.id)
-                  .reduce((sum, z) => sum + (z.stunden || 0), 0);
-                const auslastung = verfügbareStunden > 0 ? (gebuchteStunden / verfügbareStunden) * 100 : 0;
-                const isUnderbooked = auslastung < 20;
-                
-                let barColor = "bg-gradient-to-r from-emerald-400 to-emerald-500";
-                if (isUnderbooked) {
-                  barColor = "bg-gradient-to-r from-red-400 to-red-500";
-                } else if (auslastung > 100) {
-                  barColor = "bg-gradient-to-r from-amber-400 to-orange-500";
-                }
-                
-                return (
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 bg-gray-100 rounded-full h-1.5 overflow-hidden">
-                      <div 
-                        className={`h-full rounded-full transition-all duration-300 ${barColor}`}
-                        style={{ width: `${Math.min(auslastung, 100)}%` }}
-                      />
+            {/* Auslastungsbalken - kompakt - nur für M13 */}
+            {person.isM13 && (
+              <div className="mt-2">
+                {(() => {
+                  const verfügbareStunden = wochenstunden || 31;
+                  const gebuchteStunden = zuordnungen
+                    .filter(z => z.personId === person.id)
+                    .reduce((sum, z) => sum + (z.stunden || 0), 0);
+                  const auslastung = verfügbareStunden > 0 ? (gebuchteStunden / verfügbareStunden) * 100 : 0;
+                  const isUnderbooked = auslastung < 20;
+
+                  let barColor = "bg-gradient-to-r from-emerald-400 to-emerald-500";
+                  if (isUnderbooked) {
+                    barColor = "bg-gradient-to-r from-red-400 to-red-500";
+                  } else if (auslastung > 100) {
+                    barColor = "bg-gradient-to-r from-amber-400 to-orange-500";
+                  }
+
+                  return (
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all duration-300 ${barColor}`}
+                          style={{ width: `${Math.min(auslastung, 100)}%` }}
+                        />
+                      </div>
+                      <span className="text-xs text-gray-500 font-medium min-w-0 flex-shrink-0">
+                        {Math.round(auslastung)}%
+                      </span>
                     </div>
-                    <span className="text-xs text-gray-500 font-medium min-w-0 flex-shrink-0">
-                      {Math.round(auslastung)}%
-                    </span>
-                  </div>
-                );
-              })()}
-            </div>
+                  );
+                })()}
+              </div>
+            )}
           </div>
         </div>
         
@@ -563,7 +565,7 @@ const PersonDetailsModal = ({ person, isOpen, onClose, onEdit, onDeleteInitiatio
             </div>
           )}
 
-          <WorkloadIndicator person={person} zuordnungen={zuordnungen} />
+          {person.isM13 && <WorkloadIndicator person={person} zuordnungen={zuordnungen} />}
 
           {upcomingVacations.length > 0 && (
             <div className="mb-6">
