@@ -30,7 +30,7 @@ export const Auswertungen = () => {
   const [filterDatenprodukt, setFilterDatenprodukt] = useState("");
   const [filterRolle, setFilterRolle] = useState("");
   const [selectedKategorie, setSelectedKategorie] = useState("alle");
-  const [filterM13, setFilterM13] = useState("alle");
+  const [filterM13, setFilterM13] = useState("m13");
 
   if (loading)
     return (
@@ -119,8 +119,8 @@ export const Auswertungen = () => {
     (skill) => !assignedSkillIds.has(skill.id)
   );
 
-  // --- NEU: Auslastungs-Daten ---
-  const workloadData = personen.map((person) => {
+  // --- NEU: Auslastungs-Daten - nur M13 ---
+  const workloadData = personen.filter(person => person.isM13).map((person) => {
     const verfügbareStunden = person.wochenstunden || 31; // Standard: 31 Stunden
     const gebuchteStunden = zuordnungen
       .filter(z => z.personId === person.id)
@@ -508,7 +508,7 @@ export const Auswertungen = () => {
             </div>
 
             <p className="text-sm text-gray-600 mb-4">
-              Sortiert nach Auslastung (hoch → niedrig) • {filteredWorkloadData.length} von {selectedKategorie === "alle" ? workloadData.length : (groupedWorkloadData[selectedKategorie] || []).length} Personen
+              Sortiert nach Auslastung (hoch → niedrig) • {filteredWorkloadData.length} von {selectedKategorie === "alle" ? workloadData.length : (groupedWorkloadData[selectedKategorie] || []).length} M13-Personen
               {selectedKategorie !== "alle" && (
                 <span className="ml-2 px-2 py-1 bg-ard-blue-100 text-ard-blue-700 rounded-md text-xs font-medium">
                   {selectedKategorie === "Plattform" ? "🏗️ Plattform" :
