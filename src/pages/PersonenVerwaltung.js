@@ -1478,16 +1478,32 @@ const PersonenVerwaltung = () => {
 
                 <button
                   onClick={handleAddNewPerson}
-                  className="bg-white hover:bg-gray-50 text-ard-blue-700 font-semibold py-3 px-6 rounded-xl shadow-md hover:shadow-lg border border-gray-200 transition-all duration-200 whitespace-nowrap"
+                  className="w-14 h-14 bg-ard-blue-600 hover:bg-white text-white hover:text-ard-blue-600 border-2 border-ard-blue-600 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center group active:scale-95 flex-shrink-0"
+                  title="Neue Person hinzufügen"
                 >
-                  + Neue Person
+                  <svg
+                    className="w-6 h-6 transition-transform duration-200 group-active:scale-110"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
                 </button>
 
                 <button
                   onClick={() => setShowExcelModal(true)}
-                  className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 whitespace-nowrap"
+                  className="w-14 h-14 bg-green-600 hover:bg-white text-white hover:text-green-600 border-2 border-green-600 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center group active:scale-95 flex-shrink-0"
+                  title="Excel Upload"
                 >
-                  Excel Upload
+                  <svg
+                    className="w-6 h-6 transition-transform duration-200 group-active:scale-110"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
                 </button>
               </div>
             </div>

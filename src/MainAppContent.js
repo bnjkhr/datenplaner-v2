@@ -36,14 +36,6 @@ const AppFooter = ({ user }) => {
         </div>
       )}
       <div className="flex flex-col items-center gap-2">
-        <a
-          href="https://www.notion.so/Datenprodukt-Planer-20a15fafe8268041aca7d879881030a5?source=copy_link"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-sm text-ard-blue-500 hover:text-ard-blue-700 hover:underline transition-colors"
-        >
-          Bugs? Feature-Request? Hier eintragen.
-        </a>
         <p className="text-sm text-gray-500">
           &copy; {new Date().getFullYear()} Dein Datenprodukt Planungs-Tool
         </p>

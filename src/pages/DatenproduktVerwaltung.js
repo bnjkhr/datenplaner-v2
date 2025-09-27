@@ -313,17 +313,31 @@ export const DatenproduktVerwaltung = () => {
           <div className="flex gap-3">
             <button
               onClick={() => handleOpenTeamPlanner(null)}
-              className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2"
+              className="w-14 h-14 bg-purple-600 hover:bg-white text-white hover:text-purple-600 border-2 border-purple-600 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center group active:scale-95 flex-shrink-0"
+              title="Team planen"
             >
-              <span className="text-lg">🎯</span>
-              Team planen
+              <svg
+                className="w-6 h-6 transition-transform duration-200 group-active:scale-110"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
             </button>
             <button
               onClick={() => handleOpenProduktForm()}
-              className="bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2"
+              className="w-14 h-14 bg-ard-blue-600 hover:bg-white text-white hover:text-ard-blue-600 border-2 border-ard-blue-600 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center group active:scale-95 flex-shrink-0"
+              title="Neues Datenprodukt erstellen"
             >
-              <span className="text-lg">+</span>
-              Neues Datenprodukt
+              <svg
+                className="w-6 h-6 transition-transform duration-200 group-active:scale-110"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
             </button>
           </div>
         </div>
