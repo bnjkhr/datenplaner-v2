@@ -19,6 +19,8 @@ export const RollenVerwaltung = () => {
         if (neueRolleName.trim()) {
             await fuegeRolleHinzu(neueRolleName.trim());
             setNeueRolleName('');
+        } else {
+            setError('Bitte geben Sie einen Rollennamen ein.');
         }
     };
 
@@ -166,12 +168,12 @@ export const RollenVerwaltung = () => {
                                 className="block w-full px-3 py-2 border border-gray-200 rounded-lg shadow-sm focus:ring-2 focus:ring-ard-blue-500 focus:border-ard-blue-500 transition-all"
                             />
                         </div>
-                        <button 
-                            type="submit" 
-                            className="px-4 py-2 bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 rounded-lg shadow-md font-medium transition-all duration-200 flex items-center gap-2 whitespace-nowrap"
+                        <button
+                            type="submit"
+                            className="w-10 h-10 bg-ard-blue-600 hover:bg-white hover:text-ard-blue-600 hover:border-2 hover:border-ard-blue-600 text-white rounded-full shadow-md transition-all duration-200 flex items-center justify-center flex-shrink-0"
+                            title="Rolle hinzufügen"
                         >
-                            <span className="text-lg">+</span>
-                            Hinzufügen
+                            <span className="text-xl font-bold">+</span>
                         </button>
                     </form>
                 </div>

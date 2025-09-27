@@ -18,6 +18,8 @@ export const SkillsVerwaltung = () => {
             await fuegeSkillHinzu(neuerSkillName.trim(), neueSkillFarbe);
             setNeuerSkillName('');
             setNeueSkillFarbe('#4c84d4');
+        } else {
+            setError('Bitte geben Sie einen Skill-Namen ein.');
         }
     };
 
@@ -104,12 +106,12 @@ export const SkillsVerwaltung = () => {
                                 className="block w-12 h-10 p-1 border border-gray-200 rounded-lg cursor-pointer shadow-sm"
                             />
                         </div>
-                        <button 
-                            type="submit" 
-                            className="px-4 py-2 bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 rounded-lg shadow-md font-medium transition-all duration-200 flex items-center gap-2 whitespace-nowrap"
+                        <button
+                            type="submit"
+                            className="w-10 h-10 bg-ard-blue-600 hover:bg-white hover:text-ard-blue-600 hover:border-2 hover:border-ard-blue-600 text-white rounded-full shadow-md transition-all duration-200 flex items-center justify-center flex-shrink-0"
+                            title="Skill hinzufügen"
                         >
-                            <span className="text-lg">+</span>
-                            Hinzufügen
+                            <span className="text-xl font-bold">+</span>
                         </button>
                     </form>
                 </div>

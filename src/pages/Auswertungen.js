@@ -381,10 +381,12 @@ export const Auswertungen = () => {
           </div>
           <button
             onClick={handleExportToExcel}
-            className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2"
+            className="w-12 h-12 bg-yellow-500 hover:bg-white hover:text-yellow-600 hover:border-2 hover:border-yellow-500 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center flex-shrink-0"
+            title="Excel-Export"
           >
-            <span className="text-lg">📊</span>
-            Excel-Export
+            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
           </button>
         </div>
 
