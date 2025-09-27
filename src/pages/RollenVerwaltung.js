@@ -153,47 +153,56 @@ export const RollenVerwaltung = () => {
                     </div>
                 )}
 
-                <div className="mb-6 p-4 bg-white shadow-md rounded-xl border border-gray-100">
-                    <form onSubmit={handleAddRolle} className="flex flex-col sm:flex-row gap-3 items-end">
-                        <div className="flex-grow">
-                            <label htmlFor="neue-rolle" className="block text-sm font-medium text-gray-700 mb-1">
-                                Neue Rolle hinzufügen
-                            </label>
-                            <input 
-                                id="neue-rolle" 
-                                type="text" 
-                                value={neueRolleName} 
-                                onChange={(e) => setNeueRolleName(e.target.value)} 
-                                placeholder="z.B. Data Scientist" 
-                                className="block w-full px-3 py-2 border border-gray-200 rounded-lg shadow-sm focus:ring-2 focus:ring-ard-blue-500 focus:border-ard-blue-500 transition-all"
-                            />
-                        </div>
-                        <button
-                            type="submit"
-                            className="w-10 h-10 bg-ard-blue-600 hover:bg-white hover:text-ard-blue-600 hover:border-2 hover:border-ard-blue-600 text-white rounded-full shadow-md transition-all duration-200 flex items-center justify-center flex-shrink-0"
-                            title="Rolle hinzufügen"
-                        >
-                            <span className="text-xl font-bold">+</span>
-                        </button>
-                    </form>
-                </div>
                 {rollen.length === 0 ? (
-                    <div className="bg-white shadow-md rounded-xl border border-gray-100 text-center py-8 text-gray-500">
+                    <div className="bg-white shadow-md rounded-xl border border-gray-100 text-center py-8 text-gray-500 mb-6">
                         Noch keine Rollen angelegt.
                     </div>
                 ) : (
-                    <RollenListe 
-                        rollen={rollen}
-                        zuordnungen={zuordnungen}
-                        personen={personen}
-                        editingRolle={editingRolle}
-                        setEditingRolle={setEditingRolle}
-                        handleUpdateRolle={handleUpdateRolle}
-                        handleDeleteInitiation={handleDeleteInitiation}
-                        aktualisiereRolle={aktualisiereRolle}
-                        onShowDetails={handleShowDetails}
-                    />
+                    <div className="mb-6">
+                        <RollenListe
+                            rollen={rollen}
+                            zuordnungen={zuordnungen}
+                            personen={personen}
+                            editingRolle={editingRolle}
+                            setEditingRolle={setEditingRolle}
+                            handleUpdateRolle={handleUpdateRolle}
+                            handleDeleteInitiation={handleDeleteInitiation}
+                            aktualisiereRolle={aktualisiereRolle}
+                            onShowDetails={handleShowDetails}
+                        />
+                    </div>
                 )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+                    <div className="bg-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg border border-gray-200 border-dashed hover:border-gray-300 overflow-hidden">
+                        <div className="p-4">
+                            <form onSubmit={handleAddRolle} className="flex flex-col gap-3">
+                                <div>
+                                    <label htmlFor="neue-rolle" className="block text-sm font-medium text-gray-700 mb-1">
+                                        Neue Rolle hinzufügen
+                                    </label>
+                                    <input
+                                        id="neue-rolle"
+                                        type="text"
+                                        value={neueRolleName}
+                                        onChange={(e) => setNeueRolleName(e.target.value)}
+                                        placeholder="z.B. Data Scientist"
+                                        className="block w-full px-3 py-2 border border-gray-200 rounded-lg shadow-sm focus:ring-2 focus:ring-ard-blue-500 focus:border-ard-blue-500 transition-all"
+                                    />
+                                </div>
+                                <div className="flex justify-end">
+                                    <button
+                                        type="submit"
+                                        className="w-10 h-10 bg-ard-blue-600 hover:bg-white hover:text-ard-blue-600 hover:border-2 hover:border-ard-blue-600 text-white rounded-full shadow-md transition-all duration-200 flex items-center justify-center flex-shrink-0"
+                                        title="Rolle hinzufügen"
+                                    >
+                                        <span className="text-xl font-bold">+</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
 
                 <ConfirmModal 
                     isOpen={!!rolleToDelete} 

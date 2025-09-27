@@ -79,49 +79,12 @@ export const SkillsVerwaltung = () => {
                     </div>
                 )}
                 
-                <div className="mb-6 p-4 bg-white shadow-md rounded-xl border border-gray-100">
-                    <form onSubmit={handleAddSkill} className="flex flex-col sm:flex-row gap-3 items-end">
-                        <div className="flex-grow">
-                            <label htmlFor="neuer-skill" className="block text-sm font-medium text-gray-700 mb-1">
-                                Neuer Skill
-                            </label>
-                            <input 
-                                id="neuer-skill" 
-                                type="text" 
-                                value={neuerSkillName} 
-                                onChange={(e) => setNeuerSkillName(e.target.value)} 
-                                placeholder="z.B. Python, React, Data Science" 
-                                className="block w-full px-3 py-2 border border-gray-200 rounded-lg shadow-sm focus:ring-2 focus:ring-ard-blue-500 focus:border-ard-blue-500 transition-all"
-                            />
-                        </div>
-                        <div className="flex-shrink-0">
-                            <label htmlFor="neue-farbe" className="block text-sm font-medium text-gray-700 mb-1">
-                                Farbe
-                            </label>
-                            <input 
-                                id="neue-farbe" 
-                                type="color" 
-                                value={neueSkillFarbe} 
-                                onChange={(e) => setNeueSkillFarbe(e.target.value)} 
-                                className="block w-12 h-10 p-1 border border-gray-200 rounded-lg cursor-pointer shadow-sm"
-                            />
-                        </div>
-                        <button
-                            type="submit"
-                            className="w-10 h-10 bg-ard-blue-600 hover:bg-white hover:text-ard-blue-600 hover:border-2 hover:border-ard-blue-600 text-white rounded-full shadow-md transition-all duration-200 flex items-center justify-center flex-shrink-0"
-                            title="Skill hinzufügen"
-                        >
-                            <span className="text-xl font-bold">+</span>
-                        </button>
-                    </form>
-                </div>
-
                 {skills.length === 0 ? (
-                    <div className="bg-white shadow-md rounded-xl border border-gray-100 text-center py-8 text-gray-500">
+                    <div className="bg-white shadow-md rounded-xl border border-gray-100 text-center py-8 text-gray-500 mb-6">
                         Noch keine Skills angelegt.
                     </div>
                 ) : (
-                    <div className="bg-white shadow-sm rounded-lg border border-gray-100 overflow-hidden">
+                    <div className="bg-white shadow-sm rounded-lg border border-gray-100 overflow-hidden mb-6">
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm">
                                 <thead className="bg-gray-50 border-b border-gray-200">
@@ -135,17 +98,17 @@ export const SkillsVerwaltung = () => {
                                 <tbody className="divide-y divide-gray-100">
                                     {skills.map((skill) => {
                                         const skillPersons = getSkillPersons(skill.id);
-                                        
+
                                         return (
                                             <tr key={skill.id} className="hover:bg-gray-25 transition-colors">
                                                 <td className="px-4 py-3">
                                                     {editingSkill?.id === skill.id ? (
-                                                        <input 
-                                                            type="text" 
-                                                            value={editingSkill.name} 
-                                                            onChange={(e) => setEditingSkill({...editingSkill, name: e.target.value})} 
-                                                            className="block w-full px-2 py-1 text-sm border border-ard-blue-300 rounded focus:ring-1 focus:ring-ard-blue-500 focus:border-ard-blue-500" 
-                                                            autoFocus 
+                                                        <input
+                                                            type="text"
+                                                            value={editingSkill.name}
+                                                            onChange={(e) => setEditingSkill({...editingSkill, name: e.target.value})}
+                                                            className="block w-full px-2 py-1 text-sm border border-ard-blue-300 rounded focus:ring-1 focus:ring-ard-blue-500 focus:border-ard-blue-500"
+                                                            autoFocus
                                                         />
                                                     ) : (
                                                         <span className="font-medium text-gray-900 text-sm">{skill.name}</span>
@@ -155,11 +118,11 @@ export const SkillsVerwaltung = () => {
                                                     {skillPersons.length > 0 ? (
                                                         <div className="flex flex-wrap gap-1">
                                                             {skillPersons.map((person) => (
-                                                                <span 
+                                                                <span
                                                                     key={person.id}
                                                                     className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
-                                                                    style={{ 
-                                                                        backgroundColor: skill.color, 
+                                                                    style={{
+                                                                        backgroundColor: skill.color,
                                                                         color: '#1f2937'
                                                                     }}
                                                                 >
@@ -182,15 +145,15 @@ export const SkillsVerwaltung = () => {
                                                     <div className="flex items-center justify-center gap-1">
                                                         {editingSkill?.id === skill.id ? (
                                                             <>
-                                                                <button 
-                                                                    onClick={handleUpdateSkill} 
+                                                                <button
+                                                                    onClick={handleUpdateSkill}
                                                                     className="p-1.5 text-green-600 hover:text-green-700 hover:bg-green-50 rounded transition-all text-sm"
                                                                     title="Speichern"
                                                                 >
                                                                     ✓
                                                                 </button>
-                                                                <button 
-                                                                    onClick={() => setEditingSkill(null)} 
+                                                                <button
+                                                                    onClick={() => setEditingSkill(null)}
                                                                     className="p-1.5 text-gray-600 hover:text-gray-700 hover:bg-gray-50 rounded transition-all text-sm"
                                                                     title="Abbrechen"
                                                                 >
@@ -199,8 +162,8 @@ export const SkillsVerwaltung = () => {
                                                             </>
                                                         ) : (
                                                             <>
-                                                                <button 
-                                                                    onClick={() => setEditingSkill({ ...skill })} 
+                                                                <button
+                                                                    onClick={() => setEditingSkill({ ...skill })}
                                                                     className="p-1.5 text-ard-blue-600 hover:text-ard-blue-700 hover:bg-ard-blue-50 rounded transition-all text-sm"
                                                                     title="Bearbeiten"
                                                                 >
@@ -208,8 +171,8 @@ export const SkillsVerwaltung = () => {
                                                                       <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                                                                     </svg>
                                                                 </button>
-                                                                <button 
-                                                                    onClick={() => handleDeleteInitiation(skill)} 
+                                                                <button
+                                                                    onClick={() => handleDeleteInitiation(skill)}
                                                                     className="p-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 rounded transition-all text-sm"
                                                                     title="Löschen"
                                                                 >
@@ -227,6 +190,49 @@ export const SkillsVerwaltung = () => {
                         </div>
                     </div>
                 )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+                    <div className="bg-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg border border-gray-200 border-dashed hover:border-gray-300 overflow-hidden">
+                        <div className="p-4">
+                            <form onSubmit={handleAddSkill} className="flex flex-col gap-3">
+                                <div>
+                                    <label htmlFor="neuer-skill" className="block text-sm font-medium text-gray-700 mb-1">
+                                        Neuer Skill
+                                    </label>
+                                    <input
+                                        id="neuer-skill"
+                                        type="text"
+                                        value={neuerSkillName}
+                                        onChange={(e) => setNeuerSkillName(e.target.value)}
+                                        placeholder="z.B. Python, React, Data Science"
+                                        className="block w-full px-3 py-2 border border-gray-200 rounded-lg shadow-sm focus:ring-2 focus:ring-ard-blue-500 focus:border-ard-blue-500 transition-all"
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="neue-farbe" className="block text-sm font-medium text-gray-700 mb-1">
+                                        Farbe
+                                    </label>
+                                    <input
+                                        id="neue-farbe"
+                                        type="color"
+                                        value={neueSkillFarbe}
+                                        onChange={(e) => setNeueSkillFarbe(e.target.value)}
+                                        className="block w-12 h-10 p-1 border border-gray-200 rounded-lg cursor-pointer shadow-sm"
+                                    />
+                                </div>
+                                <div className="flex justify-end">
+                                    <button
+                                        type="submit"
+                                        className="w-10 h-10 bg-ard-blue-600 hover:bg-white hover:text-ard-blue-600 hover:border-2 hover:border-ard-blue-600 text-white rounded-full shadow-md transition-all duration-200 flex items-center justify-center flex-shrink-0"
+                                        title="Skill hinzufügen"
+                                    >
+                                        <span className="text-xl font-bold">+</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
 
                 <ConfirmModal 
                     isOpen={!!skillToDelete} 
