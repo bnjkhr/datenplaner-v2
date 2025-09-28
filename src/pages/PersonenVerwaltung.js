@@ -112,7 +112,7 @@ const SimpleSearch = ({ searchTerm, setSearchTerm, suggestions, onSuggestionClic
   };
 
   return (
-    <div className="relative w-full max-w-xs" ref={searchRef}>
+    <div className="relative w-full" ref={searchRef}>
       <div className="relative">
         <input
           ref={inputRef}
@@ -1462,49 +1462,53 @@ const PersonenVerwaltung = () => {
       <div className="container mx-auto px-6 py-8">
         <div className="mb-8">
           <div className="flex flex-col gap-4">
-            <div className="flex items-start justify-between gap-6">
+            <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4 lg:gap-6">
               <div className="flex-1">
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">Personenverwaltung</h1>
                 <p className="text-gray-600">Verwalte dein Team und überwache die Arbeitsauslastung</p>
               </div>
 
-              <div className="flex items-center gap-3">
-                <SimpleSearch
-                  searchTerm={searchTerm}
-                  setSearchTerm={setSearchTerm}
-                  suggestions={suggestions}
-                  onSuggestionClick={handleSuggestionClick}
-                />
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
+                <div className="flex-1 sm:flex-initial sm:min-w-0 sm:max-w-xs lg:max-w-sm">
+                  <SimpleSearch
+                    searchTerm={searchTerm}
+                    setSearchTerm={setSearchTerm}
+                    suggestions={suggestions}
+                    onSuggestionClick={handleSuggestionClick}
+                  />
+                </div>
 
-                <button
-                  onClick={handleAddNewPerson}
-                  className="w-14 h-14 bg-ard-blue-600 hover:bg-white text-white hover:text-ard-blue-600 border-2 border-ard-blue-600 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center group active:scale-95 flex-shrink-0"
-                  title="Neue Person hinzufügen"
-                >
-                  <svg
-                    className="w-6 h-6 transition-transform duration-200 group-active:scale-110"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                <div className="flex items-center gap-3 justify-center sm:justify-start">
+                  <button
+                    onClick={handleAddNewPerson}
+                    className="w-14 h-14 bg-ard-blue-600 hover:bg-white text-white hover:text-ard-blue-600 border-2 border-ard-blue-600 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center group active:scale-95 flex-shrink-0"
+                    title="Neue Person hinzufügen"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                  </svg>
-                </button>
+                    <svg
+                      className="w-6 h-6 transition-transform duration-200 group-active:scale-110"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                  </button>
 
-                <button
-                  onClick={() => setShowExcelModal(true)}
-                  className="w-14 h-14 bg-green-600 hover:bg-white text-white hover:text-green-600 border-2 border-green-600 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center group active:scale-95 flex-shrink-0"
-                  title="Excel Upload"
-                >
-                  <svg
-                    className="w-6 h-6 transition-transform duration-200 group-active:scale-110"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                  <button
+                    onClick={() => setShowExcelModal(true)}
+                    className="w-14 h-14 bg-green-600 hover:bg-white text-white hover:text-green-600 border-2 border-green-600 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center group active:scale-95 flex-shrink-0"
+                    title="Excel Upload"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                  </svg>
-                </button>
+                    <svg
+                      className="w-6 h-6 transition-transform duration-200 group-active:scale-110"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                  </button>
+                </div>
               </div>
             </div>
 

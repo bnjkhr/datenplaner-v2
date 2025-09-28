@@ -22,3 +22,8 @@ Version 2.3.3 - 22.09.2025
 * Burger-Menü
 * Aktuell abwesend -> klickbar 
 * Personen können sortiert werden
+
+Version 2.3.4 - 28.09.2025
+--------------------------
+* Responsive Design
+* Neue Buttons
