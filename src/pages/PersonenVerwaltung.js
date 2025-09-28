@@ -938,6 +938,19 @@ const PersonenListe = ({
 }) => {
   const { loading, error, zuordnungen, vacations } = useData();
   const [sortBy, setSortBy] = useState('name'); // 'name', 'auslastung', 'abwesenheit', 'datenprodukte'
+  const [showSortDropdown, setShowSortDropdown] = useState(false);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showSortDropdown && !event.target.closest('.sort-dropdown')) {
+        setShowSortDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showSortDropdown]);
 
   // Funktion um Auslastung zu berechnen
   const calculateAuslastung = (person) => {
@@ -1099,8 +1112,8 @@ const PersonenListe = ({
               {groupedPersonen[kreis].length} Person{groupedPersonen[kreis].length !== 1 ? 'en' : ''}
             </span>
 
-            {/* Sortierungs-Buttons */}
-            <div className="flex items-center gap-1 ml-4 flex-wrap">
+            {/* Sortierungs-Buttons - Desktop */}
+            <div className="hidden md:flex items-center gap-1 ml-4 flex-wrap">
               <span className="text-xs text-gray-500 mr-1">Sortieren:</span>
               <button
                 onClick={() => setSortBy('name')}
@@ -1148,11 +1161,79 @@ const PersonenListe = ({
               </button>
             </div>
 
+            {/* Sortierungs-Dropdown - Mobile */}
+            <div className="md:hidden relative ml-4 sort-dropdown">
+              <button
+                onClick={() => setShowSortDropdown(!showSortDropdown)}
+                className="flex items-center gap-1 px-2 py-1 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-600 rounded transition-all"
+              >
+                <span>Sortieren:</span>
+                <span className="text-ard-blue-700 font-semibold">
+                  {sortBy === 'name' && 'Name'}
+                  {sortBy === 'auslastung' && 'Auslastung'}
+                  {sortBy === 'abwesenheit' && 'Abwesenheit'}
+                  {sortBy === 'datenprodukte' && 'Datenprodukte'}
+                </span>
+                <svg className={`w-3 h-3 transition-transform ${showSortDropdown ? 'rotate-180' : ''}`} fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+
+              {showSortDropdown && (
+                <div className="absolute top-full right-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10 min-w-[120px]">
+                  <button
+                    onClick={() => {
+                      setSortBy('name');
+                      setShowSortDropdown(false);
+                    }}
+                    className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 transition-colors ${
+                      sortBy === 'name' ? 'text-ard-blue-700 font-semibold' : 'text-gray-700'
+                    }`}
+                  >
+                    Name
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSortBy('auslastung');
+                      setShowSortDropdown(false);
+                    }}
+                    className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 transition-colors ${
+                      sortBy === 'auslastung' ? 'text-ard-blue-700 font-semibold' : 'text-gray-700'
+                    }`}
+                  >
+                    Auslastung
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSortBy('abwesenheit');
+                      setShowSortDropdown(false);
+                    }}
+                    className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 transition-colors ${
+                      sortBy === 'abwesenheit' ? 'text-ard-blue-700 font-semibold' : 'text-gray-700'
+                    }`}
+                  >
+                    Abwesenheit
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSortBy('datenprodukte');
+                      setShowSortDropdown(false);
+                    }}
+                    className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 transition-colors ${
+                      sortBy === 'datenprodukte' ? 'text-ard-blue-700 font-semibold' : 'text-gray-700'
+                    }`}
+                  >
+                    Datenprodukte
+                  </button>
+                </div>
+              )}
+            </div>
+
             <div className="flex-1 h-px bg-gray-200"></div>
           </div>
           
           {/* Personen-Grid für diesen Kreis */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6">
             {groupedPersonen[kreis].map((person) => (
               <PersonEintrag
                 key={`${kreis}-${person.id}`}
@@ -1478,14 +1559,14 @@ const PersonenVerwaltung = () => {
                   />
                 </div>
 
-                <div className="flex items-center gap-3 justify-center sm:justify-start">
+                <div className="flex items-center gap-2 justify-start">
                   <button
                     onClick={handleAddNewPerson}
-                    className="w-14 h-14 bg-ard-blue-600 hover:bg-white text-white hover:text-ard-blue-600 border-2 border-ard-blue-600 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center group active:scale-95 flex-shrink-0"
+                    className="w-10 h-10 sm:w-14 sm:h-14 bg-ard-blue-600 hover:bg-white text-white hover:text-ard-blue-600 border-2 border-ard-blue-600 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center group active:scale-95 flex-shrink-0"
                     title="Neue Person hinzufügen"
                   >
                     <svg
-                      className="w-6 h-6 transition-transform duration-200 group-active:scale-110"
+                      className="w-4 h-4 sm:w-6 sm:h-6 transition-transform duration-200 group-active:scale-110"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -1496,11 +1577,11 @@ const PersonenVerwaltung = () => {
 
                   <button
                     onClick={() => setShowExcelModal(true)}
-                    className="w-14 h-14 bg-green-600 hover:bg-white text-white hover:text-green-600 border-2 border-green-600 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center group active:scale-95 flex-shrink-0"
+                    className="w-10 h-10 sm:w-14 sm:h-14 bg-green-600 hover:bg-white text-white hover:text-green-600 border-2 border-green-600 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center group active:scale-95 flex-shrink-0"
                     title="Excel Upload"
                   >
                     <svg
-                      className="w-6 h-6 transition-transform duration-200 group-active:scale-110"
+                      className="w-4 h-4 sm:w-6 sm:h-6 transition-transform duration-200 group-active:scale-110"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
