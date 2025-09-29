@@ -50,7 +50,7 @@ export const MainAppContent = ({ user }) => {
   const [showReleaseNotesModal, setShowReleaseNotesModal] = useState(false);
   const [showBurgerMenu, setShowBurgerMenu] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const { calendarError } = useData();
+  const { calendarError, personen } = useData();
 
   // Check for mobile screen size
   useEffect(() => {
@@ -105,6 +105,34 @@ export const MainAppContent = ({ user }) => {
     } catch (error) {
       console.error("Logout Error:", error);
     }
+  };
+
+  const handleCopyAllEmails = async () => {
+    try {
+      const emails = personen
+        .filter(person => person.email && person.email.trim() !== '')
+        .map(person => person.email.trim())
+        .join('; ');
+
+      if (emails) {
+        await navigator.clipboard.writeText(emails);
+        // Optional: You could add a toast notification here
+      }
+    } catch (error) {
+      console.error("Failed to copy emails:", error);
+      // Fallback for older browsers
+      const textArea = document.createElement("textarea");
+      const emails = personen
+        .filter(person => person.email && person.email.trim() !== '')
+        .map(person => person.email.trim())
+        .join('; ');
+      textArea.value = emails;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+    }
+    setShowBurgerMenu(false);
   };
 
 
@@ -234,6 +262,12 @@ export const MainAppContent = ({ user }) => {
                 className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 transition-colors"
               >
                 Was ist neu?
+              </button>
+              <button
+                onClick={handleCopyAllEmails}
+                className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+              >
+                Alle Adressen kopieren
               </button>
               <div className="border-t border-gray-100 my-1"></div>
               <button
