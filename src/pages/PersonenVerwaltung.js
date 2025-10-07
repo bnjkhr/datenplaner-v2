@@ -1649,16 +1649,16 @@ const PersonenVerwaltung = () => {
               {/* Upcoming absences - next week */}
               {upcomingAbsentPeople.length > 0 && (
                 <div className="flex items-start gap-2 flex-wrap">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-600 font-medium">Kommende Woche abwesend:</span>
-                    <span className="text-2xl">📅</span>
+                  <div className="flex flex-col">
+                    <span className="text-sm text-gray-600 font-medium">Kommende Woche</span>
+                    <span className="text-sm text-gray-600 font-medium">abwesend:</span>
                   </div>
-                  <div className="flex items-center gap-2 flex-wrap">
+                  <div className="flex items-center gap-3 flex-wrap">
                     {upcomingAbsentPeople.slice(0, 5).map((person) => (
                       <button
                         key={person.id}
                         onClick={() => handleShowDetails(person)}
-                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-700 hover:text-ard-blue-600 transition-all duration-200 cursor-pointer"
+                        className="inline-flex flex-col items-start text-xs font-semibold text-gray-700 hover:text-ard-blue-600 transition-all duration-200 cursor-pointer"
                         title={`Profil von ${person.name} anzeigen`}
                       >
                         <span>{person.name}</span>
@@ -1682,16 +1682,16 @@ const PersonenVerwaltung = () => {
               {/* Current absences */}
               {currentlyAbsentPeople.length > 0 && (
                 <div className="flex items-start gap-2 flex-wrap">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-600 font-medium">Aktuell abwesend:</span>
-                    <span className="text-2xl">🏖️</span>
+                  <div className="flex flex-col">
+                    <span className="text-sm text-gray-600 font-medium">Aktuell</span>
+                    <span className="text-sm text-gray-600 font-medium">abwesend:</span>
                   </div>
-                  <div className="flex items-center gap-2 flex-wrap">
+                  <div className="flex items-center gap-3 flex-wrap">
                     {currentlyAbsentPeople.slice(0, 5).map((person) => (
                       <button
                         key={person.id}
                         onClick={() => handleShowDetails(person)}
-                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-700 hover:text-ard-blue-600 transition-all duration-200 cursor-pointer"
+                        className="inline-flex flex-col items-start text-xs font-semibold text-gray-700 hover:text-ard-blue-600 transition-all duration-200 cursor-pointer"
                         title={`Profil von ${person.name} anzeigen`}
                       >
                         <span>{person.name}</span>
