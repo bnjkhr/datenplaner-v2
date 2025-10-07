@@ -1489,7 +1489,58 @@ const PersonenVerwaltung = () => {
     }).filter(Boolean);
   };
 
+  // Function to get people who will be absent in the next week
+  const getUpcomingAbsentPeople = () => {
+    const today = new Date();
+    const nextWeek = new Date(today);
+    nextWeek.setDate(today.getDate() + 7);
+
+    return personen.map(person => {
+      const searchKeys = [
+        person.name.toLowerCase(),
+        person.name.toLowerCase().replace(/\s+/g, ""),
+        person.email?.toLowerCase(),
+        person.email?.split("@")[0]?.toLowerCase(),
+      ].filter(Boolean);
+
+      let personVacations = [];
+
+      // Search through all possible keys
+      for (const key of searchKeys) {
+        if (vacations[key]) {
+          personVacations = [...personVacations, ...vacations[key]];
+        }
+      }
+
+      // Remove duplicates
+      const uniqueVacations = personVacations.filter((vacation, index, self) =>
+        self.findIndex(
+          (v) => v.start === vacation.start && v.end === vacation.end
+        ) === index
+      );
+
+      // Find upcoming vacation within the next week (but not current)
+      const upcomingVacation = uniqueVacations.find((vacation) => {
+        const start = new Date(vacation.start);
+        const end = new Date(vacation.end);
+        // Vacation starts after today and within the next week
+        return start > today && start <= nextWeek;
+      });
+
+      if (upcomingVacation) {
+        return {
+          ...person,
+          vacationStartDate: upcomingVacation.start,
+          vacationEndDate: upcomingVacation.end
+        };
+      }
+
+      return null;
+    }).filter(Boolean);
+  };
+
   const currentlyAbsentPeople = getCurrentlyAbsentPeople();
+  const upcomingAbsentPeople = getUpcomingAbsentPeople();
 
   const handleSuggestionClick = (suggestion) => {
     setSearchTerm(suggestion.name);
@@ -1593,12 +1644,41 @@ const PersonenVerwaltung = () => {
               </div>
             </div>
 
-            {/* Search bar and absent people indicator */}
-            <div className="flex items-center justify-between gap-4">
-              {/* Absent people indicator */}
+            {/* Absence indicators */}
+            <div className="flex flex-col gap-3">
+              {/* Upcoming absences - next week */}
+              {upcomingAbsentPeople.length > 0 && (
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-sm text-gray-600 font-medium">Kommende Woche abwesend:</span>
+                  <span className="text-2xl">📅</span>
+                  {upcomingAbsentPeople.slice(0, 5).map((person) => (
+                    <button
+                      key={person.id}
+                      onClick={() => handleShowDetails(person)}
+                      className="inline-flex flex-col items-center px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-amber-100 text-amber-700 border border-amber-200 hover:bg-amber-200 hover:scale-105 transition-all duration-200 cursor-pointer"
+                      title={`Profil von ${person.name} anzeigen`}
+                    >
+                      <span>{person.name}</span>
+                      {person.vacationStartDate && (
+                        <span className="text-[10px] opacity-75 font-normal mt-0.5">
+                          ab {new Date(person.vacationStartDate).toLocaleDateString("de-DE", {
+                            day: "2-digit",
+                            month: "2-digit"
+                          })}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                  {upcomingAbsentPeople.length > 5 && (
+                    <span className="text-xs text-gray-500">+{upcomingAbsentPeople.length - 5} weitere</span>
+                  )}
+                </div>
+              )}
+
+              {/* Current absences */}
               {currentlyAbsentPeople.length > 0 && (
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm text-gray-600 font-medium">Abwesend:</span>
+                  <span className="text-sm text-gray-600 font-medium">Aktuell abwesend:</span>
                   <span className="text-2xl">🏖️</span>
                   {currentlyAbsentPeople.slice(0, 5).map((person) => (
                     <button
@@ -1623,8 +1703,6 @@ const PersonenVerwaltung = () => {
                   )}
                 </div>
               )}
-
-              <div className="flex-1"></div>
             </div>
           </div>
           
