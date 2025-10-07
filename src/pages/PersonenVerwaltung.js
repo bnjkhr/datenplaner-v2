@@ -1648,59 +1648,67 @@ const PersonenVerwaltung = () => {
             <div className="flex flex-col gap-3">
               {/* Upcoming absences - next week */}
               {upcomingAbsentPeople.length > 0 && (
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm text-gray-600 font-medium">Kommende Woche abwesend:</span>
-                  <span className="text-2xl">📅</span>
-                  {upcomingAbsentPeople.slice(0, 5).map((person) => (
-                    <button
-                      key={person.id}
-                      onClick={() => handleShowDetails(person)}
-                      className="inline-flex flex-col items-center px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-amber-100 text-amber-700 border border-amber-200 hover:bg-amber-200 hover:scale-105 transition-all duration-200 cursor-pointer"
-                      title={`Profil von ${person.name} anzeigen`}
-                    >
-                      <span>{person.name}</span>
-                      {person.vacationStartDate && (
-                        <span className="text-[10px] opacity-75 font-normal mt-0.5">
-                          ab {new Date(person.vacationStartDate).toLocaleDateString("de-DE", {
-                            day: "2-digit",
-                            month: "2-digit"
-                          })}
-                        </span>
-                      )}
-                    </button>
-                  ))}
-                  {upcomingAbsentPeople.length > 5 && (
-                    <span className="text-xs text-gray-500">+{upcomingAbsentPeople.length - 5} weitere</span>
-                  )}
+                <div className="flex items-start gap-2 flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-600 font-medium">Kommende Woche abwesend:</span>
+                    <span className="text-2xl">📅</span>
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {upcomingAbsentPeople.slice(0, 5).map((person) => (
+                      <button
+                        key={person.id}
+                        onClick={() => handleShowDetails(person)}
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-700 hover:text-ard-blue-600 transition-all duration-200 cursor-pointer"
+                        title={`Profil von ${person.name} anzeigen`}
+                      >
+                        <span>{person.name}</span>
+                        {person.vacationStartDate && (
+                          <span className="text-[10px] opacity-75 font-normal">
+                            ab {new Date(person.vacationStartDate).toLocaleDateString("de-DE", {
+                              day: "2-digit",
+                              month: "2-digit"
+                            })}
+                          </span>
+                        )}
+                      </button>
+                    ))}
+                    {upcomingAbsentPeople.length > 5 && (
+                      <span className="text-xs text-gray-500">+{upcomingAbsentPeople.length - 5} weitere</span>
+                    )}
+                  </div>
                 </div>
               )}
 
               {/* Current absences */}
               {currentlyAbsentPeople.length > 0 && (
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm text-gray-600 font-medium">Aktuell abwesend:</span>
-                  <span className="text-2xl">🏖️</span>
-                  {currentlyAbsentPeople.slice(0, 5).map((person) => (
-                    <button
-                      key={person.id}
-                      onClick={() => handleShowDetails(person)}
-                      className="inline-flex flex-col items-center px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-red-100 text-red-700 border border-red-200 hover:bg-red-200 hover:scale-105 transition-all duration-200 cursor-pointer"
-                      title={`Profil von ${person.name} anzeigen`}
-                    >
-                      <span>{person.name}</span>
-                      {person.vacationEndDate && (
-                        <span className="text-[10px] opacity-75 font-normal mt-0.5">
-                          bis {new Date(person.vacationEndDate).toLocaleDateString("de-DE", {
-                            day: "2-digit",
-                            month: "2-digit"
-                          })}
-                        </span>
-                      )}
-                    </button>
-                  ))}
-                  {currentlyAbsentPeople.length > 5 && (
-                    <span className="text-xs text-gray-500">+{currentlyAbsentPeople.length - 5} weitere</span>
-                  )}
+                <div className="flex items-start gap-2 flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-600 font-medium">Aktuell abwesend:</span>
+                    <span className="text-2xl">🏖️</span>
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {currentlyAbsentPeople.slice(0, 5).map((person) => (
+                      <button
+                        key={person.id}
+                        onClick={() => handleShowDetails(person)}
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-700 hover:text-ard-blue-600 transition-all duration-200 cursor-pointer"
+                        title={`Profil von ${person.name} anzeigen`}
+                      >
+                        <span>{person.name}</span>
+                        {person.vacationEndDate && (
+                          <span className="text-[10px] opacity-75 font-normal">
+                            bis {new Date(person.vacationEndDate).toLocaleDateString("de-DE", {
+                              day: "2-digit",
+                              month: "2-digit"
+                            })}
+                          </span>
+                        )}
+                      </button>
+                    ))}
+                    {currentlyAbsentPeople.length > 5 && (
+                      <span className="text-xs text-gray-500">+{currentlyAbsentPeople.length - 5} weitere</span>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
