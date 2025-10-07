@@ -1648,11 +1648,8 @@ const PersonenVerwaltung = () => {
             <div className="flex flex-col gap-3">
               {/* Upcoming absences - next week */}
               {upcomingAbsentPeople.length > 0 && (
-                <div className="flex items-start gap-2 flex-wrap">
-                  <div className="flex flex-col">
-                    <span className="text-sm text-gray-600 font-medium">Kommende Woche</span>
-                    <span className="text-sm text-gray-600 font-medium">abwesend:</span>
-                  </div>
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-xs text-gray-500 font-medium">Kommende Woche abwesend:</span>
                   <div className="flex items-center gap-3 flex-wrap">
                     {upcomingAbsentPeople.slice(0, 5).map((person) => (
                       <button
@@ -1681,11 +1678,8 @@ const PersonenVerwaltung = () => {
 
               {/* Current absences */}
               {currentlyAbsentPeople.length > 0 && (
-                <div className="flex items-start gap-2 flex-wrap">
-                  <div className="flex flex-col">
-                    <span className="text-sm text-gray-600 font-medium">Aktuell</span>
-                    <span className="text-sm text-gray-600 font-medium">abwesend:</span>
-                  </div>
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-xs text-gray-500 font-medium">Aktuell abwesend:</span>
                   <div className="flex items-center gap-3 flex-wrap">
                     {currentlyAbsentPeople.slice(0, 5).map((person) => (
                       <button
