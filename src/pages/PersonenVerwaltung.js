@@ -1685,12 +1685,12 @@ const PersonenVerwaltung = () => {
                       <button
                         key={person.id}
                         onClick={() => handleShowDetails(person)}
-                        className="inline-flex flex-col items-start text-xs font-semibold text-gray-700 hover:text-ard-blue-600 transition-all duration-200 cursor-pointer"
+                        className="inline-flex flex-col items-start px-3 py-2 bg-red-500 text-white text-xs font-semibold rounded-lg hover:bg-red-600 transition-all duration-200 cursor-pointer shadow-md"
                         title={`Profil von ${person.name} anzeigen`}
                       >
                         <span>{person.name}</span>
                         {person.vacationEndDate && (
-                          <span className="text-[10px] opacity-75 font-normal">
+                          <span className="text-[10px] opacity-90 font-normal">
                             bis {new Date(person.vacationEndDate).toLocaleDateString("de-DE", {
                               day: "2-digit",
                               month: "2-digit"
