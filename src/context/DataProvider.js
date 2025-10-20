@@ -47,7 +47,7 @@ const tagColors = [
 
 const roleColors = [
   "#EF4444", // red-500
-  "#F97316", // orange-500  
+  "#F97316", // orange-500
   "#EAB308", // yellow-500
   "#22C55E", // green-500
   "#06B6D4", // cyan-500
@@ -102,7 +102,9 @@ const getRandomColor = () =>
   tagColors[Math.floor(Math.random() * tagColors.length)];
 
 const getRandomRoleColor = (existingColors = []) => {
-  const availableColors = roleColors.filter(color => !existingColors.includes(color));
+  const availableColors = roleColors.filter(
+    (color) => !existingColors.includes(color),
+  );
   if (availableColors.length === 0) {
     return roleColors[Math.floor(Math.random() * roleColors.length)];
   }
@@ -121,14 +123,19 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
   const [lastChange, setLastChange] = useState(null);
   const [vacations, setVacations] = useState({});
   const [calendarError, setCalendarError] = useState(false);
-  
+
   // Multi-Tenancy: Wähle entsprechenden Tenant oder fallback zu appId
-  const currentTenantId = tenantId || (isFeatureEnabled(FEATURE_FLAGS.MULTI_TENANCY) ? defaultTenantId : appId);
+  const currentTenantId =
+    tenantId ||
+    (isFeatureEnabled(FEATURE_FLAGS.MULTI_TENANCY) ? defaultTenantId : appId);
   const isMultiTenancy = isFeatureEnabled(FEATURE_FLAGS.MULTI_TENANCY);
-  
-  const lastChangeRef = doc(db, isMultiTenancy ? 
-    `tenants/${currentTenantId}` : 
-    `artifacts/${appId}/public/meta`);
+
+  const lastChangeRef = doc(
+    db,
+    isMultiTenancy
+      ? `tenants/${currentTenantId}`
+      : `artifacts/${appId}/public/meta`,
+  );
 
   const recordLastChange = async (description) => {
     const change = {
@@ -163,7 +170,7 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
       }
       return `artifacts/${appId}/public/data/${name}`;
     },
-    [isMultiTenancy, currentTenantId]
+    [isMultiTenancy, currentTenantId],
   );
 
   useEffect(() => {
@@ -179,15 +186,15 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
     const loadVacations = async () => {
       // Always use CORS proxy in production to avoid proxy issues
       let url;
-      
-      if (process.env.NODE_ENV === 'development') {
+
+      if (process.env.NODE_ENV === "development") {
         // Development: use direct URL
         url = confluenceCalendarUrl;
       } else {
         // Production: use CORS proxy directly
         url = `https://corsproxy.io/?${encodeURIComponent(confluenceCalendarUrl)}`;
       }
-      
+
       if (!url) {
         setVacations({});
         setCalendarError(true);
@@ -202,8 +209,11 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
         upcoming.forEach((ev) => {
           (ev.attendees || []).forEach((attendee) => {
             const email = attendee.toLowerCase();
-            const name = attendee.replace(/[@.].*$/, '').replace(/[._]/g, ' ').toLowerCase();
-            
+            const name = attendee
+              .replace(/[@.].*$/, "")
+              .replace(/[._]/g, " ")
+              .toLowerCase();
+
             // Store under email key
             if (!mapping[email]) mapping[email] = [];
             mapping[email].push({
@@ -211,7 +221,7 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
               end: ev.end,
               summary: ev.summary,
             });
-            
+
             // Also store under name key for fallback
             if (!mapping[name]) mapping[name] = [];
             mapping[name].push({
@@ -221,11 +231,11 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
             });
           });
         });
-        
+
         setVacations(mapping);
         setCalendarError(false);
       } catch (error) {
-        console.error('❌ Calendar loading error:', error);
+        console.error("❌ Calendar loading error:", error);
         setVacations({});
         setCalendarError(true);
       }
@@ -260,7 +270,7 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
           }));
           if (!path.includes("zuordnungen")) {
             data.sort((a, b) =>
-              (a.name || "").localeCompare(b.name || "", "de")
+              (a.name || "").localeCompare(b.name || "", "de"),
             );
           }
           setter(data);
@@ -270,7 +280,7 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
           console.error(`Error at ${path}:`, err);
           setError(`Fehler: ${err.code}.`);
           checkAllLoaded();
-        }
+        },
       );
     });
     return () => unsubscribes.forEach((unsub) => unsub());
@@ -279,18 +289,23 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
   // Migration: Rollen ohne Farbe mit Farben versorgen
   useEffect(() => {
     if (loading || isReadOnly || rollen.length === 0) return;
-    
-    const rollenOhneFarbe = rollen.filter(rolle => !rolle.color);
+
+    const rollenOhneFarbe = rollen.filter((rolle) => !rolle.color);
     if (rollenOhneFarbe.length === 0) return;
 
     const migrateRoleColors = async () => {
-      const existingColors = rollen.map(r => r.color).filter(Boolean);
+      const existingColors = rollen.map((r) => r.color).filter(Boolean);
       const batch = writeBatch(db);
 
       rollenOhneFarbe.forEach((rolle, index) => {
-        const color = getRandomRoleColor([...existingColors, ...rollenOhneFarbe.slice(0, index).map((_, i) => roleColors[i % roleColors.length])]);
+        const color = getRandomRoleColor([
+          ...existingColors,
+          ...rollenOhneFarbe
+            .slice(0, index)
+            .map((_, i) => roleColors[i % roleColors.length]),
+        ]);
         existingColors.push(color);
-        
+
         const rolleRef = doc(db, getCollectionPath("rollen"), rolle.id);
         batch.update(rolleRef, { color });
       });
@@ -298,7 +313,7 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
       try {
         await batch.commit();
       } catch (error) {
-        console.error('Fehler beim Migrieren der Rollen-Farben:', error);
+        console.error("Fehler beim Migrieren der Rollen-Farben:", error);
       }
     };
 
@@ -326,9 +341,10 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
           wochenstunden: personDaten.wochenstunden || 31, // Standard: 31 Stunden
           isM13: personDaten.isM13 || false,
           kategorien: personDaten.kategorien || [],
+          terminbuchungsLink: personDaten.terminbuchungsLink || "",
           erstelltAm: new Date().toISOString(),
           letzteAenderung: new Date().toISOString(),
-        }
+        },
       );
       recordLastChange("Neue Person angelegt");
       return docRef.id;
@@ -349,7 +365,7 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
       for (const personData of personenArray) {
         if (!personData.name || !personData.email) {
           setError(
-            `Fehler in den Daten: Ein Eintrag hat keinen Namen oder keine E-Mail.`
+            `Fehler in den Daten: Ein Eintrag hat keinen Namen oder keine E-Mail.`,
           );
           return false;
         }
@@ -359,6 +375,7 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
           wochenstunden: personData.wochenstunden || 31, // Standard: 31 Stunden
           isM13: personData.isM13 || false,
           kategorien: personData.kategorien || [],
+          terminbuchungsLink: personData.terminbuchungsLink || "",
           erstelltAm: new Date().toISOString(),
           letzteAenderung: new Date().toISOString(),
         });
@@ -372,7 +389,7 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
         setError(`Fehler beim Batch-Upload: ${e.code || e.message}`);
         return false;
       }
-    }
+    },
   );
 
   const aktualisierePerson = preventWriteActions(
@@ -389,14 +406,14 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
         setError(`Update-Fehler Person: ${e.code}`);
         return false;
       }
-    }
+    },
   );
   const loeschePerson = preventWriteActions(async (personId) => {
     try {
       const batch = writeBatch(db);
       const assignmentsQuery = query(
         collection(db, getCollectionPath("zuordnungen")),
-        where("personId", "==", personId)
+        where("personId", "==", personId),
       );
       const assignmentSnapshot = await getDocs(assignmentsQuery);
       assignmentSnapshot.forEach((doc) => batch.delete(doc.ref));
@@ -418,7 +435,7 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
           ...produktDaten,
           erstelltAm: new Date().toISOString(),
           letzteAenderung: new Date().toISOString(),
-        }
+        },
       );
       recordLastChange("Neues Datenprodukt angelegt");
       return docRef.id;
@@ -436,7 +453,7 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
           {
             ...neueDaten,
             letzteAenderung: new Date().toISOString(),
-          }
+          },
         );
         recordLastChange("Datenprodukt geändert");
         return true;
@@ -445,14 +462,14 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
         setError(`Update-Fehler: ${e.code}`);
         return false;
       }
-    }
+    },
   );
   const loescheDatenprodukt = preventWriteActions(async (produktId) => {
     try {
       const batch = writeBatch(db);
       const q = query(
         collection(db, getCollectionPath("zuordnungen")),
-        where("datenproduktId", "==", produktId)
+        where("datenproduktId", "==", produktId),
       );
       const assignments = await getDocs(q);
       assignments.forEach((doc) => batch.delete(doc.ref));
@@ -472,7 +489,7 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
         (z) =>
           z.personId === personId &&
           z.datenproduktId === produktId &&
-          z.rolleId === rolleId
+          z.rolleId === rolleId,
       );
       if (existing) {
         setError("Diese Person hat diese Rolle bereits.");
@@ -488,7 +505,7 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
             rolleId,
             stunden: Number(stunden) || 0,
             erstelltAm: new Date().toISOString(),
-          }
+          },
         );
         recordLastChange("Rolle zugewiesen");
         return docRef.id;
@@ -497,7 +514,7 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
         setError(`Zuweisungsfehler: ${e.code}`);
         return null;
       }
-    }
+    },
   );
   const entfernePersonVonDatenproduktRolle = preventWriteActions(
     async (zuordnungId) => {
@@ -510,15 +527,18 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
         setError(`Löschfehler: ${e.code}`);
         return false;
       }
-    }
+    },
   );
 
   const aktualisiereZuordnungStunden = preventWriteActions(
     async (zuordnungId, stunden) => {
       try {
-        await updateDoc(doc(db, getCollectionPath("zuordnungen"), zuordnungId), {
-          stunden: Number(stunden) || 0,
-        });
+        await updateDoc(
+          doc(db, getCollectionPath("zuordnungen"), zuordnungId),
+          {
+            stunden: Number(stunden) || 0,
+          },
+        );
         recordLastChange("Stunden aktualisiert");
         return true;
       } catch (e) {
@@ -526,7 +546,7 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
         setError(`Update-Fehler Stunden: ${e.code}`);
         return false;
       }
-    }
+    },
   );
 
   const aktualisiereZuordnung = preventWriteActions(
@@ -539,8 +559,11 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
         if (updates.rolleId !== undefined) {
           updateData.rolleId = updates.rolleId;
         }
-        
-        await updateDoc(doc(db, getCollectionPath("zuordnungen"), zuordnungId), updateData);
+
+        await updateDoc(
+          doc(db, getCollectionPath("zuordnungen"), zuordnungId),
+          updateData,
+        );
         recordLastChange("Zuordnung aktualisiert");
         return true;
       } catch (e) {
@@ -548,14 +571,14 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
         setError(`Update-Fehler Zuordnung: ${e.code}`);
         return false;
       }
-    }
+    },
   );
   const fuegeRolleHinzu = preventWriteActions(async (rollenName) => {
     if (!rollenName?.trim()) return null;
     try {
-      const existingColors = rollen.map(r => r.color).filter(Boolean);
+      const existingColors = rollen.map((r) => r.color).filter(Boolean);
       const newColor = getRandomRoleColor(existingColors);
-      
+
       const docRef = await addDoc(collection(db, getCollectionPath("rollen")), {
         name: rollenName.trim(),
         color: newColor,
@@ -569,23 +592,28 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
     }
   });
 
-  const aktualisiereRolle = preventWriteActions(async (rolleId, rollenName, color = null) => {
-    if (!rollenName?.trim()) return false;
-    try {
-      const updateData = { name: rollenName.trim() };
-      if (color !== null) {
-        updateData.color = color;
+  const aktualisiereRolle = preventWriteActions(
+    async (rolleId, rollenName, color = null) => {
+      if (!rollenName?.trim()) return false;
+      try {
+        const updateData = { name: rollenName.trim() };
+        if (color !== null) {
+          updateData.color = color;
+        }
+
+        await updateDoc(
+          doc(db, getCollectionPath("rollen"), rolleId),
+          updateData,
+        );
+        recordLastChange("Rolle geändert");
+        return true;
+      } catch (e) {
+        console.error(e);
+        setError(`Update-Fehler Rolle: ${e.code}`);
+        return false;
       }
-      
-      await updateDoc(doc(db, getCollectionPath("rollen"), rolleId), updateData);
-      recordLastChange("Rolle geändert");
-      return true;
-    } catch (e) {
-      console.error(e);
-      setError(`Update-Fehler Rolle: ${e.code}`);
-      return false;
-    }
-  });
+    },
+  );
   const loescheRolle = preventWriteActions(async (rolleId) => {
     const isRoleInUse = zuordnungen.some((z) => z.rolleId === rolleId);
     if (isRoleInUse) {
@@ -608,9 +636,9 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
     try {
       // Find roles with duplicate colors
       const colorCounts = {};
-      const rolesWithColors = rollen.filter(r => r.color);
-      
-      rolesWithColors.forEach(role => {
+      const rolesWithColors = rollen.filter((r) => r.color);
+
+      rolesWithColors.forEach((role) => {
         if (colorCounts[role.color]) {
           colorCounts[role.color].push(role);
         } else {
@@ -619,25 +647,30 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
       });
 
       // Find duplicates
-      const duplicateGroups = Object.values(colorCounts).filter(group => group.length > 1);
-      
+      const duplicateGroups = Object.values(colorCounts).filter(
+        (group) => group.length > 1,
+      );
+
       if (duplicateGroups.length === 0) {
-        return { success: true, message: 'Alle Rollenfarben sind bereits eindeutig.' };
+        return {
+          success: true,
+          message: "Alle Rollenfarben sind bereits eindeutig.",
+        };
       }
 
       const batch = writeBatch(db);
       let totalFixed = 0;
-      
+
       // For each group of duplicates, keep the first role and reassign colors to others
       for (const duplicateGroup of duplicateGroups) {
         const [, ...reassignRoles] = duplicateGroup;
-        const usedColors = rollen.map(r => r.color).filter(Boolean);
-        
+        const usedColors = rollen.map((r) => r.color).filter(Boolean);
+
         for (let i = 0; i < reassignRoles.length; i++) {
           const role = reassignRoles[i];
           const newColor = getRandomRoleColor(usedColors);
           usedColors.push(newColor);
-          
+
           const roleRef = doc(db, getCollectionPath("rollen"), role.id);
           batch.update(roleRef, { color: newColor });
           totalFixed++;
@@ -649,14 +682,14 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
 
       return {
         success: true,
-        message: `${totalFixed} doppelte Rollenfarben wurden korrigiert.` 
+        message: `${totalFixed} doppelte Rollenfarben wurden korrigiert.`,
       };
     } catch (error) {
-      console.error('Fehler beim Beheben doppelter Rollenfarben:', error);
+      console.error("Fehler beim Beheben doppelter Rollenfarben:", error);
       setError(`Fehler beim Beheben doppelter Rollenfarben: ${error.code}`);
-      return { 
-        success: false, 
-        message: 'Fehler beim Beheben der doppelten Rollenfarben.' 
+      return {
+        success: false,
+        message: "Fehler beim Beheben der doppelten Rollenfarben.",
       };
     }
   });
@@ -692,11 +725,11 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
         setError("Fehler beim Aktualisieren des Skills.");
         return false;
       }
-    }
+    },
   );
   const loescheSkill = preventWriteActions(async (skillId) => {
     const isSkillInUse = personen.some(
-      (p) => p.skillIds && p.skillIds.includes(skillId)
+      (p) => p.skillIds && p.skillIds.includes(skillId),
     );
     if (isSkillInUse) {
       setError("Dieser Skill wird noch verwendet.");

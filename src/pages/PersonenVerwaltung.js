@@ -15,7 +15,7 @@ const searchAnimationStyles = `
       opacity: 1;
     }
   }
-  
+
   @keyframes slideInScale {
     0% {
       opacity: 0;
@@ -30,7 +30,7 @@ const searchAnimationStyles = `
       transform: translateY(0) scale(1);
     }
   }
-  
+
   @keyframes fadeInUp {
     from {
       opacity: 0;
@@ -44,19 +44,23 @@ const searchAnimationStyles = `
 `;
 
 // Inject styles into document
-if (typeof document !== 'undefined') {
-  const existingStyles = document.getElementById('search-animation-styles');
+if (typeof document !== "undefined") {
+  const existingStyles = document.getElementById("search-animation-styles");
   if (!existingStyles) {
-    const styleSheet = document.createElement('style');
-    styleSheet.id = 'search-animation-styles';
+    const styleSheet = document.createElement("style");
+    styleSheet.id = "search-animation-styles";
     styleSheet.textContent = searchAnimationStyles;
     document.head.appendChild(styleSheet);
   }
 }
 
-
 // Simple Search Component
-const SimpleSearch = ({ searchTerm, setSearchTerm, suggestions, onSuggestionClick }) => {
+const SimpleSearch = ({
+  searchTerm,
+  setSearchTerm,
+  suggestions,
+  onSuggestionClick,
+}) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [activeSuggestion, setActiveSuggestion] = useState(-1);
   const searchRef = useRef(null);
@@ -70,8 +74,8 @@ const SimpleSearch = ({ searchTerm, setSearchTerm, suggestions, onSuggestionClic
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleInputChange = (e) => {
@@ -82,20 +86,20 @@ const SimpleSearch = ({ searchTerm, setSearchTerm, suggestions, onSuggestionClic
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'ArrowDown') {
+    if (e.key === "ArrowDown") {
       e.preventDefault();
-      setActiveSuggestion(prev => Math.min(prev + 1, suggestions.length - 1));
-    } else if (e.key === 'ArrowUp') {
+      setActiveSuggestion((prev) => Math.min(prev + 1, suggestions.length - 1));
+    } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      setActiveSuggestion(prev => Math.max(prev - 1, -1));
-    } else if (e.key === 'Enter') {
+      setActiveSuggestion((prev) => Math.max(prev - 1, -1));
+    } else if (e.key === "Enter") {
       e.preventDefault();
       if (activeSuggestion >= 0 && suggestions[activeSuggestion]) {
         onSuggestionClick(suggestions[activeSuggestion]);
         setActiveSuggestion(-1);
         setShowSuggestions(false);
       }
-    } else if (e.key === 'Escape') {
+    } else if (e.key === "Escape") {
       setShowSuggestions(false);
       setActiveSuggestion(-1);
     }
@@ -123,7 +127,7 @@ const SimpleSearch = ({ searchTerm, setSearchTerm, suggestions, onSuggestionClic
           onKeyDown={handleKeyDown}
           onFocus={() => setShowSuggestions(searchTerm.length > 0)}
           className={`w-full px-4 py-3 pl-10 border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-ard-blue-500 focus:border-ard-blue-500 transition-all ${
-            searchTerm ? 'pr-10' : 'pr-4'
+            searchTerm ? "pr-10" : "pr-4"
           }`}
         />
         {/* Search icon */}
@@ -134,7 +138,7 @@ const SimpleSearch = ({ searchTerm, setSearchTerm, suggestions, onSuggestionClic
         {searchTerm && (
           <button
             onClick={() => {
-              setSearchTerm('');
+              setSearchTerm("");
               setShowSuggestions(false);
               setActiveSuggestion(-1);
             }}
@@ -151,7 +155,8 @@ const SimpleSearch = ({ searchTerm, setSearchTerm, suggestions, onSuggestionClic
         <div className="absolute z-50 w-full mt-2 bg-white rounded-lg shadow-lg border border-gray-200 max-h-96 overflow-y-auto">
           <div className="p-2">
             <div className="text-xs text-gray-500 px-2 pb-2 font-medium">
-              {suggestions.length} Ergebnis{suggestions.length !== 1 ? 'se' : ''} gefunden
+              {suggestions.length} Ergebnis
+              {suggestions.length !== 1 ? "se" : ""} gefunden
             </div>
             {suggestions.map((suggestion, index) => (
               <div
@@ -162,27 +167,39 @@ const SimpleSearch = ({ searchTerm, setSearchTerm, suggestions, onSuggestionClic
                 }}
                 className={`px-3 py-3 cursor-pointer transition-colors rounded-lg mb-1 ${
                   index === activeSuggestion
-                    ? 'bg-ard-blue-50 text-ard-blue-900'
-                    : 'hover:bg-gray-50'
+                    ? "bg-ard-blue-50 text-ard-blue-900"
+                    : "hover:bg-gray-50"
                 }`}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-gray-900 truncate">{suggestion.name}</div>
+                    <div className="font-medium text-gray-900 truncate">
+                      {suggestion.name}
+                    </div>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
-                        suggestion.type === 'person' ? 'bg-ard-blue-100 text-ard-blue-700' :
-                        suggestion.type === 'skill' ? 'bg-green-100 text-green-700' :
-                        suggestion.type === 'datenprodukt' ? 'bg-purple-100 text-purple-700' :
-                        'bg-gray-100 text-gray-700'
-                      }`}>
-                        {suggestion.type === 'person' ? 'Person' :
-                         suggestion.type === 'skill' ? 'Skill' :
-                         suggestion.type === 'datenprodukt' ? 'Produkt' :
-                         suggestion.type}
+                      <span
+                        className={`px-2 py-0.5 rounded text-xs font-semibold ${
+                          suggestion.type === "person"
+                            ? "bg-ard-blue-100 text-ard-blue-700"
+                            : suggestion.type === "skill"
+                              ? "bg-green-100 text-green-700"
+                              : suggestion.type === "datenprodukt"
+                                ? "bg-purple-100 text-purple-700"
+                                : "bg-gray-100 text-gray-700"
+                        }`}
+                      >
+                        {suggestion.type === "person"
+                          ? "Person"
+                          : suggestion.type === "skill"
+                            ? "Skill"
+                            : suggestion.type === "datenprodukt"
+                              ? "Produkt"
+                              : suggestion.type}
                       </span>
                       {suggestion.details && (
-                        <span className="text-xs text-gray-500 truncate">{suggestion.details}</span>
+                        <span className="text-xs text-gray-500 truncate">
+                          {suggestion.details}
+                        </span>
                       )}
                     </div>
                     {suggestion.matchedField && (
@@ -204,17 +221,18 @@ const SimpleSearch = ({ searchTerm, setSearchTerm, suggestions, onSuggestionClic
 const WorkloadIndicator = ({ person, zuordnungen }) => {
   const verfügbareStunden = person.wochenstunden || 31;
   const gebuchteStunden = zuordnungen
-    .filter(z => z.personId === person.id)
+    .filter((z) => z.personId === person.id)
     .reduce((sum, z) => sum + (z.stunden || 0), 0);
-  
-  const auslastung = verfügbareStunden > 0 ? (gebuchteStunden / verfügbareStunden) * 100 : 0;
+
+  const auslastung =
+    verfügbareStunden > 0 ? (gebuchteStunden / verfügbareStunden) * 100 : 0;
   const isUnderbooked = auslastung < 20;
-  
+
   // Moderne Farben basierend auf Auslastung
   let barColor = "bg-gradient-to-r from-emerald-400 to-emerald-500"; // Normal (20-100%)
   let bgColor = "bg-emerald-50";
   let textColor = "text-emerald-700";
-  
+
   if (isUnderbooked) {
     barColor = "bg-gradient-to-r from-red-400 to-red-500"; // Unterbuchung (<20%)
     bgColor = "bg-red-50";
@@ -234,7 +252,7 @@ const WorkloadIndicator = ({ person, zuordnungen }) => {
         </span>
       </div>
       <div className="w-full bg-white/60 rounded-full h-2.5 overflow-hidden">
-        <div 
+        <div
           className={`h-full rounded-full transition-all duration-500 ease-out ${barColor} shadow-sm`}
           style={{ width: `${Math.min(auslastung, 100)}%` }}
         />
@@ -253,7 +271,6 @@ const WorkloadIndicator = ({ person, zuordnungen }) => {
   );
 };
 
-
 const PersonEintrag = ({
   person,
   onEdit,
@@ -269,13 +286,17 @@ const PersonEintrag = ({
   // Kreis-Indikator für kompakte Ansicht
   const getKreisIndicator = () => {
     if (!kategorien || kategorien.length === 0) return null;
-    return kategorien.map(k => k.charAt(0)).join('');
+    return kategorien.map((k) => k.charAt(0)).join("");
   };
 
   // Anzahl Datenprodukte berechnen
   const getDataProductCount = () => {
-    const personAssignments = zuordnungen.filter(z => z.personId === person.id);
-    const uniqueDataProducts = new Set(personAssignments.map(z => z.datenproduktId));
+    const personAssignments = zuordnungen.filter(
+      (z) => z.personId === person.id,
+    );
+    const uniqueDataProducts = new Set(
+      personAssignments.map((z) => z.datenproduktId),
+    );
     return uniqueDataProducts.size;
   };
 
@@ -305,7 +326,9 @@ const PersonEintrag = ({
   return (
     <div
       className={`bg-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg border border-gray-200 hover:border-gray-300 overflow-hidden cursor-pointer ${
-        isCurrentlyAbsent() ? "bg-gradient-to-br from-red-50 to-red-100/30 border-red-200" : ""
+        isCurrentlyAbsent()
+          ? "bg-gradient-to-br from-red-50 to-red-100/30 border-red-200"
+          : ""
       }`}
       onClick={() => onShowDetails(person)}
     >
@@ -328,7 +351,7 @@ const PersonEintrag = ({
                 </span>
               )}
               {/* Datenprodukte-Tag bei entsprechender Sortierung */}
-              {sortBy === 'datenprodukte' && getDataProductCount() > 0 && (
+              {sortBy === "datenprodukte" && getDataProductCount() > 0 && (
                 <span className="inline-flex items-center px-1 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-700 border border-indigo-200">
                   {getDataProductCount()}
                 </span>
@@ -336,46 +359,70 @@ const PersonEintrag = ({
             </div>
 
             {/* Abwesenheits-Info bei Sortierung nach Abwesenheit */}
-            {sortBy === 'abwesenheit' && (() => {
-              const nextAbsenceInfo = getNextAbsenceInfo(person);
-              if (nextAbsenceInfo) {
-                return (
-                  <div className="text-xs text-gray-500 mt-1">
-                    Abwesend ab {nextAbsenceInfo.startDate.toLocaleDateString("de-DE", {
-                      day: "2-digit",
-                      month: "2-digit"
-                    })}
-                  </div>
-                );
-              }
-              return null;
-            })()}
-            
-            {/* Teams Link unter dem Namen */}
-            {msTeamsLink && (
-              <a
-                href={msTeamsLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-gray-500 hover:text-ard-blue-600 transition-colors mt-0.5 block"
-                onClick={(e) => e.stopPropagation()}
-              >
-                Nachricht in Teams senden
-              </a>
-            )}
-            
+            {sortBy === "abwesenheit" &&
+              (() => {
+                const nextAbsenceInfo = getNextAbsenceInfo(person);
+                if (nextAbsenceInfo) {
+                  return (
+                    <div className="text-xs text-gray-500 mt-1">
+                      Abwesend ab{" "}
+                      {nextAbsenceInfo.startDate.toLocaleDateString("de-DE", {
+                        day: "2-digit",
+                        month: "2-digit",
+                      })}
+                    </div>
+                  );
+                }
+                return null;
+              })()}
+
+            {/* Teams Link und Terminbuchungslink unter dem Namen */}
+            <div className="flex flex-wrap items-center gap-2 mt-0.5">
+              {msTeamsLink && (
+                <a
+                  href={msTeamsLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-gray-500 hover:text-ard-blue-600 transition-colors"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  Nachricht in Teams senden
+                </a>
+              )}
+              {person.terminbuchungsLink && (
+                <>
+                  {msTeamsLink && (
+                    <span className="text-xs text-gray-300">•</span>
+                  )}
+                  <a
+                    href={person.terminbuchungsLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-gray-500 hover:text-ard-blue-600 transition-colors"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Termin buchen
+                  </a>
+                </>
+              )}
+            </div>
+
             {/* Auslastungsbalken - kompakt - nur für M13 */}
             {person.isM13 && (
               <div className="mt-2">
                 {(() => {
                   const verfügbareStunden = wochenstunden || 31;
                   const gebuchteStunden = zuordnungen
-                    .filter(z => z.personId === person.id)
+                    .filter((z) => z.personId === person.id)
                     .reduce((sum, z) => sum + (z.stunden || 0), 0);
-                  const auslastung = verfügbareStunden > 0 ? (gebuchteStunden / verfügbareStunden) * 100 : 0;
+                  const auslastung =
+                    verfügbareStunden > 0
+                      ? (gebuchteStunden / verfügbareStunden) * 100
+                      : 0;
                   const isUnderbooked = auslastung < 20;
 
-                  let barColor = "bg-gradient-to-r from-emerald-400 to-emerald-500";
+                  let barColor =
+                    "bg-gradient-to-r from-emerald-400 to-emerald-500";
                   if (isUnderbooked) {
                     barColor = "bg-gradient-to-r from-red-400 to-red-500";
                   } else if (auslastung > 100) {
@@ -400,11 +447,15 @@ const PersonEintrag = ({
             )}
           </div>
         </div>
-        
+
         {/* Details-Indikator */}
         <div className="text-gray-400">
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+            <path
+              fillRule="evenodd"
+              d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+              clipRule="evenodd"
+            />
           </svg>
         </div>
       </div>
@@ -412,7 +463,14 @@ const PersonEintrag = ({
   );
 };
 
-const PersonDetailsModal = ({ person, isOpen, onClose, onEdit, onDeleteInitiation, onSkillClick }) => {
+const PersonDetailsModal = ({
+  person,
+  isOpen,
+  onClose,
+  onEdit,
+  onDeleteInitiation,
+  onSkillClick,
+}) => {
   const {
     datenprodukte,
     zuordnungen,
@@ -423,7 +481,15 @@ const PersonDetailsModal = ({ person, isOpen, onClose, onEdit, onDeleteInitiatio
 
   if (!isOpen || !person) return null;
 
-  const { name, email, skillIds, msTeamsLink, wochenstunden, isM13, kategorien } = person;
+  const {
+    name,
+    email,
+    skillIds,
+    msTeamsLink,
+    wochenstunden,
+    isM13,
+    kategorien,
+  } = person;
 
   // Verbesserte Abwesenheits-Logik
   const getPersonVacations = () => {
@@ -447,14 +513,14 @@ const PersonDetailsModal = ({ person, isOpen, onClose, onEdit, onDeleteInitiatio
       const vacationEnd = new Date(vacation.end);
       const isUnique =
         self.findIndex(
-          (v) => v.start === vacation.start && v.end === vacation.end
+          (v) => v.start === vacation.start && v.end === vacation.end,
         ) === index;
 
       return isUnique && vacationEnd >= today;
     });
 
     return uniqueVacations.sort(
-      (a, b) => new Date(a.start) - new Date(b.start)
+      (a, b) => new Date(a.start) - new Date(b.start),
     );
   };
 
@@ -473,7 +539,7 @@ const PersonDetailsModal = ({ person, isOpen, onClose, onEdit, onDeleteInitiatio
     .filter((z) => z.personId === person.id)
     .map((assignment) => {
       const produkt = datenprodukte.find(
-        (dp) => dp.id === assignment.datenproduktId
+        (dp) => dp.id === assignment.datenproduktId,
       );
       const rolleInProdukt = rollen.find((r) => r.id === assignment.rolleId);
       return {
@@ -501,32 +567,55 @@ const PersonDetailsModal = ({ person, isOpen, onClose, onEdit, onDeleteInitiatio
                 {name}
                 {email && (
                   <span className="text-lg font-normal text-gray-600 ml-2">
-                    (<a
+                    (
+                    <a
                       href={`mailto:${email}`}
                       className="hover:text-ard-blue-600 transition-colors"
                     >
                       {email}
-                    </a>)
+                    </a>
+                    )
                   </span>
                 )}
               </h2>
-              {msTeamsLink && (
-                <a
-                  href={msTeamsLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-gray-500 hover:text-ard-blue-600 transition-colors mt-0.5 block"
-                >
-                  Nachricht in Teams senden
-                </a>
-              )}
+              <div className="flex flex-wrap items-center gap-2 mt-0.5">
+                {msTeamsLink && (
+                  <a
+                    href={msTeamsLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-gray-500 hover:text-ard-blue-600 transition-colors"
+                  >
+                    Nachricht in Teams senden
+                  </a>
+                )}
+                {person.terminbuchungsLink && (
+                  <>
+                    {msTeamsLink && (
+                      <span className="text-xs text-gray-300">•</span>
+                    )}
+                    <a
+                      href={person.terminbuchungsLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-gray-500 hover:text-ard-blue-600 transition-colors"
+                    >
+                      Termin buchen
+                    </a>
+                  </>
+                )}
+              </div>
             </div>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 transition-colors"
             >
               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                <path
+                  fillRule="evenodd"
+                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
               </svg>
             </button>
           </div>
@@ -547,25 +636,28 @@ const PersonDetailsModal = ({ person, isOpen, onClose, onEdit, onDeleteInitiatio
                     ✓ M13
                   </span>
                 )}
-                {kategorien && kategorien.map((kategorie) => (
-                  <button
-                    key={kategorie}
-                    onClick={() => {
-                      onClose();
-                      // Use setTimeout to ensure modal is closed before setting search term
-                      setTimeout(() => onSkillClick(kategorie), 10);
-                    }}
-                    className="inline-flex items-center px-3 py-1 rounded-lg text-sm font-semibold bg-gradient-to-r from-purple-50 to-purple-100 text-purple-700 border border-purple-200 hover:from-purple-100 hover:to-purple-200 hover:scale-105 transition-all duration-200 cursor-pointer"
-                    title={`Nach Kreis "${kategorie}" filtern`}
-                  >
-                    {kategorie}
-                  </button>
-                ))}
+                {kategorien &&
+                  kategorien.map((kategorie) => (
+                    <button
+                      key={kategorie}
+                      onClick={() => {
+                        onClose();
+                        // Use setTimeout to ensure modal is closed before setting search term
+                        setTimeout(() => onSkillClick(kategorie), 10);
+                      }}
+                      className="inline-flex items-center px-3 py-1 rounded-lg text-sm font-semibold bg-gradient-to-r from-purple-50 to-purple-100 text-purple-700 border border-purple-200 hover:from-purple-100 hover:to-purple-200 hover:scale-105 transition-all duration-200 cursor-pointer"
+                      title={`Nach Kreis "${kategorie}" filtern`}
+                    >
+                      {kategorie}
+                    </button>
+                  ))}
               </div>
             </div>
           )}
 
-          {person.isM13 && <WorkloadIndicator person={person} zuordnungen={zuordnungen} />}
+          {person.isM13 && (
+            <WorkloadIndicator person={person} zuordnungen={zuordnungen} />
+          )}
 
           {upcomingVacations.length > 0 && (
             <div className="mb-6">
@@ -593,7 +685,8 @@ const PersonDetailsModal = ({ person, isOpen, onClose, onEdit, onDeleteInitiatio
                         {vacation.summary || "Abwesenheit"}
                       </div>
                       <div className="text-sm opacity-75">
-                        {formatDate(vacation.start)} - {formatDate(vacation.end)}
+                        {formatDate(vacation.start)} -{" "}
+                        {formatDate(vacation.end)}
                       </div>
                     </div>
                   );
@@ -623,10 +716,10 @@ const PersonDetailsModal = ({ person, isOpen, onClose, onEdit, onDeleteInitiatio
                         setTimeout(() => onSkillClick(skill.name), 10);
                       }}
                       className="px-3 py-2 rounded-lg text-sm font-semibold hover:scale-105 transition-all duration-200 shadow-sm border"
-                      style={{ 
-                        backgroundColor: skill.color, 
+                      style={{
+                        backgroundColor: skill.color,
                         color: "#1f2937",
-                        borderColor: skill.color
+                        borderColor: skill.color,
                       }}
                       title={`Nach Skill "${skill.name}" filtern`}
                     >
@@ -645,7 +738,9 @@ const PersonDetailsModal = ({ person, isOpen, onClose, onEdit, onDeleteInitiatio
               </p>
               <div className="space-y-2">
                 {personAssignments.map((a) => {
-                  const assignment = zuordnungen.find(z => z.id === a.assignmentId);
+                  const assignment = zuordnungen.find(
+                    (z) => z.id === a.assignmentId,
+                  );
                   const stunden = assignment?.stunden || 0;
                   return (
                     <div
@@ -654,10 +749,12 @@ const PersonDetailsModal = ({ person, isOpen, onClose, onEdit, onDeleteInitiatio
                     >
                       <div className="flex justify-between items-center">
                         <div className="flex flex-col">
-                          <span className="font-semibold text-gray-900">{a.produktName}</span>
+                          <span className="font-semibold text-gray-900">
+                            {a.produktName}
+                          </span>
                           <div className="flex items-center gap-2 mt-1">
                             <span className="text-gray-600 text-sm">als</span>
-                            <span 
+                            <span
                               className="inline-flex items-center px-2 py-1 rounded text-sm font-medium text-white"
                               style={{ backgroundColor: a.rolleColor }}
                             >
@@ -717,7 +814,9 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
   const [name, setName] = useState(personToEdit?.name || "");
   const [email, setEmail] = useState(personToEdit?.email || "");
   const [skillIds, setSkillIds] = useState(personToEdit?.skillIds || []);
-  const [wochenstunden, setWochenstunden] = useState(personToEdit?.wochenstunden || 31);
+  const [wochenstunden, setWochenstunden] = useState(
+    personToEdit?.wochenstunden || 31,
+  );
   const [msTeamsEmail, setMsTeamsEmail] = useState(() => {
     if (personToEdit?.msTeamsLink) {
       const emailMatch = personToEdit.msTeamsLink.match(/users=([^&]+)/);
@@ -727,6 +826,9 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
   });
   const [isM13, setIsM13] = useState(personToEdit?.isM13 || false);
   const [kategorien, setKategorien] = useState(personToEdit?.kategorien || []);
+  const [terminbuchungsLink, setTerminbuchungsLink] = useState(
+    personToEdit?.terminbuchungsLink || "",
+  );
   const [validationError, setValidationError] = useState("");
 
   const validateForm = () => {
@@ -766,6 +868,7 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
       msTeamsLink: finalMsTeamsLink,
       isM13,
       kategorien,
+      terminbuchungsLink: terminbuchungsLink.trim(),
     };
 
     const success = personToEdit
@@ -778,7 +881,10 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 p-8 bg-white rounded-2xl shadow-xl">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-6 p-8 bg-white rounded-2xl shadow-xl"
+    >
       <h2 className="text-3xl font-bold text-gray-900 mb-8">
         {personToEdit ? "Person bearbeiten" : "Neue Person hinzufügen"}
       </h2>
@@ -840,7 +946,9 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
           required
           className="block w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-ard-blue-500 focus:border-ard-blue-500 transition-all"
         />
-        <p className="mt-2 text-xs text-gray-500">Anzahl der Arbeitsstunden pro Woche (Standard: 31, Bereich: 1-80).</p>
+        <p className="mt-2 text-xs text-gray-500">
+          Anzahl der Arbeitsstunden pro Woche (Standard: 31, Bereich: 1-80).
+        </p>
       </div>
       <div>
         <label
@@ -859,6 +967,25 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
         <p className="mt-1 text-xs text-gray-500">Für den Chat-Link.</p>
       </div>
       <div>
+        <label
+          htmlFor="terminbuchungsLink"
+          className="block text-sm font-medium text-gray-700"
+        >
+          Terminbuchungslink
+        </label>
+        <input
+          id="terminbuchungsLink"
+          type="url"
+          value={terminbuchungsLink}
+          onChange={(e) => setTerminbuchungsLink(e.target.value)}
+          placeholder="https://..."
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+        />
+        <p className="mt-1 text-xs text-gray-500">
+          Link zur Terminbuchungsseite (optional).
+        </p>
+      </div>
+      <div>
         <label className="block text-sm font-medium text-gray-700">
           Skills
         </label>
@@ -869,7 +996,7 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
           onCreateSkill={fuegeSkillHinzu}
         />
       </div>
-      
+
       <div>
         <label className="flex items-center space-x-3">
           <input
@@ -882,13 +1009,13 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
         </label>
         <p className="mt-1 text-xs text-gray-500">Mitarbeiter mit M13-Status</p>
       </div>
-      
+
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Kreise
         </label>
         <div className="space-y-2">
-          {['Plattform', 'Datenprodukt', 'Governance'].map((kategorie) => (
+          {["Plattform", "Datenprodukt", "Governance"].map((kategorie) => (
             <label key={kategorie} className="flex items-center space-x-3">
               <input
                 type="checkbox"
@@ -897,7 +1024,7 @@ const PersonFormular = ({ personToEdit, onFormClose }) => {
                   if (e.target.checked) {
                     setKategorien([...kategorien, kategorie]);
                   } else {
-                    setKategorien(kategorien.filter(k => k !== kategorie));
+                    setKategorien(kategorien.filter((k) => k !== kategorie));
                   }
                 }}
                 className="w-4 h-4 text-ard-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-ard-blue-500 focus:ring-2"
@@ -937,28 +1064,30 @@ const PersonenListe = ({
   onShowDetails,
 }) => {
   const { loading, error, zuordnungen, vacations } = useData();
-  const [sortBy, setSortBy] = useState('name'); // 'name', 'auslastung', 'abwesenheit', 'datenprodukte'
+  const [sortBy, setSortBy] = useState("name"); // 'name', 'auslastung', 'abwesenheit', 'datenprodukte'
   const [showSortDropdown, setShowSortDropdown] = useState(false);
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (showSortDropdown && !event.target.closest('.sort-dropdown')) {
+      if (showSortDropdown && !event.target.closest(".sort-dropdown")) {
         setShowSortDropdown(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showSortDropdown]);
 
   // Funktion um Auslastung zu berechnen
   const calculateAuslastung = (person) => {
     const verfügbareStunden = person.wochenstunden || 31;
     const gebuchteStunden = zuordnungen
-      .filter(z => z.personId === person.id)
+      .filter((z) => z.personId === person.id)
       .reduce((sum, z) => sum + (z.stunden || 0), 0);
-    return verfügbareStunden > 0 ? (gebuchteStunden / verfügbareStunden) * 100 : 0;
+    return verfügbareStunden > 0
+      ? (gebuchteStunden / verfügbareStunden) * 100
+      : 0;
   };
 
   // Funktion um nächste Abwesenheit zu ermitteln
@@ -980,20 +1109,28 @@ const PersonenListe = ({
 
     // Remove duplicates and filter for future vacations
     const uniqueFutureVacations = personVacations
-      .filter((vacation, index, self) =>
-        self.findIndex(v => v.start === vacation.start && v.end === vacation.end) === index
+      .filter(
+        (vacation, index, self) =>
+          self.findIndex(
+            (v) => v.start === vacation.start && v.end === vacation.end,
+          ) === index,
       )
-      .filter(vacation => new Date(vacation.start) > today)
+      .filter((vacation) => new Date(vacation.start) > today)
       .sort((a, b) => new Date(a.start) - new Date(b.start));
 
-    return uniqueFutureVacations.length > 0 ? new Date(uniqueFutureVacations[0].start) : null;
+    return uniqueFutureVacations.length > 0
+      ? new Date(uniqueFutureVacations[0].start)
+      : null;
   };
-
 
   // Funktion um Anzahl Datenprodukte zu berechnen
   const getDataProductCount = (person) => {
-    const personAssignments = zuordnungen.filter(z => z.personId === person.id);
-    const uniqueDataProducts = new Set(personAssignments.map(z => z.datenproduktId));
+    const personAssignments = zuordnungen.filter(
+      (z) => z.personId === person.id,
+    );
+    const uniqueDataProducts = new Set(
+      personAssignments.map((z) => z.datenproduktId),
+    );
     return uniqueDataProducts.size;
   };
 
@@ -1016,16 +1153,19 @@ const PersonenListe = ({
 
     // Remove duplicates and filter for future vacations
     const uniqueFutureVacations = personVacations
-      .filter((vacation, index, self) =>
-        self.findIndex(v => v.start === vacation.start && v.end === vacation.end) === index
+      .filter(
+        (vacation, index, self) =>
+          self.findIndex(
+            (v) => v.start === vacation.start && v.end === vacation.end,
+          ) === index,
       )
-      .filter(vacation => new Date(vacation.start) > today)
+      .filter((vacation) => new Date(vacation.start) > today)
       .sort((a, b) => new Date(a.start) - new Date(b.start));
 
     if (uniqueFutureVacations.length > 0) {
       return {
         startDate: new Date(uniqueFutureVacations[0].start),
-        endDate: new Date(uniqueFutureVacations[0].end)
+        endDate: new Date(uniqueFutureVacations[0].end),
       };
     }
     return null;
@@ -1034,9 +1174,11 @@ const PersonenListe = ({
   // Funktion um Personen zu sortieren
   const getSortedPersonen = (personen) => {
     switch (sortBy) {
-      case 'auslastung':
-        return [...personen].sort((a, b) => calculateAuslastung(b) - calculateAuslastung(a)); // Höchste zuerst
-      case 'abwesenheit':
+      case "auslastung":
+        return [...personen].sort(
+          (a, b) => calculateAuslastung(b) - calculateAuslastung(a),
+        ); // Höchste zuerst
+      case "abwesenheit":
         return [...personen].sort((a, b) => {
           const aNext = getNextAbsenceDate(a);
           const bNext = getNextAbsenceDate(b);
@@ -1046,7 +1188,7 @@ const PersonenListe = ({
           if (aNext && bNext) return aNext - bNext; // Frühere Abwesenheit zuerst
           return a.name.localeCompare(b.name); // Gleiche Bedingung -> alphabetisch
         });
-      case 'datenprodukte':
+      case "datenprodukte":
         return [...personen].sort((a, b) => {
           const aCount = getDataProductCount(a);
           const bCount = getDataProductCount(b);
@@ -1073,12 +1215,13 @@ const PersonenListe = ({
 
   // Gruppiere Personen nach Kreisen und sortiere innerhalb der Gruppen
   const groupedPersonen = personenToDisplay.reduce((groups, person) => {
-    const kreise = person.kategorien && person.kategorien.length > 0
-      ? person.kategorien
-      : ['Ohne Kreis'];
+    const kreise =
+      person.kategorien && person.kategorien.length > 0
+        ? person.kategorien
+        : ["Ohne Kreis"];
 
     // Person kann in mehreren Kreisen sein
-    kreise.forEach(kreis => {
+    kreise.forEach((kreis) => {
       if (!groups[kreis]) {
         groups[kreis] = [];
       }
@@ -1089,13 +1232,13 @@ const PersonenListe = ({
   }, {});
 
   // Sortiere Personen innerhalb jeder Gruppe
-  Object.keys(groupedPersonen).forEach(kreis => {
+  Object.keys(groupedPersonen).forEach((kreis) => {
     groupedPersonen[kreis] = getSortedPersonen(groupedPersonen[kreis]);
   });
 
   // Sortiere Gruppen: Erst die bekannten Kreise, dann "Ohne Kreis"
   const sortedKreise = Object.keys(groupedPersonen).sort((a, b) => {
-    const order = ['Plattform', 'Datenprodukt', 'Governance', 'Ohne Kreis'];
+    const order = ["Plattform", "Datenprodukt", "Governance", "Ohne Kreis"];
     const indexA = order.indexOf(a) !== -1 ? order.indexOf(a) : 999;
     const indexB = order.indexOf(b) !== -1 ? order.indexOf(b) : 999;
     return indexA - indexB;
@@ -1109,51 +1252,52 @@ const PersonenListe = ({
           <div className="flex items-center gap-3">
             <h2 className="text-xl font-bold text-gray-900">{kreis}</h2>
             <span className="inline-flex items-center px-2.5 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700">
-              {groupedPersonen[kreis].length} Person{groupedPersonen[kreis].length !== 1 ? 'en' : ''}
+              {groupedPersonen[kreis].length} Person
+              {groupedPersonen[kreis].length !== 1 ? "en" : ""}
             </span>
 
             {/* Sortierungs-Buttons - Desktop */}
             <div className="hidden md:flex items-center gap-1 ml-4 flex-wrap">
               <span className="text-xs text-gray-500 mr-1">Sortieren:</span>
               <button
-                onClick={() => setSortBy('name')}
+                onClick={() => setSortBy("name")}
                 className={`px-2 py-1 text-xs font-medium rounded transition-all ${
-                  sortBy === 'name'
-                    ? 'bg-ard-blue-100 text-ard-blue-700 border border-ard-blue-200'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  sortBy === "name"
+                    ? "bg-ard-blue-100 text-ard-blue-700 border border-ard-blue-200"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
                 title="Nach Namen sortieren"
               >
                 Name
               </button>
               <button
-                onClick={() => setSortBy('auslastung')}
+                onClick={() => setSortBy("auslastung")}
                 className={`px-2 py-1 text-xs font-medium rounded transition-all ${
-                  sortBy === 'auslastung'
-                    ? 'bg-ard-blue-100 text-ard-blue-700 border border-ard-blue-200'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  sortBy === "auslastung"
+                    ? "bg-ard-blue-100 text-ard-blue-700 border border-ard-blue-200"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
                 title="Nach Auslastung sortieren (höchste zuerst)"
               >
                 Auslastung
               </button>
               <button
-                onClick={() => setSortBy('abwesenheit')}
+                onClick={() => setSortBy("abwesenheit")}
                 className={`px-2 py-1 text-xs font-medium rounded transition-all ${
-                  sortBy === 'abwesenheit'
-                    ? 'bg-ard-blue-100 text-ard-blue-700 border border-ard-blue-200'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  sortBy === "abwesenheit"
+                    ? "bg-ard-blue-100 text-ard-blue-700 border border-ard-blue-200"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
                 title="Nach anstehender Abwesenheit sortieren"
               >
                 Abwesenheit
               </button>
               <button
-                onClick={() => setSortBy('datenprodukte')}
+                onClick={() => setSortBy("datenprodukte")}
                 className={`px-2 py-1 text-xs font-medium rounded transition-all ${
-                  sortBy === 'datenprodukte'
-                    ? 'bg-ard-blue-100 text-ard-blue-700 border border-ard-blue-200'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  sortBy === "datenprodukte"
+                    ? "bg-ard-blue-100 text-ard-blue-700 border border-ard-blue-200"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
                 title="Nach Anzahl Datenprodukte sortieren (mehr zuerst)"
               >
@@ -1169,13 +1313,21 @@ const PersonenListe = ({
               >
                 <span>Sortieren:</span>
                 <span className="text-ard-blue-700 font-semibold">
-                  {sortBy === 'name' && 'Name'}
-                  {sortBy === 'auslastung' && 'Auslastung'}
-                  {sortBy === 'abwesenheit' && 'Abwesenheit'}
-                  {sortBy === 'datenprodukte' && 'Datenprodukte'}
+                  {sortBy === "name" && "Name"}
+                  {sortBy === "auslastung" && "Auslastung"}
+                  {sortBy === "abwesenheit" && "Abwesenheit"}
+                  {sortBy === "datenprodukte" && "Datenprodukte"}
                 </span>
-                <svg className={`w-3 h-3 transition-transform ${showSortDropdown ? 'rotate-180' : ''}`} fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                <svg
+                  className={`w-3 h-3 transition-transform ${showSortDropdown ? "rotate-180" : ""}`}
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  />
                 </svg>
               </button>
 
@@ -1183,44 +1335,52 @@ const PersonenListe = ({
                 <div className="absolute top-full right-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10 min-w-[120px]">
                   <button
                     onClick={() => {
-                      setSortBy('name');
+                      setSortBy("name");
                       setShowSortDropdown(false);
                     }}
                     className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 transition-colors ${
-                      sortBy === 'name' ? 'text-ard-blue-700 font-semibold' : 'text-gray-700'
+                      sortBy === "name"
+                        ? "text-ard-blue-700 font-semibold"
+                        : "text-gray-700"
                     }`}
                   >
                     Name
                   </button>
                   <button
                     onClick={() => {
-                      setSortBy('auslastung');
+                      setSortBy("auslastung");
                       setShowSortDropdown(false);
                     }}
                     className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 transition-colors ${
-                      sortBy === 'auslastung' ? 'text-ard-blue-700 font-semibold' : 'text-gray-700'
+                      sortBy === "auslastung"
+                        ? "text-ard-blue-700 font-semibold"
+                        : "text-gray-700"
                     }`}
                   >
                     Auslastung
                   </button>
                   <button
                     onClick={() => {
-                      setSortBy('abwesenheit');
+                      setSortBy("abwesenheit");
                       setShowSortDropdown(false);
                     }}
                     className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 transition-colors ${
-                      sortBy === 'abwesenheit' ? 'text-ard-blue-700 font-semibold' : 'text-gray-700'
+                      sortBy === "abwesenheit"
+                        ? "text-ard-blue-700 font-semibold"
+                        : "text-gray-700"
                     }`}
                   >
                     Abwesenheit
                   </button>
                   <button
                     onClick={() => {
-                      setSortBy('datenprodukte');
+                      setSortBy("datenprodukte");
                       setShowSortDropdown(false);
                     }}
                     className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 transition-colors ${
-                      sortBy === 'datenprodukte' ? 'text-ard-blue-700 font-semibold' : 'text-gray-700'
+                      sortBy === "datenprodukte"
+                        ? "text-ard-blue-700 font-semibold"
+                        : "text-gray-700"
                     }`}
                   >
                     Datenprodukte
@@ -1231,7 +1391,7 @@ const PersonenListe = ({
 
             <div className="flex-1 h-px bg-gray-200"></div>
           </div>
-          
+
           {/* Personen-Grid für diesen Kreis */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6">
             {groupedPersonen[kreis].map((person) => (
@@ -1260,7 +1420,15 @@ const PersonenVerwaltung = () => {
   const [personToDelete, setPersonToDelete] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [personToShowDetails, setPersonToShowDetails] = useState(null);
-  const { personen, skills, datenprodukte, zuordnungen, rollen, loeschePerson, vacations } = useData();
+  const {
+    personen,
+    skills,
+    datenprodukte,
+    zuordnungen,
+    rollen,
+    loeschePerson,
+    vacations,
+  } = useData();
   const [searchTerm, setSearchTerm] = useState("");
   const [showExcelModal, setShowExcelModal] = useState(false);
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
@@ -1276,105 +1444,115 @@ const PersonenVerwaltung = () => {
   // Comprehensive search function
   const getSearchSuggestions = (term) => {
     if (!term || term.length < 2) return [];
-    
+
     const suggestions = [];
     const lowerTerm = term.toLowerCase();
 
     // Search in persons (name, email, M13, kategorien)
-    personen.forEach(person => {
+    personen.forEach((person) => {
       if (person.name.toLowerCase().includes(lowerTerm)) {
         suggestions.push({
           id: person.id,
           name: person.name,
-          type: 'person',
+          type: "person",
           details: person.email,
-          matchedField: 'Name',
-          data: person
+          matchedField: "Name",
+          data: person,
         });
       } else if (person.email?.toLowerCase().includes(lowerTerm)) {
         suggestions.push({
           id: person.id,
           name: person.name,
-          type: 'person',
+          type: "person",
           details: person.email,
-          matchedField: 'E-Mail',
-          data: person
+          matchedField: "E-Mail",
+          data: person,
         });
-      } else if (person.isM13 && 'm13'.includes(lowerTerm)) {
+      } else if (person.isM13 && "m13".includes(lowerTerm)) {
         suggestions.push({
           id: person.id,
           name: person.name,
-          type: 'person',
-          details: 'M13-Status',
-          matchedField: 'M13',
-          data: person
+          type: "person",
+          details: "M13-Status",
+          matchedField: "M13",
+          data: person,
         });
-      } else if (person.kategorien?.some(kat => kat.toLowerCase().includes(lowerTerm))) {
-        const matchedKategorie = person.kategorien.find(kat => kat.toLowerCase().includes(lowerTerm));
+      } else if (
+        person.kategorien?.some((kat) => kat.toLowerCase().includes(lowerTerm))
+      ) {
+        const matchedKategorie = person.kategorien.find((kat) =>
+          kat.toLowerCase().includes(lowerTerm),
+        );
         suggestions.push({
           id: person.id,
           name: person.name,
-          type: 'person',
+          type: "person",
           details: `Kreis: ${matchedKategorie}`,
-          matchedField: 'Kreis',
-          data: person
+          matchedField: "Kreis",
+          data: person,
         });
       }
     });
 
     // Search in skills
-    skills.forEach(skill => {
+    skills.forEach((skill) => {
       if (skill.name.toLowerCase().includes(lowerTerm)) {
-        const personCount = personen.filter(p => 
-          p.skillIds && p.skillIds.includes(skill.id)
+        const personCount = personen.filter(
+          (p) => p.skillIds && p.skillIds.includes(skill.id),
         ).length;
         suggestions.push({
           id: skill.id,
           name: skill.name,
-          type: 'skill',
-          details: `${personCount} Person${personCount !== 1 ? 'en' : ''}`,
-          matchedField: 'Skill',
-          data: skill
+          type: "skill",
+          details: `${personCount} Person${personCount !== 1 ? "en" : ""}`,
+          matchedField: "Skill",
+          data: skill,
         });
       }
     });
 
     // Search in data products
-    datenprodukte.forEach(dp => {
+    datenprodukte.forEach((dp) => {
       if (dp.name.toLowerCase().includes(lowerTerm)) {
-        const teamSize = zuordnungen.filter(z => z.datenproduktId === dp.id).length;
+        const teamSize = zuordnungen.filter(
+          (z) => z.datenproduktId === dp.id,
+        ).length;
         suggestions.push({
           id: dp.id,
           name: dp.name,
-          type: 'datenprodukt',
-          details: `${teamSize} Teammitglied${teamSize !== 1 ? 'er' : ''}`,
-          matchedField: 'Datenprodukt',
-          data: dp
+          type: "datenprodukt",
+          details: `${teamSize} Teammitglied${teamSize !== 1 ? "er" : ""}`,
+          matchedField: "Datenprodukt",
+          data: dp,
         });
       } else if (dp.beschreibung?.toLowerCase().includes(lowerTerm)) {
-        const teamSize = zuordnungen.filter(z => z.datenproduktId === dp.id).length;
+        const teamSize = zuordnungen.filter(
+          (z) => z.datenproduktId === dp.id,
+        ).length;
         suggestions.push({
           id: dp.id,
           name: dp.name,
-          type: 'datenprodukt',
-          details: `${teamSize} Teammitglied${teamSize !== 1 ? 'er' : ''}`,
-          matchedField: 'Beschreibung',
-          data: dp
+          type: "datenprodukt",
+          details: `${teamSize} Teammitglied${teamSize !== 1 ? "er" : ""}`,
+          matchedField: "Beschreibung",
+          data: dp,
         });
       }
     });
 
     // Search in roles
-    rollen.forEach(rolle => {
+    rollen.forEach((rolle) => {
       if (rolle.name.toLowerCase().includes(lowerTerm)) {
-        const assignmentCount = zuordnungen.filter(z => z.rolleId === rolle.id).length;
+        const assignmentCount = zuordnungen.filter(
+          (z) => z.rolleId === rolle.id,
+        ).length;
         suggestions.push({
           id: rolle.id,
           name: rolle.name,
-          type: 'rolle',
-          details: `${assignmentCount} Zuweisung${assignmentCount !== 1 ? 'en' : ''}`,
-          matchedField: 'Rolle',
-          data: rolle
+          type: "rolle",
+          details: `${assignmentCount} Zuweisung${assignmentCount !== 1 ? "en" : ""}`,
+          matchedField: "Rolle",
+          data: rolle,
         });
       }
     });
@@ -1388,7 +1566,7 @@ const PersonenVerwaltung = () => {
         const bExact = b.name.toLowerCase() === lowerTerm;
         if (aExact && !bExact) return -1;
         if (!aExact && bExact) return 1;
-        
+
         // Then by type priority (person > skill > datenprodukt > rolle)
         const typePriority = { person: 0, skill: 1, datenprodukt: 2, rolle: 3 };
         return typePriority[a.type] - typePriority[b.type];
@@ -1400,39 +1578,47 @@ const PersonenVerwaltung = () => {
   // Filter persons based on comprehensive search
   const getFilteredPersonen = () => {
     if (!debouncedSearchTerm) return personen;
-    
+
     const lowerTerm = debouncedSearchTerm.toLowerCase();
-    
-    return personen.filter(person => {
+
+    return personen.filter((person) => {
       // Search in person name, email, M13, and kategorien
-      if (person.name.toLowerCase().includes(lowerTerm) || 
-          person.email?.toLowerCase().includes(lowerTerm) ||
-          (person.isM13 && 'm13'.includes(lowerTerm)) ||
-          person.kategorien?.some(kat => kat.toLowerCase().includes(lowerTerm))) {
+      if (
+        person.name.toLowerCase().includes(lowerTerm) ||
+        person.email?.toLowerCase().includes(lowerTerm) ||
+        (person.isM13 && "m13".includes(lowerTerm)) ||
+        person.kategorien?.some((kat) => kat.toLowerCase().includes(lowerTerm))
+      ) {
         return true;
       }
-      
+
       // Search in person's skills
       if (person.skillIds) {
-        const hasMatchingSkill = person.skillIds.some(skillId => {
-          const skill = skills.find(s => s.id === skillId);
+        const hasMatchingSkill = person.skillIds.some((skillId) => {
+          const skill = skills.find((s) => s.id === skillId);
           return skill && skill.name.toLowerCase().includes(lowerTerm);
         });
         if (hasMatchingSkill) return true;
       }
-      
+
       // Search in person's data products and roles
-      const personAssignments = zuordnungen.filter(z => z.personId === person.id);
-      const hasMatchingAssignment = personAssignments.some(assignment => {
-        const datenprodukt = datenprodukte.find(dp => dp.id === assignment.datenproduktId);
-        const rolle = rollen.find(r => r.id === assignment.rolleId);
-        
-        return (datenprodukt && (
-          datenprodukt.name.toLowerCase().includes(lowerTerm) ||
-          datenprodukt.beschreibung?.toLowerCase().includes(lowerTerm)
-        )) || (rolle && rolle.name.toLowerCase().includes(lowerTerm));
+      const personAssignments = zuordnungen.filter(
+        (z) => z.personId === person.id,
+      );
+      const hasMatchingAssignment = personAssignments.some((assignment) => {
+        const datenprodukt = datenprodukte.find(
+          (dp) => dp.id === assignment.datenproduktId,
+        );
+        const rolle = rollen.find((r) => r.id === assignment.rolleId);
+
+        return (
+          (datenprodukt &&
+            (datenprodukt.name.toLowerCase().includes(lowerTerm) ||
+              datenprodukt.beschreibung?.toLowerCase().includes(lowerTerm))) ||
+          (rolle && rolle.name.toLowerCase().includes(lowerTerm))
+        );
       });
-      
+
       return hasMatchingAssignment;
     });
   };
@@ -1443,50 +1629,54 @@ const PersonenVerwaltung = () => {
   const getCurrentlyAbsentPeople = () => {
     const today = new Date();
 
-    return personen.map(person => {
-      const searchKeys = [
-        person.name.toLowerCase(),
-        person.name.toLowerCase().replace(/\s+/g, ""),
-        person.email?.toLowerCase(),
-        person.email?.split("@")[0]?.toLowerCase(),
-      ].filter(Boolean);
+    return personen
+      .map((person) => {
+        const searchKeys = [
+          person.name.toLowerCase(),
+          person.name.toLowerCase().replace(/\s+/g, ""),
+          person.email?.toLowerCase(),
+          person.email?.split("@")[0]?.toLowerCase(),
+        ].filter(Boolean);
 
-      let personVacations = [];
+        let personVacations = [];
 
-      // Search through all possible keys
-      for (const key of searchKeys) {
-        if (vacations[key]) {
-          personVacations = [...personVacations, ...vacations[key]];
+        // Search through all possible keys
+        for (const key of searchKeys) {
+          if (vacations[key]) {
+            personVacations = [...personVacations, ...vacations[key]];
+          }
         }
-      }
 
-      // Remove duplicates and find current vacation
-      const uniqueVacations = personVacations.filter((vacation, index, self) => {
-        const vacationEnd = new Date(vacation.end);
-        const isUnique =
-          self.findIndex(
-            (v) => v.start === vacation.start && v.end === vacation.end
-          ) === index;
+        // Remove duplicates and find current vacation
+        const uniqueVacations = personVacations.filter(
+          (vacation, index, self) => {
+            const vacationEnd = new Date(vacation.end);
+            const isUnique =
+              self.findIndex(
+                (v) => v.start === vacation.start && v.end === vacation.end,
+              ) === index;
 
-        return isUnique && vacationEnd >= today;
-      });
+            return isUnique && vacationEnd >= today;
+          },
+        );
 
-      // Find current vacation and its end date
-      const currentVacation = uniqueVacations.find((vacation) => {
-        const start = new Date(vacation.start);
-        const end = new Date(vacation.end);
-        return today >= start && today <= end;
-      });
+        // Find current vacation and its end date
+        const currentVacation = uniqueVacations.find((vacation) => {
+          const start = new Date(vacation.start);
+          const end = new Date(vacation.end);
+          return today >= start && today <= end;
+        });
 
-      if (currentVacation) {
-        return {
-          ...person,
-          vacationEndDate: currentVacation.end
-        };
-      }
+        if (currentVacation) {
+          return {
+            ...person,
+            vacationEndDate: currentVacation.end,
+          };
+        }
 
-      return null;
-    }).filter(Boolean);
+        return null;
+      })
+      .filter(Boolean);
   };
 
   // Function to get people who will be absent in the next week
@@ -1495,48 +1685,51 @@ const PersonenVerwaltung = () => {
     const nextWeek = new Date(today);
     nextWeek.setDate(today.getDate() + 7);
 
-    return personen.map(person => {
-      const searchKeys = [
-        person.name.toLowerCase(),
-        person.name.toLowerCase().replace(/\s+/g, ""),
-        person.email?.toLowerCase(),
-        person.email?.split("@")[0]?.toLowerCase(),
-      ].filter(Boolean);
+    return personen
+      .map((person) => {
+        const searchKeys = [
+          person.name.toLowerCase(),
+          person.name.toLowerCase().replace(/\s+/g, ""),
+          person.email?.toLowerCase(),
+          person.email?.split("@")[0]?.toLowerCase(),
+        ].filter(Boolean);
 
-      let personVacations = [];
+        let personVacations = [];
 
-      // Search through all possible keys
-      for (const key of searchKeys) {
-        if (vacations[key]) {
-          personVacations = [...personVacations, ...vacations[key]];
+        // Search through all possible keys
+        for (const key of searchKeys) {
+          if (vacations[key]) {
+            personVacations = [...personVacations, ...vacations[key]];
+          }
         }
-      }
 
-      // Remove duplicates
-      const uniqueVacations = personVacations.filter((vacation, index, self) =>
-        self.findIndex(
-          (v) => v.start === vacation.start && v.end === vacation.end
-        ) === index
-      );
+        // Remove duplicates
+        const uniqueVacations = personVacations.filter(
+          (vacation, index, self) =>
+            self.findIndex(
+              (v) => v.start === vacation.start && v.end === vacation.end,
+            ) === index,
+        );
 
-      // Find upcoming vacation within the next week (but not current)
-      const upcomingVacation = uniqueVacations.find((vacation) => {
-        const start = new Date(vacation.start);
-        const end = new Date(vacation.end);
-        // Vacation starts after today and within the next week
-        return start > today && start <= nextWeek;
-      });
+        // Find upcoming vacation within the next week (but not current)
+        const upcomingVacation = uniqueVacations.find((vacation) => {
+          const start = new Date(vacation.start);
+          const end = new Date(vacation.end);
+          // Vacation starts after today and within the next week
+          return start > today && start <= nextWeek;
+        });
 
-      if (upcomingVacation) {
-        return {
-          ...person,
-          vacationStartDate: upcomingVacation.start,
-          vacationEndDate: upcomingVacation.end
-        };
-      }
+        if (upcomingVacation) {
+          return {
+            ...person,
+            vacationStartDate: upcomingVacation.start,
+            vacationEndDate: upcomingVacation.end,
+          };
+        }
 
-      return null;
-    }).filter(Boolean);
+        return null;
+      })
+      .filter(Boolean);
   };
 
   const currentlyAbsentPeople = getCurrentlyAbsentPeople();
@@ -1578,12 +1771,12 @@ const PersonenVerwaltung = () => {
   const handleSkillClick = (skillName) => {
     setSearchTerm(skillName);
   };
-  
+
   const handleShowDetails = (person) => {
     setPersonToShowDetails(person);
     setShowDetailsModal(true);
   };
-  
+
   const handleCloseDetails = () => {
     setShowDetailsModal(false);
     setPersonToShowDetails(null);
@@ -1596,8 +1789,12 @@ const PersonenVerwaltung = () => {
           <div className="flex flex-col gap-4">
             <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4 lg:gap-6">
               <div className="flex-1">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">Personenverwaltung</h1>
-                <p className="text-gray-600">Verwalte dein Team und überwache die Arbeitsauslastung</p>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                  Personenverwaltung
+                </h1>
+                <p className="text-gray-600">
+                  Verwalte dein Team und überwache die Arbeitsauslastung
+                </p>
               </div>
 
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
@@ -1622,7 +1819,12 @@ const PersonenVerwaltung = () => {
                       stroke="currentColor"
                       viewBox="0 0 24 24"
                     >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                      />
                     </svg>
                   </button>
 
@@ -1637,7 +1839,12 @@ const PersonenVerwaltung = () => {
                       stroke="currentColor"
                       viewBox="0 0 24 24"
                     >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -1649,7 +1856,9 @@ const PersonenVerwaltung = () => {
               {/* Upcoming absences - next week */}
               {upcomingAbsentPeople.length > 0 && (
                 <div className="flex flex-col gap-1.5">
-                  <span className="text-xs text-gray-500 font-medium">Kommende Woche abwesend:</span>
+                  <span className="text-xs text-gray-500 font-medium">
+                    Kommende Woche abwesend:
+                  </span>
                   <div className="flex items-center gap-3 flex-wrap">
                     {upcomingAbsentPeople.slice(0, 5).map((person) => (
                       <button
@@ -1661,16 +1870,21 @@ const PersonenVerwaltung = () => {
                         <span>{person.name}</span>
                         {person.vacationStartDate && (
                           <span className="text-[10px] opacity-75 font-normal">
-                            ab {new Date(person.vacationStartDate).toLocaleDateString("de-DE", {
+                            ab{" "}
+                            {new Date(
+                              person.vacationStartDate,
+                            ).toLocaleDateString("de-DE", {
                               day: "2-digit",
-                              month: "2-digit"
+                              month: "2-digit",
                             })}
                           </span>
                         )}
                       </button>
                     ))}
                     {upcomingAbsentPeople.length > 5 && (
-                      <span className="text-xs text-gray-500">+{upcomingAbsentPeople.length - 5} weitere</span>
+                      <span className="text-xs text-gray-500">
+                        +{upcomingAbsentPeople.length - 5} weitere
+                      </span>
                     )}
                   </div>
                 </div>
@@ -1679,7 +1893,9 @@ const PersonenVerwaltung = () => {
               {/* Current absences */}
               {currentlyAbsentPeople.length > 0 && (
                 <div className="flex flex-col gap-1.5">
-                  <span className="text-xs text-gray-500 font-medium">Aktuell abwesend:</span>
+                  <span className="text-xs text-gray-500 font-medium">
+                    Aktuell abwesend:
+                  </span>
                   <div className="flex items-center gap-3 flex-wrap">
                     {currentlyAbsentPeople.slice(0, 5).map((person) => (
                       <button
@@ -1691,32 +1907,39 @@ const PersonenVerwaltung = () => {
                         <span>{person.name}</span>
                         {person.vacationEndDate && (
                           <span className="text-[10px] opacity-90 font-normal">
-                            bis {new Date(person.vacationEndDate).toLocaleDateString("de-DE", {
+                            bis{" "}
+                            {new Date(
+                              person.vacationEndDate,
+                            ).toLocaleDateString("de-DE", {
                               day: "2-digit",
-                              month: "2-digit"
+                              month: "2-digit",
                             })}
                           </span>
                         )}
                       </button>
                     ))}
                     {currentlyAbsentPeople.length > 5 && (
-                      <span className="text-xs text-gray-500">+{currentlyAbsentPeople.length - 5} weitere</span>
+                      <span className="text-xs text-gray-500">
+                        +{currentlyAbsentPeople.length - 5} weitere
+                      </span>
                     )}
                   </div>
                 </div>
               )}
             </div>
           </div>
-          
+
           {(debouncedSearchTerm || searchTerm) && (
             <div className="mt-4 flex items-center justify-between">
               <div className="text-sm text-gray-600">
                 {debouncedSearchTerm ? (
                   <>
-                    {filteredPersonen.length} Person{filteredPersonen.length !== 1 ? 'en' : ''} gefunden für "{debouncedSearchTerm}"
+                    {filteredPersonen.length} Person
+                    {filteredPersonen.length !== 1 ? "en" : ""} gefunden für "
+                    {debouncedSearchTerm}"
                   </>
                 ) : (
-                  'Suche läuft...'
+                  "Suche läuft..."
                 )}
               </div>
               {searchTerm && (
@@ -1731,53 +1954,52 @@ const PersonenVerwaltung = () => {
           )}
         </div>
 
-
-      {showForm && (
-        <div
-          className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-40 p-4"
-          onClick={handleFormClose}
-        >
+        {showForm && (
           <div
-            className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-40 p-4"
+            onClick={handleFormClose}
           >
-            <PersonFormular
-              personToEdit={editingPerson}
-              onFormClose={handleFormClose}
-            />
+            <div
+              className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <PersonFormular
+                personToEdit={editingPerson}
+                onFormClose={handleFormClose}
+              />
+            </div>
           </div>
-        </div>
-      )}
-      <PersonenListe
-        personenToDisplay={filteredPersonen}
-        onEditPerson={handleEditPerson}
-        onDeleteInitiation={handleDeleteInitiation}
-        onSkillClick={handleSkillClick}
-        onShowDetails={handleShowDetails}
-      />
-      <ConfirmModal
-        isOpen={showDeleteModal}
-        title="Person löschen"
-        message={`Möchten Sie ${
-          personToDelete?.name || "diese Person"
-        } wirklich löschen?`}
-        onConfirm={confirmDelete}
-        onCancel={cancelDelete}
-      />
-      {showExcelModal && (
-        <ExcelUploadModal
-          isOpen={showExcelModal}
-          onClose={() => setShowExcelModal(false)}
+        )}
+        <PersonenListe
+          personenToDisplay={filteredPersonen}
+          onEditPerson={handleEditPerson}
+          onDeleteInitiation={handleDeleteInitiation}
+          onSkillClick={handleSkillClick}
+          onShowDetails={handleShowDetails}
         />
-      )}
-      <PersonDetailsModal
-        person={personToShowDetails}
-        isOpen={showDetailsModal}
-        onClose={handleCloseDetails}
-        onEdit={handleEditPerson}
-        onDeleteInitiation={handleDeleteInitiation}
-        onSkillClick={handleSkillClick}
-      />
+        <ConfirmModal
+          isOpen={showDeleteModal}
+          title="Person löschen"
+          message={`Möchten Sie ${
+            personToDelete?.name || "diese Person"
+          } wirklich löschen?`}
+          onConfirm={confirmDelete}
+          onCancel={cancelDelete}
+        />
+        {showExcelModal && (
+          <ExcelUploadModal
+            isOpen={showExcelModal}
+            onClose={() => setShowExcelModal(false)}
+          />
+        )}
+        <PersonDetailsModal
+          person={personToShowDetails}
+          isOpen={showDetailsModal}
+          onClose={handleCloseDetails}
+          onEdit={handleEditPerson}
+          onDeleteInitiation={handleDeleteInitiation}
+          onSkillClick={handleSkillClick}
+        />
       </div>
     </div>
   );
