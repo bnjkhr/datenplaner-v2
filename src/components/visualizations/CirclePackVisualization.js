@@ -8,6 +8,7 @@ export const CirclePackVisualization = ({ data, personen, skills, datenprodukte,
   const [dimensions, setDimensions] = useState({ width: 1200, height: 1200 });
   const [hoveredPerson, setHoveredPerson] = useState(null);
   const [selectedPerson, setSelectedPerson] = useState(null);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
   // Responsive dimensions
   useEffect(() => {
@@ -171,13 +172,17 @@ export const CirclePackVisualization = ({ data, personen, skills, datenprodukte,
           .attr('transform', `translate(${x},${y})`)
           .attr('class', 'person-badge')
           .style('cursor', 'pointer')
-          .on('mouseenter', function() {
+          .on('mouseenter', function(event) {
             setHoveredPerson(person);
+            setMousePosition({ x: event.pageX, y: event.pageY });
             d3.select(this).select('circle')
               .transition()
               .duration(200)
               .attr('r', badgeRadius * 1.2)
               .attr('stroke-width', 3);
+          })
+          .on('mousemove', function(event) {
+            setMousePosition({ x: event.pageX, y: event.pageY });
           })
           .on('mouseleave', function() {
             setHoveredPerson(null);
@@ -248,7 +253,13 @@ export const CirclePackVisualization = ({ data, personen, skills, datenprodukte,
 
       {/* Tooltip */}
       {hoveredPerson && (
-        <div className="absolute top-4 left-4 bg-white rounded-lg shadow-xl p-4 border-2 border-gray-200 max-w-xs z-10">
+        <div
+          className="fixed bg-white rounded-lg shadow-xl p-4 border-2 border-gray-200 max-w-xs z-50 pointer-events-none"
+          style={{
+            left: `${mousePosition.x + 15}px`,
+            top: `${mousePosition.y + 15}px`,
+          }}
+        >
           <div className="flex items-center gap-2 mb-2">
             <h3 className="font-bold text-gray-900">{hoveredPerson.name}</h3>
             {hoveredPerson.isM13 && (
