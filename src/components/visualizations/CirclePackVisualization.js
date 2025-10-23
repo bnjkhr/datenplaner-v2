@@ -1,11 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
+import { PersonDetailsModal } from '../ui/PersonDetailsModal';
 
-export const CirclePackVisualization = ({ data, personen, skills }) => {
+export const CirclePackVisualization = ({ data, personen, skills, datenprodukte, zuordnungen, rollen }) => {
   const svgRef = useRef();
   const containerRef = useRef();
   const [dimensions, setDimensions] = useState({ width: 1200, height: 1200 });
   const [hoveredPerson, setHoveredPerson] = useState(null);
+  const [selectedPerson, setSelectedPerson] = useState(null);
 
   // Responsive dimensions
   useEffect(() => {
@@ -36,7 +38,8 @@ export const CirclePackVisualization = ({ data, personen, skills }) => {
       .attr('width', width)
       .attr('height', height)
       .attr('viewBox', [0, 0, width, height])
-      .style('font-family', 'system-ui, -apple-system, sans-serif');
+      .style('font-family', 'system-ui, -apple-system, sans-serif')
+      .style('background', 'transparent');
 
     // Create hierarchy
     const hierarchy = d3.hierarchy(data)
@@ -66,9 +69,10 @@ export const CirclePackVisualization = ({ data, personen, skills }) => {
       .attr('transform', `translate(${margin},${margin})`);
 
     // Draw circles for each node
-    const nodes = g.selectAll('g')
+    const nodes = g.selectAll('g.node')
       .data(root.descendants())
       .join('g')
+      .attr('class', 'node')
       .attr('transform', d => `translate(${d.x},${d.y})`);
 
     // Main circles (depth 0 = root, depth 1 = main categories)
@@ -182,6 +186,10 @@ export const CirclePackVisualization = ({ data, personen, skills }) => {
               .duration(200)
               .attr('r', badgeRadius)
               .attr('stroke-width', 2);
+          })
+          .on('click', function(event) {
+            event.stopPropagation();
+            setSelectedPerson(person);
           });
 
         // Badge Circle
@@ -219,11 +227,24 @@ export const CirclePackVisualization = ({ data, personen, skills }) => {
       });
     });
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, dimensions, personen, skills]);
 
   return (
     <div ref={containerRef} className="relative w-full">
       <svg ref={svgRef} className="w-full h-auto" />
+
+      {/* Person Details Modal */}
+      {selectedPerson && (
+        <PersonDetailsModal
+          person={selectedPerson}
+          skills={skills}
+          datenprodukte={datenprodukte}
+          zuordnungen={zuordnungen}
+          rollen={rollen}
+          onClose={() => setSelectedPerson(null)}
+        />
+      )}
 
       {/* Tooltip */}
       {hoveredPerson && (

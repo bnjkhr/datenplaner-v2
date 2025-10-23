@@ -491,6 +491,9 @@ export const Auswertungen = () => {
                 data={hierarchicalData}
                 personen={personen}
                 skills={skills}
+                datenprodukte={datenprodukte}
+                zuordnungen={zuordnungen}
+                rollen={rollen}
               />
             </div>
           </CollapsibleSection>
