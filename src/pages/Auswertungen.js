@@ -12,6 +12,7 @@ import {
 } from "recharts";
 import * as XLSX from "xlsx";
 import { CollapsibleSection } from "../components/ui/CollapsibleSection";
+import { CirclePackVisualization } from "../components/visualizations/CirclePackVisualization";
 
 export const Auswertungen = () => {
   const {
@@ -226,6 +227,94 @@ export const Auswertungen = () => {
 
   const filteredWorkloadData = getFilteredWorkloadData();
 
+  // --- NEU: Hierarchische Datenstruktur für Circle Pack Visualization ---
+  const buildHierarchicalData = () => {
+    // Farben für die Hauptkreise (basierend auf Screenshot)
+    const categoryColors = {
+      'DATENPRODUKTE': '#fbbf24',   // gelb/gold
+      'GOVERNANCE': '#8b5cf6',      // lila/violett
+      'M13 CORE': '#6b7280'         // grau
+    };
+
+    const children = [];
+
+    // 1. DATENPRODUKTE - Alle Datenprodukte mit ihren Teams AUSSER "M13 Core"
+    const datenproduktChildren = [];
+    datenprodukte.forEach(dp => {
+      // Überspringe "M13 Core" - das wird separat behandelt
+      if (dp.name.toLowerCase().includes('m13 core') ||
+          dp.name.toLowerCase() === 'm13core') {
+        return;
+      }
+
+      const teamZuordnungen = zuordnungen.filter(z => z.datenproduktId === dp.id);
+      const teamPersonenIds = [...new Set(teamZuordnungen.map(z => z.personId))];
+      const teamPersonen = teamPersonenIds
+        .map(personId => personen.find(p => p.id === personId))
+        .filter(Boolean);
+
+      if (teamPersonen.length > 0) {
+        datenproduktChildren.push({
+          name: dp.name,
+          personen: teamPersonen
+        });
+      }
+    });
+
+    if (datenproduktChildren.length > 0) {
+      children.push({
+        name: 'DATENPRODUKTE',
+        color: categoryColors['DATENPRODUKTE'],
+        children: datenproduktChildren
+      });
+    }
+
+    // 2. GOVERNANCE - Personen mit "Governance" Tag
+    const governancePersonen = personen.filter(person => {
+      const tags = person.kategorien || [];
+      return tags.some(tag =>
+        tag.toLowerCase().includes('governance')
+      );
+    });
+
+    if (governancePersonen.length > 0) {
+      children.push({
+        name: 'GOVERNANCE',
+        color: categoryColors['GOVERNANCE'],
+        personen: governancePersonen
+      });
+    }
+
+    // 3. M13 CORE - Das Datenprodukt "M13 Core" als eigener Hauptkreis
+    const m13CoreProdukt = datenprodukte.find(dp =>
+      dp.name.toLowerCase().includes('m13 core') ||
+      dp.name.toLowerCase() === 'm13core'
+    );
+
+    if (m13CoreProdukt) {
+      const m13CoreZuordnungen = zuordnungen.filter(z => z.datenproduktId === m13CoreProdukt.id);
+      const m13CorePersonenIds = [...new Set(m13CoreZuordnungen.map(z => z.personId))];
+      const m13CorePersonen = m13CorePersonenIds
+        .map(personId => personen.find(p => p.id === personId))
+        .filter(Boolean);
+
+      if (m13CorePersonen.length > 0) {
+        children.push({
+          name: 'M13 CORE',
+          color: categoryColors['M13 CORE'],
+          personen: m13CorePersonen
+        });
+      }
+    }
+
+    return {
+      name: 'Organisation',
+      children: children
+    };
+  };
+
+  const hierarchicalData = buildHierarchicalData();
+
   // --- NEU: Funktion für den Excel-Export ---
   const handleExportToExcel = () => {
     // 1. Auslastungsübersicht (Workload Data)
@@ -392,8 +481,22 @@ export const Auswertungen = () => {
 
         <div className="space-y-8">
 
+          {/* NEU: Organisationsübersicht als Kreisvisualisierung */}
+          <CollapsibleSection title="Organisationsübersicht" defaultOpen={true}>
+            <div className="bg-white rounded-xl p-6 shadow-sm">
+              <p className="text-sm text-gray-600 mb-4">
+                Visualisierung der Organisationsstruktur mit allen Personen in ihren zugeordneten Kreisen
+              </p>
+              <CirclePackVisualization
+                data={hierarchicalData}
+                personen={personen}
+                skills={skills}
+              />
+            </div>
+          </CollapsibleSection>
+
           {/* NEU: Kompakte Auslastungsübersicht */}
-          <CollapsibleSection title="Auslastungsübersicht" defaultOpen={true}>
+          <CollapsibleSection title="Auslastungsübersicht" defaultOpen={false}>
             {/* Filter Controls */}
             <div className="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
               <h3 className="text-sm font-semibold text-gray-700 mb-3">Filter</h3>
