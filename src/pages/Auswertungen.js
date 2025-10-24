@@ -243,9 +243,11 @@ export const Auswertungen = () => {
     const datenproduktChildren = [];
     datenprodukte.forEach(dp => {
       // Überspringe "M13 Core" und "Plattform-Team" - die werden separat behandelt
+      // WICHTIG: Nicht "plattform" generell ausschließen, nur "Plattform-Team" Datenprodukt
       if (dp.name.toLowerCase().includes('m13 core') ||
           dp.name.toLowerCase() === 'm13core' ||
-          dp.name.toLowerCase().includes('plattform')) {
+          dp.name.toLowerCase() === 'plattform-team' ||
+          dp.name.toLowerCase() === 'plattform team') {
         return;
       }
 
@@ -309,9 +311,10 @@ export const Auswertungen = () => {
       }
     }
 
-    // 4. PLATTFORM-TEAM - Das Datenprodukt "Plattform" als eigener Hauptkreis
+    // 4. PLATTFORM-TEAM - Das Datenprodukt "Plattform-Team" als eigener Hauptkreis
     const plattformProdukt = datenprodukte.find(dp =>
-      dp.name.toLowerCase().includes('plattform')
+      dp.name.toLowerCase() === 'plattform-team' ||
+      dp.name.toLowerCase() === 'plattform team'
     );
 
     if (plattformProdukt) {
