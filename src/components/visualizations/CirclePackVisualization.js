@@ -34,13 +34,13 @@ export const CirclePackVisualization = ({ data, personen, skills, datenprodukte,
     const { width, height } = dimensions;
     const margin = 20;
 
-    // Create SVG
+    // Create SVG with modern styling
     const svg = d3.select(svgRef.current)
       .attr('width', width)
       .attr('height', height)
       .attr('viewBox', [0, 0, width, height])
-      .style('font-family', 'system-ui, -apple-system, sans-serif')
-      .style('background', 'transparent');
+      .style('font-family', "'Inter', 'SF Pro Display', system-ui, -apple-system, sans-serif")
+      .style('background', 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)');
 
     // Create hierarchy
     const hierarchy = d3.hierarchy(data)
@@ -65,6 +65,48 @@ export const CirclePackVisualization = ({ data, personen, skills, datenprodukte,
 
     const root = pack(hierarchy);
 
+    // Add gradients for modern design
+    const defs = svg.append('defs');
+
+    // Gradient for each main category
+    const categories = root.children || [];
+    categories.forEach(category => {
+      const gradientId = `gradient-${category.data.name.replace(/\s+/g, '-')}`;
+      const gradient = defs.append('radialGradient')
+        .attr('id', gradientId);
+
+      const color = category.data.color || '#6b7280';
+      gradient.append('stop')
+        .attr('offset', '0%')
+        .attr('stop-color', color)
+        .attr('stop-opacity', 0.3);
+
+      gradient.append('stop')
+        .attr('offset', '100%')
+        .attr('stop-color', color)
+        .attr('stop-opacity', 0.1);
+    });
+
+    // Gradient for M13 badges
+    const m13Gradient = defs.append('radialGradient')
+      .attr('id', 'm13-badge-gradient');
+    m13Gradient.append('stop')
+      .attr('offset', '0%')
+      .attr('stop-color', '#d1fae5');
+    m13Gradient.append('stop')
+      .attr('offset', '100%')
+      .attr('stop-color', '#ffffff');
+
+    // Gradient for regular badges
+    const regularGradient = defs.append('radialGradient')
+      .attr('id', 'regular-badge-gradient');
+    regularGradient.append('stop')
+      .attr('offset', '0%')
+      .attr('stop-color', '#f8fafc');
+    regularGradient.append('stop')
+      .attr('offset', '100%')
+      .attr('stop-color', '#ffffff');
+
     // Create groups
     const g = svg.append('g')
       .attr('transform', `translate(${margin},${margin})`);
@@ -76,20 +118,19 @@ export const CirclePackVisualization = ({ data, personen, skills, datenprodukte,
       .attr('class', 'node')
       .attr('transform', d => `translate(${d.x},${d.y})`);
 
-    // Main circles (depth 0 = root, depth 1 = main categories)
+    // Main circles (depth 0 = root, depth 1 = main categories) - modern glassmorphism style
     nodes.filter(d => d.depth <= 2)
       .append('circle')
       .attr('r', d => d.r)
       .attr('fill', d => {
         if (d.depth === 0) return 'none'; // Root invisible
         if (d.depth === 1) {
-          // Hauptkreise - mit Transparenz
-          return d.data.color ? `${d.data.color}40` : '#e5e7eb40';
+          // Hauptkreise - modern gradient fill
+          return `url(#gradient-${d.data.name.replace(/\s+/g, '-')})`;
         }
         if (d.depth === 2) {
-          // Sub-Kreise - etwas dunkler
-          const parent = d.parent;
-          return parent?.data.color ? `${parent.data.color}60` : '#d1d5db60';
+          // Sub-Kreise - glassmorphism effect
+          return 'rgba(255, 255, 255, 0.5)';
         }
         return 'none';
       })
@@ -100,18 +141,24 @@ export const CirclePackVisualization = ({ data, personen, skills, datenprodukte,
         }
         if (d.depth === 2) {
           const parent = d.parent;
-          return parent?.data.color || '#6b7280';
+          return parent?.data.color || 'rgba(255, 255, 255, 0.8)';
         }
         return 'none';
       })
       .attr('stroke-width', d => {
-        if (d.depth === 1) return 3;
-        if (d.depth === 2) return 2;
+        if (d.depth === 1) return 4;
+        if (d.depth === 2) return 3;
         return 0;
       })
-      .attr('opacity', 0.9);
+      .attr('opacity', d => d.depth === 1 ? 0.85 : 0.9)
+      .style('filter', d => {
+        if (d.depth === 1) return 'drop-shadow(0 8px 32px rgba(0,0,0,0.1))';
+        if (d.depth === 2) return 'drop-shadow(0 4px 16px rgba(0,0,0,0.08))';
+        return 'none';
+      })
+      .style('backdrop-filter', 'blur(10px)');
 
-    // Labels for sub-circles (depth 2) - position to AVOID main circle tag area
+    // Labels for sub-circles (depth 2) - modern style
     nodes.filter(d => d.depth === 2)
       .append('text')
       .attr('text-anchor', 'middle')
@@ -135,9 +182,10 @@ export const CirclePackVisualization = ({ data, personen, skills, datenprodukte,
         // Otherwise, normal top position
         return -d.r + 18;
       })
-      .style('font-size', '11px')
+      .style('font-size', '11.5px')
       .style('font-weight', '600')
-      .style('fill', '#374151')
+      .style('fill', '#475569')
+      .style('letter-spacing', '0.01em')
       .style('pointer-events', 'none')
       .text(d => d.data.name);
 
@@ -151,13 +199,15 @@ export const CirclePackVisualization = ({ data, personen, skills, datenprodukte,
         const tagGroup = node.append('g')
           .attr('transform', `translate(0,${labelY})`);
 
-        // Text element (create first to measure)
+        // Text element (create first to measure) - modern style
         const text = tagGroup.append('text')
           .attr('text-anchor', 'middle')
           .attr('dy', '0.35em')
-          .style('font-size', '13px')
+          .style('font-size', '13.5px')
           .style('font-weight', '700')
           .style('fill', '#ffffff')
+          .style('letter-spacing', '0.05em')
+          .style('text-shadow', '0 2px 4px rgba(0,0,0,0.2)')
           .style('pointer-events', 'none')
           .text(d.data.name);
 
@@ -167,17 +217,37 @@ export const CirclePackVisualization = ({ data, personen, skills, datenprodukte,
         const bgWidth = bbox.width + padding * 2;
         const bgHeight = bbox.height + padding;
 
-        // Insert colored tag background with extra padding to cover underlying text
+        // Insert modern gradient tag background
         const extraPadding = 8;
-        tagGroup.insert('rect', 'text')
+        const tagBg = tagGroup.insert('rect', 'text')
           .attr('x', -(bgWidth + extraPadding) / 2)
           .attr('y', -(bgHeight + extraPadding) / 2)
           .attr('width', bgWidth + extraPadding)
           .attr('height', bgHeight + extraPadding)
           .attr('rx', (bgHeight + extraPadding) / 2) // Rounded corners
-          .attr('fill', d.data.color || '#6b7280')
-          .attr('opacity', 1) // Full opacity to cover text beneath
-          .style('filter', 'drop-shadow(0 2px 8px rgba(0,0,0,0.2))');
+          .attr('fill', `url(#tag-gradient-${d.data.name.replace(/\s+/g, '-')})`)
+          .attr('opacity', 1)
+          .style('filter', 'drop-shadow(0 4px 12px rgba(0,0,0,0.25))');
+
+        // Add gradient for tag
+        const tagGradientId = `tag-gradient-${d.data.name.replace(/\s+/g, '-')}`;
+        if (!defs.select(`#${tagGradientId}`).node()) {
+          const tagGradient = defs.append('linearGradient')
+            .attr('id', tagGradientId)
+            .attr('x1', '0%')
+            .attr('y1', '0%')
+            .attr('x2', '100%')
+            .attr('y2', '100%');
+
+          const color = d.data.color || '#6b7280';
+          tagGradient.append('stop')
+            .attr('offset', '0%')
+            .attr('stop-color', d3.color(color).brighter(0.3));
+
+          tagGradient.append('stop')
+            .attr('offset', '100%')
+            .attr('stop-color', d3.color(color).darker(0.2));
+        }
       });
 
     // Person badges - nur für Nodes mit Personen
@@ -243,35 +313,37 @@ export const CirclePackVisualization = ({ data, personen, skills, datenprodukte,
             setSelectedPerson(person);
           });
 
-        // Badge Circle
+        // Badge Circle - modern style with gradient
         personGroup.append('circle')
           .attr('r', badgeRadius)
-          .attr('fill', '#ffffff')
-          .attr('stroke', person.isM13 ? '#10b981' : '#6b7280')
-          .attr('stroke-width', 2)
-          .style('filter', 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))');
+          .attr('fill', person.isM13 ? 'url(#m13-badge-gradient)' : 'url(#regular-badge-gradient)')
+          .attr('stroke', person.isM13 ? '#10b981' : '#94a3b8')
+          .attr('stroke-width', 2.5)
+          .style('filter', 'drop-shadow(0 3px 6px rgba(0,0,0,0.15))');
 
         // Nur Vorname (erster Teil vor dem Leerzeichen)
         const firstName = person.name.split(' ')[0];
 
-        // Name UNTER dem Badge - kompakt aber lesbar
+        // Name UNTER dem Badge - modern style
         personGroup.append('text')
           .attr('text-anchor', 'middle')
-          .attr('dy', `${badgeRadius + 10}px`) // Knapp unter dem Badge
-          .style('font-size', '6px')
+          .attr('dy', `${badgeRadius + 10}px`)
+          .style('font-size', '6.5px')
           .style('font-weight', '600')
-          .style('fill', '#1f2937')
+          .style('fill', '#334155')
+          .style('letter-spacing', '0.02em')
           .style('pointer-events', 'none')
           .text(firstName);
 
-        // M13 Badge - im Badge zentriert
+        // M13 Badge - im Badge zentriert, modern style
         if (person.isM13) {
           personGroup.append('text')
             .attr('text-anchor', 'middle')
             .attr('dy', '0.3em')
             .style('font-size', '6px')
-            .style('font-weight', '700')
-            .style('fill', '#10b981')
+            .style('font-weight', '800')
+            .style('fill', '#059669')
+            .style('letter-spacing', '0.05em')
             .style('pointer-events', 'none')
             .text('M13');
         }
