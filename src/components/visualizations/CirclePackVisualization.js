@@ -57,10 +57,10 @@ export const CirclePackVisualization = ({ data, personen, skills, datenprodukte,
     const pack = d3.pack()
       .size([width - margin * 2, height - margin * 2])
       .padding(d => {
-        // Mehr Padding für höhere Ebenen
+        // Mehr Padding für höhere Ebenen - mehr Platz für Tags
         if (d.depth === 0) return 20; // Root
-        if (d.depth === 1) return 10; // Hauptkreise
-        return 5; // Sub-Kreise
+        if (d.depth === 1) return 70; // Hauptkreise - mehr Platz für Tag oben
+        return 8; // Sub-Kreise
       });
 
     const root = pack(hierarchy);
@@ -111,28 +111,74 @@ export const CirclePackVisualization = ({ data, personen, skills, datenprodukte,
       })
       .attr('opacity', 0.9);
 
-    // Labels for main circles (depth 1) and sub-circles (depth 2)
-    nodes.filter(d => d.depth === 1 || d.depth === 2)
+    // Labels for sub-circles (depth 2) - position to AVOID main circle tag area
+    nodes.filter(d => d.depth === 2)
       .append('text')
       .attr('text-anchor', 'middle')
       .attr('dy', d => {
-        // Position label based on circle size
-        if (d.depth === 1) {
-          return -d.r + 25; // Oben im Kreis
+        // Calculate if this sub-circle is in the top area where main circle tag would be
+        const parent = d.parent;
+        if (!parent) return -d.r + 18;
+
+        // Check if sub-circle is positioned in the upper area of parent circle
+        // where the main tag would be (top 60px of parent circle)
+        const relativeY = d.y; // y position relative to parent center
+        const parentRadius = parent.r;
+        const tagProtectedArea = 60; // Reserved space for main tag at top
+
+        // If sub-circle's top edge is in the protected tag area
+        if (relativeY - d.r < -parentRadius + tagProtectedArea) {
+          // Position label at BOTTOM of sub-circle instead
+          return d.r - 15;
         }
-        return -d.r + 18; // Für Sub-Kreise
+
+        // Otherwise, normal top position
+        return -d.r + 18;
       })
-      .style('font-size', d => {
-        if (d.depth === 1) return '16px';
-        return '12px';
-      })
-      .style('font-weight', d => d.depth === 1 ? '700' : '600')
-      .style('fill', d => {
-        if (d.depth === 1) return '#1f2937';
-        return '#374151';
-      })
+      .style('font-size', '11px')
+      .style('font-weight', '600')
+      .style('fill', '#374151')
       .style('pointer-events', 'none')
       .text(d => d.data.name);
+
+    // Labels for main circles (depth 1) - render AFTER sub-circles so they appear on top
+    nodes.filter(d => d.depth === 1)
+      .each(function(d) {
+        const node = d3.select(this);
+
+        const labelY = -d.r + 25; // Position for tag
+
+        const tagGroup = node.append('g')
+          .attr('transform', `translate(0,${labelY})`);
+
+        // Text element (create first to measure)
+        const text = tagGroup.append('text')
+          .attr('text-anchor', 'middle')
+          .attr('dy', '0.35em')
+          .style('font-size', '13px')
+          .style('font-weight', '700')
+          .style('fill', '#ffffff')
+          .style('pointer-events', 'none')
+          .text(d.data.name);
+
+        // Measure text to create background
+        const bbox = text.node().getBBox();
+        const padding = 12;
+        const bgWidth = bbox.width + padding * 2;
+        const bgHeight = bbox.height + padding;
+
+        // Insert colored tag background with extra padding to cover underlying text
+        const extraPadding = 8;
+        tagGroup.insert('rect', 'text')
+          .attr('x', -(bgWidth + extraPadding) / 2)
+          .attr('y', -(bgHeight + extraPadding) / 2)
+          .attr('width', bgWidth + extraPadding)
+          .attr('height', bgHeight + extraPadding)
+          .attr('rx', (bgHeight + extraPadding) / 2) // Rounded corners
+          .attr('fill', d.data.color || '#6b7280')
+          .attr('opacity', 1) // Full opacity to cover text beneath
+          .style('filter', 'drop-shadow(0 2px 8px rgba(0,0,0,0.2))');
+      });
 
     // Person badges - nur für Nodes mit Personen
     const personNodes = nodes.filter(d => d.data.personen && d.data.personen.length > 0);

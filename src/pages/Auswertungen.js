@@ -233,17 +233,19 @@ export const Auswertungen = () => {
     const categoryColors = {
       'DATENPRODUKTE': '#fbbf24',   // gelb/gold
       'GOVERNANCE': '#8b5cf6',      // lila/violett
-      'M13 CORE': '#6b7280'         // grau
+      'M13 CORE': '#6b7280',        // grau
+      'PLATTFORM-TEAM': '#ef4444'   // rot
     };
 
     const children = [];
 
-    // 1. DATENPRODUKTE - Alle Datenprodukte mit ihren Teams AUSSER "M13 Core"
+    // 1. DATENPRODUKTE - Alle Datenprodukte mit ihren Teams AUSSER "M13 Core" und "Plattform-Team"
     const datenproduktChildren = [];
     datenprodukte.forEach(dp => {
-      // Überspringe "M13 Core" - das wird separat behandelt
+      // Überspringe "M13 Core" und "Plattform-Team" - die werden separat behandelt
       if (dp.name.toLowerCase().includes('m13 core') ||
-          dp.name.toLowerCase() === 'm13core') {
+          dp.name.toLowerCase() === 'm13core' ||
+          dp.name.toLowerCase().includes('plattform')) {
         return;
       }
 
@@ -303,6 +305,27 @@ export const Auswertungen = () => {
           name: 'M13 CORE',
           color: categoryColors['M13 CORE'],
           personen: m13CorePersonen
+        });
+      }
+    }
+
+    // 4. PLATTFORM-TEAM - Das Datenprodukt "Plattform" als eigener Hauptkreis
+    const plattformProdukt = datenprodukte.find(dp =>
+      dp.name.toLowerCase().includes('plattform')
+    );
+
+    if (plattformProdukt) {
+      const plattformZuordnungen = zuordnungen.filter(z => z.datenproduktId === plattformProdukt.id);
+      const plattformPersonenIds = [...new Set(plattformZuordnungen.map(z => z.personId))];
+      const plattformPersonen = plattformPersonenIds
+        .map(personId => personen.find(p => p.id === personId))
+        .filter(Boolean);
+
+      if (plattformPersonen.length > 0) {
+        children.push({
+          name: 'PLATTFORM-TEAM',
+          color: categoryColors['PLATTFORM-TEAM'],
+          personen: plattformPersonen
         });
       }
     }
