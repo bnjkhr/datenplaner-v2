@@ -174,7 +174,7 @@ export const CirclePackVisualization = ({ data, personen, skills, datenprodukte,
           .style('cursor', 'pointer')
           .on('mouseenter', function(event) {
             setHoveredPerson(person);
-            setMousePosition({ x: event.pageX, y: event.pageY });
+            setMousePosition({ x: event.clientX, y: event.clientY });
             d3.select(this).select('circle')
               .transition()
               .duration(200)
@@ -182,7 +182,7 @@ export const CirclePackVisualization = ({ data, personen, skills, datenprodukte,
               .attr('stroke-width', 3);
           })
           .on('mousemove', function(event) {
-            setMousePosition({ x: event.pageX, y: event.pageY });
+            setMousePosition({ x: event.clientX, y: event.clientY });
           })
           .on('mouseleave', function() {
             setHoveredPerson(null);
