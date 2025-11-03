@@ -213,26 +213,6 @@ export const MainAppContent = ({ user }) => {
                     Datenprodukte
                   </button>
                   <button
-                    onClick={() => handleNavigation("rollen")}
-                    className={`w-full px-4 py-2 text-left text-sm font-semibold transition-colors ${
-                      currentPage === "rollen"
-                        ? "bg-ard-blue-50 text-ard-blue-700"
-                        : "text-gray-700 hover:bg-gray-100"
-                    }`}
-                  >
-                    Rollen
-                  </button>
-                  <button
-                    onClick={() => handleNavigation("skills")}
-                    className={`w-full px-4 py-2 text-left text-sm font-semibold transition-colors ${
-                      currentPage === "skills"
-                        ? "bg-ard-blue-50 text-ard-blue-700"
-                        : "text-gray-700 hover:bg-gray-100"
-                    }`}
-                  >
-                    Skills
-                  </button>
-                  <button
                     onClick={() => handleNavigation("auswertungen")}
                     className={`w-full px-4 py-2 text-left text-sm font-semibold transition-colors ${
                       currentPage === "auswertungen"
@@ -245,6 +225,27 @@ export const MainAppContent = ({ user }) => {
                   <div className="border-t border-gray-100 my-1"></div>
                 </>
               )}
+              <button
+                onClick={() => handleNavigation("rollen")}
+                className={`w-full px-4 py-2 text-left text-sm font-semibold transition-colors ${
+                  currentPage === "rollen"
+                    ? "bg-ard-blue-50 text-ard-blue-700"
+                    : "text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                Rollen
+              </button>
+              <button
+                onClick={() => handleNavigation("skills")}
+                className={`w-full px-4 py-2 text-left text-sm font-semibold transition-colors ${
+                  currentPage === "skills"
+                    ? "bg-ard-blue-50 text-ard-blue-700"
+                    : "text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                Skills
+              </button>
+              <div className="border-t border-gray-100 my-1"></div>
               <button
                 onClick={() => {
                   setShowChangePasswordModal(true);
@@ -301,8 +302,6 @@ export const MainAppContent = ({ user }) => {
                 <>
                   <NavLink pageName="personen">Personen</NavLink>
                   <NavLink pageName="datenprodukte">Datenprodukte</NavLink>
-                  <NavLink pageName="rollen">Rollen</NavLink>
-                  <NavLink pageName="skills">Skills</NavLink>
                   <NavLink pageName="auswertungen">Auswertungen</NavLink>
                   <div className="w-px h-6 bg-gray-300 mx-2"></div>
                 </>
