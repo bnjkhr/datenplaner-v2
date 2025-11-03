@@ -5,6 +5,9 @@ module.exports = {
 ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Onest', 'sans-serif'],
+      },
       colors: {
         'ard-blue': {
           50: '#e6f2ff',
