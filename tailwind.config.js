@@ -6,7 +6,7 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Momo Trust Display', 'sans-serif'],
+        sans: ['Roboto', 'sans-serif'],
       },
       colors: {
         'ard-blue': {
