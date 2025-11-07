@@ -3,6 +3,7 @@ import { auth, setAnalyticsUserId, waitForAnalytics } from '../firebase/config';
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { logEvent } from 'firebase/analytics';
 import { ErrorOverlay } from '../components/ui/ErrorOverlay';
+import { checkRateLimit, validateEmail, sanitizeInput, validatePassword } from '../utils/security';
 
 const AuthPage = () => {
   const [email, setEmail] = useState('');
@@ -12,8 +13,29 @@ const AuthPage = () => {
   const [error, setError] = useState('');
 
   const handleLogin = async () => {
+    let sanitizedEmail = '';
+    
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      // Validate and sanitize inputs
+      sanitizedEmail = sanitizeInput(email);
+      if (!validateEmail(sanitizedEmail)) {
+        setError('Bitte geben Sie eine gültige E-Mail-Adresse ein.');
+        return;
+      }
+      
+      // Check rate limiting
+      if (!checkRateLimit(sanitizedEmail, 5, 60000)) {
+        setError('Zu viele Login-Versuche. Bitte warten Sie einen Moment.');
+        return;
+      }
+      
+      const passwordValidation = validatePassword(password);
+      if (!passwordValidation.valid) {
+        setError(passwordValidation.errors[0]);
+        return;
+      }
+
+      const userCredential = await signInWithEmailAndPassword(auth, sanitizedEmail, password);
 
       // Setze Analytics User ID für personalisierte Verfolgung
       await setAnalyticsUserId(userCredential.user.uid);
@@ -28,7 +50,19 @@ const AuthPage = () => {
         });
       }
     } catch (err) {
-      setError(err.message);
+      // Don't expose detailed error messages to users
+      let userMessage = 'Login fehlgeschlagen. Bitte überprüfen Sie Ihre Anmeldedaten.';
+      
+      // Map specific error codes to user-friendly messages
+      if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+        userMessage = 'E-Mail oder Passwort ist falsch.';
+      } else if (err.code === 'auth/too-many-requests') {
+        userMessage = 'Zu viele Login-Versuche. Bitte versuchen Sie es später erneut.';
+      } else if (err.code === 'auth/invalid-email') {
+        userMessage = 'Ungültige E-Mail-Adresse.';
+      }
+      
+      setError(userMessage);
       setMessage('');
 
       const analyticsInstance = await waitForAnalytics();
@@ -36,7 +70,7 @@ const AuthPage = () => {
         logEvent(analyticsInstance, 'login_failed', {
           method: 'email',
           error_code: err.code,
-          attempted_email: email,
+          attempted_email: sanitizedEmail,
           login_timestamp: Date.now()
         });
       }
@@ -45,11 +79,25 @@ const AuthPage = () => {
 
   const handlePasswordReset = async () => {
     try {
-      await sendPasswordResetEmail(auth, email);
+      // Validate and sanitize email
+      const sanitizedEmail = sanitizeInput(email);
+      if (!validateEmail(sanitizedEmail)) {
+        setError('Bitte geben Sie eine gültige E-Mail-Adresse ein.');
+        return;
+      }
+      
+      // Check rate limiting for password reset
+      if (!checkRateLimit(`reset:${sanitizedEmail}`, 3, 300000)) {
+        setError('Zu viele Passwort-Reset-Versuche. Bitte warten Sie einen Moment.');
+        return;
+      }
+      
+      await sendPasswordResetEmail(auth, sanitizedEmail);
       setMessage('Passwort-Zurücksetzungs-E-Mail gesendet!');
       setError('');
     } catch (err) {
-      setError(err.message);
+      // Don't expose detailed error messages to users
+      setError('Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.');
       setMessage('');
     }
   };

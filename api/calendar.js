@@ -2,8 +2,18 @@
 export default async function handler(req, res) {
   console.log('🚀 Calendar API called');
   
-  // CORS Headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  // CORS Headers - Restrict to allowed origins
+  const allowedOrigins = [
+    'http://localhost:3000',
+    'https://datenplaner-app-v3.vercel.app',
+    'https://your-production-domain.com'
+  ];
+  
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   

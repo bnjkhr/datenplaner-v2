@@ -6,12 +6,18 @@ import { DataProvider } from './context/DataProvider';
 import AuthPage from './pages/AuthPage';
 import { MainAppContent } from './MainAppContent';
 import FeatureFlagManager from './components/admin/FeatureFlagManager';
+import { displaySecurityValidation } from './utils/envValidation';
 
 function App() {
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
 
   useEffect(() => {
+    // Run security validation in development
+    if (process.env.NODE_ENV === 'development') {
+      displaySecurityValidation();
+    }
+    
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setAuthLoading(false);

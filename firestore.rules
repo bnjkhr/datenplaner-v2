@@ -1,0 +1,62 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    function isAdmin() {
+      return request.auth.token.admin == true;
+    }
+    
+    function isValidTenant(tenantId) {
+      return request.auth.token.tenantId == tenantId || isAdmin();
+    }
+    
+    function hasValidFields() {
+      return request.resource.data.keys().hasAll(['name']) &&
+             request.resource.data.name is string &&
+             request.resource.data.name.size() > 0 &&
+             request.resource.data.name.size() <= 100;
+    }
+    
+    // Default deny - explicit allow only
+    match /{document=**} {
+      allow read, write: if false;
+    }
+    
+    // Legacy app structure (artifacts)
+    match /artifacts/{appId}/public/data/{collection}/{document} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && 
+        collection in ['personen', 'datenprodukte', 'rollen', 'skills', 'zuordnungen', 'urlaube'] &&
+        hasValidFields();
+    }
+    
+    // Multi-tenant structure
+    match /tenant-{tenantId}-{collection}/{document} {
+      allow read: if isAuthenticated() && isValidTenant(tenantId);
+      allow write: if isAuthenticated() && isValidTenant(tenantId) && isAdmin() &&
+        collection in ['personen', 'datenprodukte', 'rollen', 'skills', 'zuordnungen', 'urlaube'] &&
+        hasValidFields();
+    }
+    
+    // Tenant metadata
+    match /tenants/{tenantId} {
+      allow read: if isAuthenticated() && isValidTenant(tenantId);
+      allow write: if isAuthenticated() && isAdmin();
+    }
+    
+    // User profiles (if implemented)
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      allow write: if isAuthenticated() && isOwner(userId);
+    }
+  }
+}

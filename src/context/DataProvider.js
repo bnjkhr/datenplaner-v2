@@ -15,6 +15,8 @@ import {
 } from "../firebase/config";
 import { isFeatureEnabled, FEATURE_FLAGS } from "../utils/featureFlags";
 import { fetchCalendarEvents } from "../api/calendar";
+import { secureLog } from "../utils/secureLogging";
+import { handleSecureError } from "../utils/errorHandling";
 import {
   collection,
   doc,
@@ -152,12 +154,13 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
         // Legacy-Pfad: Nutze die alte Struktur
         await setDoc(lastChangeRef, { lastChange: change }, { merge: true });
       }
-      const logUrl = logServerUrl || "http://localhost:3001/log";
-      fetch(logUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(change),
-      }).catch((err) => console.error("Log server error:", err));
+      // Use secure logging instead of direct fetch
+      secureLog({
+        type: 'data_change',
+        description: change.description,
+        userEmail: change.userEmail,
+        timestamp: change.timestamp
+      }).catch((err) => console.error("Secure log error:", err));
     } catch (e) {
       console.error("Error updating last change:", e);
     }
@@ -278,7 +281,15 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
         },
         (err) => {
           console.error(`Error at ${path}:`, err);
-          setError(`Fehler: ${err.code}.`);
+          // Use secure error handling instead of exposing raw error codes
+          const userMessage = handleSecureError(err, null, {
+            customMessages: {
+              'permission-denied': 'Keine Berechtigung für diese Daten.',
+              'not-found': 'Daten nicht gefunden.',
+              'unavailable': 'Datenbank vorübergehend nicht verfügbar.'
+            }
+          });
+          setError(userMessage);
           checkAllLoaded();
         },
       );

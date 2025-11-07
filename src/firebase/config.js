@@ -2,6 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getAnalytics, isSupported, setUserId } from "firebase/analytics";
+import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -46,6 +47,20 @@ export const tenantRegistrationEnabled =
   process.env.REACT_APP_TENANT_REGISTRATION_ENABLED === "true";
 
 const app = initializeApp(firebaseConfig);
+
+// Initialize App Check for additional security (optional, can be enabled later)
+let appCheck = null;
+if (process.env.REACT_APP_RECAPTCHA_SITE_KEY && process.env.NODE_ENV === 'production') {
+  try {
+    appCheck = initializeAppCheck(app, {
+      provider: new ReCaptchaV3Provider(process.env.REACT_APP_RECAPTCHA_SITE_KEY),
+      isTokenAutoRefreshEnabled: true
+    });
+  } catch (error) {
+    console.warn('App Check initialization failed:', error);
+  }
+}
+
 const auth = getAuth(app);
 const db = getFirestore(app);
 
