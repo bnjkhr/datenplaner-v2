@@ -1810,7 +1810,7 @@ const PersonenVerwaltung = () => {
                 <div className="flex items-center gap-3 justify-start">
                   <button
                     onClick={handleAddNewPerson}
-                    className="p-3 rounded-xl bg-ard-blue-600 hover:bg-ard-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:transform hover:scale-105"
+                    className="p-3 rounded-xl bg-ard-blue-600 hover:bg-ard-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
                     title="Neue Person hinzufügen"
                   >
                     <svg
@@ -1830,7 +1830,7 @@ const PersonenVerwaltung = () => {
 
                   <button
                     onClick={() => setShowExcelModal(true)}
-                    className="p-3 rounded-xl bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:transform hover:scale-105"
+                    className="p-3 rounded-xl bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
                     title="Excel Upload"
                   >
                     <svg

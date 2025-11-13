@@ -140,7 +140,7 @@ import { SpeedInsights } from "@vercel/speed-insights/react";
   const NavLink = ({ pageName, children }) => (
     <button
       onClick={() => setCurrentPage(pageName)}
-      className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 hover:transform hover:scale-105 ${
+      className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 transform hover:scale-105 ${
         currentPage === pageName
           ? "bg-white text-ard-blue-600 shadow-lg"
           : "text-white/80 hover:text-white hover:bg-white/10 hover:shadow-lg"
@@ -180,7 +180,7 @@ import { SpeedInsights } from "@vercel/speed-insights/react";
       <div className="relative" ref={menuRef}>
         <button
           onClick={() => setShowBurgerMenu(!showBurgerMenu)}
-          className="p-3 rounded-xl text-white/80 hover:text-white hover:bg-white/10 hover:transform hover:scale-110 transition-all duration-200"
+          className="p-3 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transform hover:scale-110 transition-all duration-200"
           title={isMobile ? "Menü" : "Benutzermenü"}
         >
           <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">

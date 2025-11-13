@@ -30,7 +30,7 @@ const ModernButton = ({
   
   const stateClasses = disabled 
     ? 'opacity-50 cursor-not-allowed' 
-    : 'hover:transform hover:scale-105 hover:shadow-lg';
+    : 'transform hover:scale-105 hover:shadow-lg';
   
   const loadingClasses = loading 
     ? 'cursor-wait opacity-75' 

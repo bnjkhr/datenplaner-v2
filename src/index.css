@@ -10,7 +10,7 @@
   }
   
   .glass-card-hover {
-    @apply glass-card hover:bg-white/80 hover:shadow-modern-lg hover:transform hover:scale-[1.02] transition-all duration-300;
+    @apply glass-card hover:bg-white/80 hover:shadow-modern-lg transform hover:scale-[1.02] transition-all duration-300;
   }
   
   /* Opaque Cards for menus */
@@ -21,7 +21,7 @@
   /* Moderne Buttons */
   .modern-button {
     @apply px-6 py-3 rounded-xl font-medium transition-all duration-300 
-           hover:transform hover:scale-105 hover:shadow-lg;
+           transform hover:scale-105 hover:shadow-lg;
   }
   
   .modern-button-primary {
@@ -50,7 +50,7 @@
   
   /* Hover Effects */
   .hover-lift {
-    @apply transition-all duration-300 hover:transform hover:scale-[1.02] hover:shadow-modern;
+    @apply transition-all duration-300 transform hover:scale-[1.02] hover:shadow-modern;
   }
   
   .hover-glow {
@@ -76,7 +76,7 @@
   }
   
   .modern-card-elevated {
-    @apply modern-card hover:transform hover:scale-[1.01] hover-lift;
+    @apply modern-card transform hover:scale-[1.01] hover-lift;
   }
   
   /* Status Badges */
