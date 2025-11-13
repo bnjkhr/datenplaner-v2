@@ -1245,26 +1245,26 @@ const PersonenListe = ({
   });
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {sortedKreise.map((kreis) => (
         <div key={kreis} className="space-y-4">
           {/* Kreis-Header */}
-          <div className="flex items-center gap-3">
-            <h2 className="text-xl font-bold text-gray-900">{kreis}</h2>
-            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700">
+          <div className="flex items-center gap-4 mb-4">
+            <h2 className="text-2xl font-bold text-gray-800">{kreis}</h2>
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-700">
               {groupedPersonen[kreis].length} Person
               {groupedPersonen[kreis].length !== 1 ? "en" : ""}
             </span>
 
             {/* Sortierungs-Buttons - Desktop */}
-            <div className="hidden md:flex items-center gap-1 ml-4 flex-wrap">
-              <span className="text-xs text-gray-500 mr-1">Sortieren:</span>
+            <div className="hidden md:flex items-center gap-2 ml-auto flex-wrap">
+              <span className="text-sm text-gray-500 mr-2">Sortieren:</span>
               <button
                 onClick={() => setSortBy("name")}
-                className={`px-2 py-1 text-xs font-medium rounded transition-all ${
+                className={`px-3 py-2 text-sm font-medium rounded-xl transition-all duration-200 ${
                   sortBy === "name"
                     ? "bg-ard-blue-100 text-ard-blue-700 border border-ard-blue-200"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-ard-blue-600"
                 }`}
                 title="Nach Namen sortieren"
               >
@@ -1272,10 +1272,10 @@ const PersonenListe = ({
               </button>
               <button
                 onClick={() => setSortBy("auslastung")}
-                className={`px-2 py-1 text-xs font-medium rounded transition-all ${
+                className={`px-3 py-2 text-sm font-medium rounded-xl transition-all duration-200 ${
                   sortBy === "auslastung"
                     ? "bg-ard-blue-100 text-ard-blue-700 border border-ard-blue-200"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-ard-blue-600"
                 }`}
                 title="Nach Auslastung sortieren (höchste zuerst)"
               >
@@ -1283,10 +1283,10 @@ const PersonenListe = ({
               </button>
               <button
                 onClick={() => setSortBy("abwesenheit")}
-                className={`px-2 py-1 text-xs font-medium rounded transition-all ${
+                className={`px-3 py-2 text-sm font-medium rounded-xl transition-all duration-200 ${
                   sortBy === "abwesenheit"
                     ? "bg-ard-blue-100 text-ard-blue-700 border border-ard-blue-200"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-ard-blue-600"
                 }`}
                 title="Nach anstehender Abwesenheit sortieren"
               >
@@ -1294,10 +1294,10 @@ const PersonenListe = ({
               </button>
               <button
                 onClick={() => setSortBy("datenprodukte")}
-                className={`px-2 py-1 text-xs font-medium rounded transition-all ${
+                className={`px-3 py-2 text-sm font-medium rounded-xl transition-all duration-200 ${
                   sortBy === "datenprodukte"
                     ? "bg-ard-blue-100 text-ard-blue-700 border border-ard-blue-200"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-ard-blue-600"
                 }`}
                 title="Nach Anzahl Datenprodukte sortieren (mehr zuerst)"
               >
@@ -1309,10 +1309,10 @@ const PersonenListe = ({
             <div className="md:hidden relative ml-4 sort-dropdown">
               <button
                 onClick={() => setShowSortDropdown(!showSortDropdown)}
-                className="flex items-center gap-1 px-2 py-1 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-600 rounded transition-all"
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl transition-all duration-200"
               >
                 <span>Sortieren:</span>
-                <span className="text-ard-blue-700 font-semibold">
+                <span className="text-ard-blue-600 font-semibold">
                   {sortBy === "name" && "Name"}
                   {sortBy === "auslastung" && "Auslastung"}
                   {sortBy === "abwesenheit" && "Abwesenheit"}
@@ -1393,7 +1393,7 @@ const PersonenListe = ({
           </div>
 
           {/* Personen-Grid für diesen Kreis */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
             {groupedPersonen[kreis].map((person) => (
               <PersonEintrag
                 key={`${kreis}-${person.id}`}
@@ -1783,16 +1783,16 @@ const PersonenVerwaltung = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-ard-blue-50/30">
+    <div className="min-h-screen bg-white">
       <div className="container mx-auto px-6 py-8">
         <div className="mb-8">
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-6">
             <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4 lg:gap-6">
               <div className="flex-1">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                <h1 className="text-4xl font-bold text-gray-900 mb-3">
                   Personenverwaltung
                 </h1>
-                <p className="text-gray-600">
+                <p className="text-gray-600 text-lg">
                   Verwalte dein Team und überwache die Arbeitsauslastung
                 </p>
               </div>
@@ -1807,14 +1807,14 @@ const PersonenVerwaltung = () => {
                   />
                 </div>
 
-                <div className="flex items-center gap-2 justify-start">
+                <div className="flex items-center gap-3 justify-start">
                   <button
                     onClick={handleAddNewPerson}
-                    className="w-10 h-10 sm:w-14 sm:h-14 bg-ard-blue-600 hover:bg-white text-white hover:text-ard-blue-600 border-2 border-ard-blue-600 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center group active:scale-95 flex-shrink-0"
+                    className="p-3 rounded-xl bg-ard-blue-600 hover:bg-ard-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
                     title="Neue Person hinzufügen"
                   >
                     <svg
-                      className="w-4 h-4 sm:w-6 sm:h-6 transition-transform duration-200 group-active:scale-110"
+                      className="w-5 h-5"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -1830,11 +1830,11 @@ const PersonenVerwaltung = () => {
 
                   <button
                     onClick={() => setShowExcelModal(true)}
-                    className="w-10 h-10 sm:w-14 sm:h-14 bg-green-600 hover:bg-white text-white hover:text-green-600 border-2 border-green-600 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center group active:scale-95 flex-shrink-0"
+                    className="p-3 rounded-xl bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
                     title="Excel Upload"
                   >
                     <svg
-                      className="w-4 h-4 sm:w-6 sm:h-6 transition-transform duration-200 group-active:scale-110"
+                      className="w-5 h-5 text-modern-success"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -1851,12 +1851,12 @@ const PersonenVerwaltung = () => {
               </div>
             </div>
 
-            {/* Absence indicators */}
-            <div className="flex flex-col gap-3">
+             {/* Absence indicators */}
+            <div className="flex flex-col gap-4">
               {/* Upcoming absences - next week */}
               {upcomingAbsentPeople.length > 0 && (
-                <div className="flex flex-col gap-1.5">
-                  <span className="text-xs text-gray-500 font-medium">
+                <div className="opaque-card p-4 hover-lift">
+                  <span className="text-sm text-gray-600 font-semibold mb-3 block">
                     Kommende Woche abwesend:
                   </span>
                   <div className="flex items-center gap-3 flex-wrap">
@@ -1864,7 +1864,7 @@ const PersonenVerwaltung = () => {
                       <button
                         key={person.id}
                         onClick={() => handleShowDetails(person)}
-                        className="inline-flex flex-col items-start text-xs font-semibold text-gray-700 hover:text-ard-blue-600 transition-all duration-200 cursor-pointer"
+                        className="inline-flex flex-col items-start text-xs font-semibold text-gray-700 hover:text-ard-blue-600 transition-all duration-200 cursor-pointer hover-lift"
                         title={`Profil von ${person.name} anzeigen`}
                       >
                         <span>{person.name}</span>
