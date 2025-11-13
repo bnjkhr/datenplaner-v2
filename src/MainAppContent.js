@@ -14,7 +14,7 @@ import { ReleaseNotesModal } from "./components/ui/ReleaseNotesModal";
 import CalendarWarningBanner from "./components/CalendarWarningBanner";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 
-const AppFooter = ({ user }) => {
+  const AppFooter = ({ user }) => {
   const { lastChange } = useData();
   const formatTimestamp = (ts) => {
     if (!ts) return "";
@@ -22,37 +22,38 @@ const AppFooter = ({ user }) => {
     return dateObj.toLocaleString("de-DE");
   };
   return (
-    <footer className="bg-white shadow-inner mt-auto py-4 text-center">
+    <footer className="opaque-card mt-auto py-6 text-center">
       {user && (
-        <div className="mb-2 text-sm text-gray-600">
-          Angemeldet als: <span className="font-semibold">{user.email}</span>
+        <div className="mb-3 text-sm text-gray-600">
+          Angemeldet als: <span className="font-semibold text-gray-900">{user.email}</span>
         </div>
       )}
       {lastChange && (
-        <div className="mb-2 text-sm text-gray-600">
-          Letzte Änderung: {lastChange.description} am{" "}
-          {formatTimestamp(lastChange.timestamp)} von{" "}
-          <span className="font-semibold">{lastChange.userEmail}</span>
+        <div className="mb-3 text-sm text-gray-600">
+          Letzte Änderung: <span className="font-medium">{lastChange.description}</span> am{" "}
+          <span className="font-medium">{formatTimestamp(lastChange.timestamp)}</span> von{" "}
+          <span className="font-semibold text-gray-900">{lastChange.userEmail}</span>
         </div>
       )}
       <div className="flex flex-col items-center gap-2">
         <p className="text-sm text-gray-500">
-          &copy; {new Date().getFullYear()} Dein Datenprodukt Planungs-Tool
+          &copy; {new Date().getFullYear()} DP Planer
         </p>
       </div>
     </footer>
   );
 };
 
-export const MainAppContent = ({ user }) => {
+  export const MainAppContent = ({ user }) => {
   const [currentPage, setCurrentPage] = useState("personen");
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const [showReleaseNotesModal, setShowReleaseNotesModal] = useState(false);
   const [showBurgerMenu, setShowBurgerMenu] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const { calendarError, personen } = useData();
 
   // Check for mobile screen size
+  const [isMobile, setIsMobile] = useState(false);
+  
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
@@ -139,10 +140,10 @@ export const MainAppContent = ({ user }) => {
   const NavLink = ({ pageName, children }) => (
     <button
       onClick={() => setCurrentPage(pageName)}
-      className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+      className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 hover:transform hover:scale-105 ${
         currentPage === pageName
-          ? "bg-gradient-to-r from-ard-blue-500 to-ard-blue-600 text-white shadow-lg"
-          : "text-gray-600 hover:text-ard-blue-500 hover:bg-ard-blue-50"
+          ? "bg-white text-ard-blue-600 shadow-lg"
+          : "text-white/80 hover:text-white hover:bg-white/10 hover:shadow-lg"
       }`}
     >
       {children}
@@ -179,7 +180,7 @@ export const MainAppContent = ({ user }) => {
       <div className="relative" ref={menuRef}>
         <button
           onClick={() => setShowBurgerMenu(!showBurgerMenu)}
-          className="p-2 rounded-lg text-gray-600 hover:text-gray-800 hover:bg-gray-100 transition-all"
+          className="p-3 rounded-xl text-white/80 hover:text-white hover:bg-white/10 hover:transform hover:scale-110 transition-all duration-200"
           title={isMobile ? "Menü" : "Benutzermenü"}
         >
           <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
@@ -188,70 +189,70 @@ export const MainAppContent = ({ user }) => {
         </button>
 
         {showBurgerMenu && (
-          <div className={`absolute right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 z-50 ${isMobile ? 'w-56' : 'w-48'}`}>
-            <div className="py-2">
+          <div className={`absolute right-0 mt-3 opaque-card z-50 ${isMobile ? 'w-64' : 'w-56'}`}>
+            <div className="py-3">
               {isMobile && (
                 <>
                   <button
                     onClick={() => handleNavigation("personen")}
-                    className={`w-full px-4 py-2 text-left text-sm font-semibold transition-colors ${
+                    className={`w-full px-4 py-3 text-left text-sm font-semibold transition-all duration-200 ${
                       currentPage === "personen"
-                        ? "bg-ard-blue-50 text-ard-blue-700"
-                        : "text-gray-700 hover:bg-gray-100"
+                        ? "bg-modern-primary/10 text-modern-primary border-r-2 border-modern-primary"
+                        : "text-modern-neutral-700 hover:bg-modern-primary/5 hover:text-modern-primary"
                     }`}
                   >
                     Personen
                   </button>
                   <button
                     onClick={() => handleNavigation("datenprodukte")}
-                    className={`w-full px-4 py-2 text-left text-sm font-semibold transition-colors ${
+                    className={`w-full px-4 py-3 text-left text-sm font-semibold transition-all duration-200 ${
                       currentPage === "datenprodukte"
-                        ? "bg-ard-blue-50 text-ard-blue-700"
-                        : "text-gray-700 hover:bg-gray-100"
+                        ? "bg-modern-primary/10 text-modern-primary border-r-2 border-modern-primary"
+                        : "text-modern-neutral-700 hover:bg-modern-primary/5 hover:text-modern-primary"
                     }`}
                   >
-                    Datenprodukte
+                    DP-Verwaltung
                   </button>
                   <button
                     onClick={() => handleNavigation("auswertungen")}
-                    className={`w-full px-4 py-2 text-left text-sm font-semibold transition-colors ${
+                    className={`w-full px-4 py-3 text-left text-sm font-semibold transition-all duration-200 ${
                       currentPage === "auswertungen"
-                        ? "bg-ard-blue-50 text-ard-blue-700"
-                        : "text-gray-700 hover:bg-gray-100"
+                        ? "bg-modern-primary/10 text-modern-primary border-r-2 border-modern-primary"
+                        : "text-modern-neutral-700 hover:bg-modern-primary/5 hover:text-modern-primary"
                     }`}
                   >
                     Auswertungen
                   </button>
-                  <div className="border-t border-gray-100 my-1"></div>
+                  <div className="border-t border-modern-neutral-200 my-2 mx-4"></div>
                 </>
               )}
               <button
                 onClick={() => handleNavigation("rollen")}
-                className={`w-full px-4 py-2 text-left text-sm font-semibold transition-colors ${
+                className={`w-full px-4 py-3 text-left text-sm font-semibold transition-all duration-200 ${
                   currentPage === "rollen"
-                    ? "bg-ard-blue-50 text-ard-blue-700"
-                    : "text-gray-700 hover:bg-gray-100"
+                    ? "bg-modern-primary/10 text-modern-primary-dark border-r-2 border-modern-primary"
+                    : "text-modern-neutral-700 hover:bg-modern-primary/5 hover:text-modern-primary"
                 }`}
               >
                 Rollen
               </button>
               <button
                 onClick={() => handleNavigation("skills")}
-                className={`w-full px-4 py-2 text-left text-sm font-semibold transition-colors ${
+                className={`w-full px-4 py-3 text-left text-sm font-semibold transition-all duration-200 ${
                   currentPage === "skills"
-                    ? "bg-ard-blue-50 text-ard-blue-700"
-                    : "text-gray-700 hover:bg-gray-100"
+                    ? "bg-modern-primary/10 text-modern-primary-dark border-r-2 border-modern-primary"
+                    : "text-modern-neutral-700 hover:bg-modern-primary/5 hover:text-modern-primary"
                 }`}
               >
                 Skills
               </button>
-              <div className="border-t border-gray-100 my-1"></div>
+              <div className="border-t border-modern-neutral-200 my-2 mx-4"></div>
               <button
                 onClick={() => {
                   setShowChangePasswordModal(true);
                   setShowBurgerMenu(false);
                 }}
-                className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                className="w-full px-4 py-3 text-left text-sm text-modern-neutral-700 hover:bg-modern-primary/5 hover:text-modern-primary transition-all duration-200"
               >
                 Passwort ändern
               </button>
@@ -260,23 +261,23 @@ export const MainAppContent = ({ user }) => {
                   setShowReleaseNotesModal(true);
                   setShowBurgerMenu(false);
                 }}
-                className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                className="w-full px-4 py-3 text-left text-sm text-modern-neutral-700 hover:bg-modern-primary/5 hover:text-modern-primary transition-all duration-200"
               >
                 Was ist neu?
               </button>
               <button
                 onClick={handleCopyAllEmails}
-                className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                className="w-full px-4 py-3 text-left text-sm text-modern-neutral-700 hover:bg-modern-primary/5 hover:text-modern-primary transition-all duration-200"
               >
                 Alle Adressen kopieren
               </button>
-              <div className="border-t border-gray-100 my-1"></div>
+              <div className="border-t border-modern-neutral-200 my-2 mx-4"></div>
               <button
                 onClick={() => {
                   handleLogout();
                   setShowBurgerMenu(false);
                 }}
-                className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 transition-colors"
+                className="w-full px-4 py-3 text-left text-sm text-modern-error hover:bg-modern-error/10 hover:text-modern-error-dark transition-all duration-200"
               >
                 Logout
               </button>
@@ -288,22 +289,22 @@ export const MainAppContent = ({ user }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-ard-blue-50/30 font-sans flex flex-col">
-      <header className="bg-white/80 backdrop-blur-md shadow-lg border-b border-gray-100 sticky top-0 z-30">
+    <div className="min-h-screen bg-white font-sans flex flex-col">
+      <header className="bg-ard-blue-600 sticky top-0 z-30 shadow-lg">
         <nav className="container mx-auto px-4 sm:px-6 py-4">
           <div className="flex justify-between items-center gap-4">
-            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-              <div className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-ard-blue-500 to-ard-blue-600 bg-clip-text text-transparent truncate">
-                {isMobile ? "Datenplaner" : "Datenprodukt Planer"}
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+              <div className="text-3xl sm:text-4xl md:text-5xl font-bold text-white truncate">
+                DP Planer
               </div>
             </div>
-            <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               {!isMobile && (
                 <>
                   <NavLink pageName="personen">Personen</NavLink>
                   <NavLink pageName="datenprodukte">Datenprodukte</NavLink>
                   <NavLink pageName="auswertungen">Auswertungen</NavLink>
-                  <div className="w-px h-6 bg-gray-300 mx-2"></div>
+                  <div className="w-px h-8 bg-gray-200 mx-1"></div>
                 </>
               )}
               <BurgerMenu />

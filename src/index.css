@@ -1,3 +1,139 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Moderne Utility-Klassen für Glassmorphism und neues Design */
+@layer components {
+  /* Glassmorphism Cards */
+  .glass-card {
+    @apply bg-white/70 backdrop-blur-lg border border-white/20 rounded-2xl shadow-modern;
+  }
+  
+  .glass-card-hover {
+    @apply glass-card hover:bg-white/80 hover:shadow-modern-lg hover:transform hover:scale-[1.02] transition-all duration-300;
+  }
+  
+  /* Opaque Cards for menus */
+  .opaque-card {
+    @apply bg-white rounded-2xl shadow-xl border border-gray-200;
+  }
+  
+  /* Moderne Buttons */
+  .modern-button {
+    @apply px-6 py-3 rounded-xl font-medium transition-all duration-300 
+           hover:transform hover:scale-105 hover:shadow-lg;
+  }
+  
+  .modern-button-primary {
+    @apply modern-button bg-gradient-to-r from-modern-primary to-ard-blue-500 text-white
+           hover:from-modern-primary-dark hover:to-ard-blue-600;
+  }
+  
+  .modern-button-secondary {
+    @apply modern-button bg-modern-secondary text-modern-primary border border-modern-primary/20
+           hover:bg-white hover:border-modern-primary/30;
+  }
+  
+  .modern-button-accent {
+    @apply modern-button bg-gradient-to-r from-modern-accent to-modern-accent-light text-white
+           hover:from-modern-accent-dark hover:to-modern-accent;
+  }
+  
+  /* Gradient Text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-ard-blue-500 to-ard-blue-400 bg-clip-text text-transparent;
+  }
+  
+  .gradient-text-primary {
+    @apply bg-gradient-to-r from-modern-primary to-modern-primary-light bg-clip-text text-transparent;
+  }
+  
+  /* Hover Effects */
+  .hover-lift {
+    @apply transition-all duration-300 hover:transform hover:scale-[1.02] hover:shadow-modern;
+  }
+  
+  .hover-glow {
+    @apply transition-all duration-300 hover:shadow-modern-lg hover:brightness-110;
+  }
+  
+  /* Modern Inputs */
+  .modern-input {
+    @apply w-full px-4 py-3 rounded-xl border border-gray-200 bg-white/50 
+           focus:ring-2 focus:ring-modern-primary/20 focus:border-modern-primary 
+           transition-all duration-200 backdrop-blur-sm;
+  }
+  
+  /* Glass Header */
+  .glass-header {
+    @apply bg-white/80 backdrop-blur-xl border-b border-white/20 shadow-modern;
+  }
+  
+  /* Modern Cards */
+  .modern-card {
+    @apply bg-white rounded-2xl shadow-modern border border-gray-100 
+           hover:shadow-modern-lg hover:border-gray-200 transition-all duration-300;
+  }
+  
+  .modern-card-elevated {
+    @apply modern-card hover:transform hover:scale-[1.01] hover-lift;
+  }
+  
+  /* Status Badges */
+  .badge-modern {
+    @apply px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm;
+  }
+  
+  .badge-success {
+    @apply badge-modern bg-modern-success/10 text-modern-success-dark border border-modern-success/20;
+  }
+  
+ .badge-warning {
+    @apply badge-modern bg-modern-warning/10 text-modern-warning-dark border border-modern-warning/20;
+  }
+  
+  .badge-error {
+    @apply badge-modern bg-modern-error/10 text-modern-error-dark border border-modern-error/20;
+  }
+  
+  .badge-info {
+    @apply badge-modern bg-modern-primary/10 text-modern-primary-dark border border-modern-primary/20;
+  }
+  
+  /* Loading Animations */
+  .skeleton {
+    @apply animate-pulse bg-gradient-to-r from-gray-200 to-gray-300 rounded-xl;
+  }
+  
+  .skeleton-text {
+    @apply skeleton h-4 w-full;
+  }
+  
+  .skeleton-card {
+    @apply skeleton h-32 w-full;
+  }
+}
+
+/* Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
