@@ -180,10 +180,12 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
     const unsubscribe = onSnapshot(lastChangeRef, (snapshot) => {
       if (snapshot.exists()) {
         setLastChange(snapshot.data().lastChange || null);
+      } else {
+        setLastChange(null);
       }
     });
     return () => unsubscribe();
-  }, []);
+  }, [lastChangeRef]);
 
   useEffect(() => {
     const loadVacations = async () => {
