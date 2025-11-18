@@ -1,7 +1,13 @@
 {
   "name": "datenplaner-app-v3",
   "version": "0.1.0",
-  "private": true,
+  "description": "React-basierte Anwendung zur Verwaltung von Personal, Datenprodukten, Rollen und Skills mit Kalenderintegration",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/benkohler/datenplaner-v2.git"
+  },
+  "author": "Ben Kohler",
+  "license": "MIT",
   "dependencies": {
     "@vercel/speed-insights": "^1.2.0",
     "d3": "^7.9.0",

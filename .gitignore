@@ -23,3 +23,6 @@ service-account-key.json
 
 # Deployment
 .vercel
+
+# Files with hardcoded credentials
+public/readonly-firebase.html
