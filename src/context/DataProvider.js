@@ -355,6 +355,11 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
           isM13: personDaten.isM13 || false,
           kategorien: personDaten.kategorien || [],
           terminbuchungsLink: personDaten.terminbuchungsLink || "",
+          // Auth-Felder
+          authUserId: personDaten.authUserId || null,
+          role: personDaten.role || 'viewer',
+          isActive: personDaten.isActive !== undefined ? personDaten.isActive : false,
+          lastLoginAt: personDaten.lastLoginAt || null,
           erstelltAm: new Date().toISOString(),
           letzteAenderung: new Date().toISOString(),
         },
@@ -389,6 +394,11 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
           isM13: personData.isM13 || false,
           kategorien: personData.kategorien || [],
           terminbuchungsLink: personData.terminbuchungsLink || "",
+          // Auth-Felder
+          authUserId: personData.authUserId || null,
+          role: personData.role || 'viewer',
+          isActive: personData.isActive !== undefined ? personData.isActive : false,
+          lastLoginAt: personData.lastLoginAt || null,
           erstelltAm: new Date().toISOString(),
           letzteAenderung: new Date().toISOString(),
         });
@@ -760,6 +770,112 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
     }
   });
 
+  // ==================== User Management Functions ====================
+
+  /**
+   * Verknüpft einen Firebase Auth User mit einem Personen-Profil
+   * Aktualisiert sowohl das User-Dokument (/users/{uid}) als auch
+   * das Personen-Dokument (authUserId)
+   */
+  const verknuepfeUserMitPerson = preventWriteActions(async (userId, personId, role = 'user') => {
+    try {
+      const batch = writeBatch(db);
+
+      // Update User document
+      const userDocRef = doc(db, 'users', userId);
+      batch.set(userDocRef, {
+        personId: personId,
+        role: role,
+      }, { merge: true });
+
+      // Update Person document
+      const personDocRef = doc(db, getCollectionPath("personen"), personId);
+      batch.update(personDocRef, {
+        authUserId: userId,
+        role: role,
+        isActive: true,
+        letzteAenderung: new Date().toISOString(),
+      });
+
+      await batch.commit();
+      recordLastChange("User mit Person verknüpft");
+      return true;
+    } catch (e) {
+      console.error("Error linking user to person:", e);
+      setError(`Fehler beim Verknüpfen: ${e.code || e.message}`);
+      return false;
+    }
+  });
+
+  /**
+   * Aktualisiert die Rolle eines Users
+   */
+  const aktualisiereUserRolle = preventWriteActions(async (userId, personId, newRole) => {
+    try {
+      const batch = writeBatch(db);
+
+      // Update User document
+      if (userId) {
+        const userDocRef = doc(db, 'users', userId);
+        batch.set(userDocRef, {
+          role: newRole,
+        }, { merge: true });
+      }
+
+      // Update Person document
+      if (personId) {
+        const personDocRef = doc(db, getCollectionPath("personen"), personId);
+        batch.update(personDocRef, {
+          role: newRole,
+          letzteAenderung: new Date().toISOString(),
+        });
+      }
+
+      await batch.commit();
+      recordLastChange(`Benutzerrolle aktualisiert auf ${newRole}`);
+      return true;
+    } catch (e) {
+      console.error("Error updating user role:", e);
+      setError(`Fehler beim Aktualisieren der Rolle: ${e.code || e.message}`);
+      return false;
+    }
+  });
+
+  /**
+   * Trennt die Verbindung zwischen User und Person
+   */
+  const trenneUserVonPerson = preventWriteActions(async (userId, personId) => {
+    try {
+      const batch = writeBatch(db);
+
+      // Update User document
+      if (userId) {
+        const userDocRef = doc(db, 'users', userId);
+        batch.set(userDocRef, {
+          personId: null,
+        }, { merge: true });
+      }
+
+      // Update Person document
+      if (personId) {
+        const personDocRef = doc(db, getCollectionPath("personen"), personId);
+        batch.update(personDocRef, {
+          authUserId: null,
+          isActive: false,
+          letzteAenderung: new Date().toISOString(),
+        });
+      }
+
+      await batch.commit();
+      recordLastChange("User von Person getrennt");
+      return true;
+    } catch (e) {
+      console.error("Error unlinking user from person:", e);
+      setError(`Fehler beim Trennen: ${e.code || e.message}`);
+      return false;
+    }
+  });
+
   return (
     <DataContext.Provider
       value={{
@@ -788,6 +904,10 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
         fuegeSkillHinzu,
         aktualisiereSkill,
         loescheSkill,
+        // User Management
+        verknuepfeUserMitPerson,
+        aktualisiereUserRolle,
+        trenneUserVonPerson,
         loading,
         error,
         setError,

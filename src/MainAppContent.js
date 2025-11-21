@@ -8,8 +8,11 @@ import PersonenVerwaltung from "./pages/PersonenVerwaltung";
 import { DatenproduktVerwaltung } from "./pages/DatenproduktVerwaltung";
 import { Auswertungen } from "./pages/Auswertungen";
 import { RollenVerwaltung } from "./pages/RollenVerwaltung";
-import { SkillsVerwaltung } from "./pages/SkillsVerwaltung"; // NEU
+import { SkillsVerwaltung } from "./pages/SkillsVerwaltung";
+import { MyProfile } from "./components/profile/MyProfile";
+import { UserManagement } from "./components/admin/UserManagement";
 import { useData } from "./context/DataProvider";
+import { useAuth } from "./context/AuthContext";
 import { ReleaseNotesModal } from "./components/ui/ReleaseNotesModal";
 import CalendarWarningBanner from "./components/CalendarWarningBanner";
 import { SpeedInsights } from "@vercel/speed-insights/react";
@@ -50,6 +53,7 @@ import { SpeedInsights } from "@vercel/speed-insights/react";
   const [showReleaseNotesModal, setShowReleaseNotesModal] = useState(false);
   const [showBurgerMenu, setShowBurgerMenu] = useState(false);
   const { calendarError, personen } = useData();
+  const { isAdmin, canManageData } = useAuth();
 
   // Check for mobile screen size
   const [isMobile, setIsMobile] = useState(false);
@@ -248,6 +252,29 @@ import { SpeedInsights } from "@vercel/speed-insights/react";
               </button>
               <div className="border-t border-modern-neutral-200 my-2 mx-4"></div>
               <button
+                onClick={() => handleNavigation("my-profile")}
+                className={`w-full px-4 py-3 text-left text-sm font-semibold transition-all duration-200 ${
+                  currentPage === "my-profile"
+                    ? "bg-modern-primary/10 text-modern-primary-dark border-r-2 border-modern-primary"
+                    : "text-modern-neutral-700 hover:bg-modern-primary/5 hover:text-modern-primary"
+                }`}
+              >
+                Mein Profil
+              </button>
+              {isAdmin() && (
+                <button
+                  onClick={() => handleNavigation("user-management")}
+                  className={`w-full px-4 py-3 text-left text-sm font-semibold transition-all duration-200 ${
+                    currentPage === "user-management"
+                      ? "bg-modern-primary/10 text-modern-primary-dark border-r-2 border-modern-primary"
+                      : "text-modern-neutral-700 hover:bg-modern-primary/5 hover:text-modern-primary"
+                  }`}
+                >
+                  Benutzerverwaltung
+                </button>
+              )}
+              <div className="border-t border-modern-neutral-200 my-2 mx-4"></div>
+              <button
                 onClick={() => {
                   setShowChangePasswordModal(true);
                   setShowBurgerMenu(false);
@@ -317,8 +344,10 @@ import { SpeedInsights } from "@vercel/speed-insights/react";
         {currentPage === "personen" && <PersonenVerwaltung />}
         {currentPage === "datenprodukte" && <DatenproduktVerwaltung />}
         {currentPage === "rollen" && <RollenVerwaltung />}
-        {currentPage === "skills" && <SkillsVerwaltung />} {/* NEU */}
+        {currentPage === "skills" && <SkillsVerwaltung />}
         {currentPage === "auswertungen" && <Auswertungen />}
+        {currentPage === "my-profile" && <MyProfile />}
+        {currentPage === "user-management" && <UserManagement />}
       </main>
       <AppFooter user={user} />
       <ChangePasswordModal

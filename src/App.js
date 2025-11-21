@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebase/config';
 import { DataProvider } from './context/DataProvider';
+import { AuthProvider } from './context/AuthContext';
 import AuthPage from './pages/AuthPage';
 import { MainAppContent } from './MainAppContent';
 import FeatureFlagManager from './components/admin/FeatureFlagManager';
@@ -38,9 +39,11 @@ function App() {
         {!user ? (
             <AuthPage />
         ) : (
-            <DataProvider user={user}>
+            <AuthProvider user={user}>
+              <DataProvider user={user}>
                 <MainAppContent user={user} />
-            </DataProvider>
+              </DataProvider>
+            </AuthProvider>
         )}
         <FeatureFlagManager />
       </>

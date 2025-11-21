@@ -6,24 +6,47 @@ service cloud.firestore {
     function isAuthenticated() {
       return request.auth != null;
     }
-    
+
     function isOwner(userId) {
       return request.auth.uid == userId;
     }
-    
-    function isAdmin() {
-      return request.auth.token.admin == true;
+
+    // Role-based helper functions
+    function getUserRole() {
+      return request.auth.token.role;
     }
-    
+
+    function isAdmin() {
+      return getUserRole() == 'admin';
+    }
+
+    function isEditor() {
+      return getUserRole() in ['admin', 'editor'];
+    }
+
+    function isUser() {
+      return getUserRole() in ['admin', 'editor', 'user'];
+    }
+
     function isValidTenant(tenantId) {
       return request.auth.token.tenantId == tenantId || isAdmin();
     }
-    
+
     function hasValidFields() {
       return request.resource.data.keys().hasAll(['name']) &&
              request.resource.data.name is string &&
              request.resource.data.name.size() > 0 &&
              request.resource.data.name.size() <= 100;
+    }
+
+    // Get user's person ID from custom claims
+    function getUserPersonId() {
+      return request.auth.token.personId;
+    }
+
+    // Check if editing own profile
+    function isOwnProfile(personId) {
+      return getUserPersonId() == personId;
     }
     
     // Default deny - explicit allow only
@@ -31,12 +54,35 @@ service cloud.firestore {
       allow read, write: if false;
     }
     
-    // Legacy app structure (artifacts)
-    match /artifacts/{appId}/public/data/{collection}/{document} {
+    // Legacy app structure (artifacts) - with role-based permissions
+    match /artifacts/{appId}/public/data/personen/{personId} {
+      // Everyone can read all profiles
       allow read: if isAuthenticated();
-      allow write: if isAuthenticated() && 
-        collection in ['personen', 'datenprodukte', 'rollen', 'skills', 'zuordnungen', 'urlaube'] &&
+
+      // Users can update their own profile
+      allow update: if isAuthenticated() && isUser() && isOwnProfile(personId);
+
+      // Editors and Admins can update all profiles
+      allow update: if isAuthenticated() && isEditor();
+
+      // Only Admins can create and delete profiles
+      allow create, delete: if isAuthenticated() && isAdmin();
+    }
+
+    // Other data collections (datenprodukte, zuordnungen, rollen, skills, urlaube)
+    match /artifacts/{appId}/public/data/{collection}/{document} {
+      // Everyone can read
+      allow read: if isAuthenticated() &&
+        collection in ['datenprodukte', 'rollen', 'skills', 'zuordnungen', 'urlaube'];
+
+      // Editors and Admins can write (except delete)
+      allow create, update: if isAuthenticated() && isEditor() &&
+        collection in ['datenprodukte', 'rollen', 'skills', 'zuordnungen', 'urlaube'] &&
         hasValidFields();
+
+      // Only Admins can delete
+      allow delete: if isAuthenticated() && isAdmin() &&
+        collection in ['datenprodukte', 'rollen', 'skills', 'zuordnungen', 'urlaube'];
     }
     
     // Multi-tenant structure
@@ -53,10 +99,25 @@ service cloud.firestore {
       allow write: if isAuthenticated() && isAdmin();
     }
     
-    // User profiles (if implemented)
+    // User profiles - stores user metadata and role assignments
     match /users/{userId} {
+      // Users can read their own profile, Admins can read all
       allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
-      allow write: if isAuthenticated() && isOwner(userId);
+
+      // Users can update their own profile (but not role field)
+      allow update: if isAuthenticated() && isOwner(userId) &&
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'personId', 'isActive']);
+
+      // Only Admins can create users, update roles, or change personId
+      allow create: if isAuthenticated() && isAdmin();
+      allow update: if isAuthenticated() && isAdmin();
+      allow delete: if isAuthenticated() && isAdmin();
+    }
+
+    // Meta collection for last changes
+    match /artifacts/{appId}/public/meta {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
     }
   }
 }
