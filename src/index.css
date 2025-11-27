@@ -121,12 +121,12 @@
 
   /* Dashboard Cards */
   .dashboard-card {
-    @apply bg-white rounded-2xl shadow-dashboard p-6 border border-gray-100
+    @apply bg-white rounded-xl sm:rounded-2xl shadow-dashboard p-4 sm:p-6 border border-gray-100
            hover:shadow-dashboard-hover transition-all duration-300;
   }
 
   .dashboard-card-no-hover {
-    @apply bg-white rounded-2xl shadow-dashboard p-6 border border-gray-100;
+    @apply bg-white rounded-xl sm:rounded-2xl shadow-dashboard p-4 sm:p-6 border border-gray-100;
   }
 
   /* KPI Cards */

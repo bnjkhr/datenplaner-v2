@@ -42,27 +42,27 @@ const KPICard = ({
       {/* Accent bar */}
       <div className="kpi-card-accent" />
 
-      <div className="flex items-start justify-between pl-3">
-        <div className="flex-1">
-          <p className="text-sm text-gray-500 font-medium">{title}</p>
-          <p className="text-3xl font-bold text-gray-900 mt-1">{value}</p>
+      <div className="flex items-start justify-between pl-3 gap-3">
+        <div className="flex-1 min-w-0">
+          <p className="text-xs sm:text-sm text-gray-500 font-medium truncate">{title}</p>
+          <p className="text-2xl sm:text-3xl font-bold text-gray-900 mt-1">{value}</p>
           {subtitle && (
-            <p className="text-sm text-gray-400 mt-1">{subtitle}</p>
+            <p className="text-xs sm:text-sm text-gray-400 mt-1 truncate">{subtitle}</p>
           )}
           {trend && (
-            <div className={`mt-3 text-sm flex items-center gap-1 ${
+            <div className={`mt-3 text-xs sm:text-sm flex items-center gap-1 ${
               trend.direction === 'up' ? 'text-emerald-600' : 'text-red-500'
             }`}>
               <span>{trend.direction === 'up' ? '↑' : '↓'}</span>
               <span>{trend.value}%</span>
-              <span className="text-gray-400 ml-1">vs. letzte Woche</span>
+              <span className="text-gray-400 ml-1 hidden sm:inline">vs. letzte Woche</span>
             </div>
           )}
         </div>
 
         {icon && (
-          <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${colors.gradient}
-                          flex items-center justify-center text-white text-xl shadow-lg`}>
+          <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br ${colors.gradient}
+                          flex items-center justify-center text-white text-lg sm:text-xl shadow-lg flex-shrink-0`}>
             {icon}
           </div>
         )}
