@@ -315,29 +315,6 @@ const PersonEintrag = ({
   const { name, email, msTeamsLink, wochenstunden, kategorien, skillIds } = person;
   const { vacations, zuordnungen, skills: allSkills } = useData();
 
-  // Avatar-Initialen
-  const getInitials = () => {
-    const parts = name.split(' ');
-    if (parts.length >= 2) {
-      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-    }
-    return name.substring(0, 2).toUpperCase();
-  };
-
-  // Avatar-Farbe basierend auf Name
-  const getAvatarColor = () => {
-    const colors = [
-      'from-accent-400 to-accent-600',
-      'from-purple-accent-400 to-purple-accent-600',
-      'from-blue-400 to-blue-600',
-      'from-emerald-400 to-emerald-600',
-      'from-amber-400 to-amber-600',
-      'from-rose-400 to-rose-600',
-    ];
-    const index = name.charCodeAt(0) % colors.length;
-    return colors[index];
-  };
-
   // Anzahl Datenprodukte berechnen
   const getDataProductCount = () => {
     const personAssignments = zuordnungen.filter(
