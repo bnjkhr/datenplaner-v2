@@ -6,7 +6,7 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
+        sans: ['Roboto', 'sans-serif'],
       },
       colors: {
         'ard-blue': {
@@ -20,6 +20,37 @@ module.exports = {
           700: '#002666',
           800: '#001f59',
           900: '#00184c',
+        },
+        // Pink/Lila Akzentfarben (TrackPro-Style)
+        'accent': {
+          50: '#fdf2f8',
+          100: '#fce7f3',
+          200: '#fbcfe8',
+          300: '#f9a8d4',
+          400: '#f472b6',
+          500: '#ec4899',
+          600: '#db2777',
+          700: '#be185d',
+          800: '#9d174d',
+          900: '#831843',
+        },
+        'purple-accent': {
+          50: '#faf5ff',
+          100: '#f3e8ff',
+          200: '#e9d5ff',
+          300: '#d8b4fe',
+          400: '#c084fc',
+          500: '#a855f7',
+          600: '#9333ea',
+          700: '#7e22ce',
+          800: '#6b21a8',
+          900: '#581c87',
+        },
+        'dashboard': {
+          'bg': '#f8fafc',
+          'card': '#ffffff',
+          'text': '#1e293b',
+          'muted': '#64748b',
         },
         // Moderne Farbpalette
         'modern': {
@@ -72,6 +103,10 @@ module.exports = {
         'modern-lg': '0 10px 40px rgba(0, 0, 0, 0.12)',
         'modern-xl': '0 20px 60px rgba(0, 0, 0, 0.16)',
         'inner-modern': 'inset 0 2px 4px rgba(0, 0, 0, 0.06)',
+        'dashboard': '0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.1)',
+        'dashboard-hover': '0 4px 6px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.1)',
+        'dashboard-lg': '0 10px 15px rgba(0, 0, 0, 0.05), 0 4px 6px rgba(0, 0, 0, 0.05)',
+        'timeline': '0 2px 8px rgba(168, 85, 247, 0.15)',
       },
       borderRadius: {
         'xl': '12px',
