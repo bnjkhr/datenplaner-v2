@@ -26,17 +26,13 @@ function App() {
     return () => unsubscribe();
   }, []);
 
-  if (authLoading) {
-    return (
-        <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
-             <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-indigo-600 dark:border-indigo-400"></div>
-        </div>
-    );
-  }
-
   return (
       <ThemeProvider>
-        {!user ? (
+        {authLoading ? (
+          <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-indigo-600 dark:border-indigo-400"></div>
+          </div>
+        ) : !user ? (
             <AuthPage />
         ) : (
             <DataProvider user={user}>
