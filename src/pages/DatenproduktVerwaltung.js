@@ -83,7 +83,7 @@ export const DatenproduktVerwaltung = () => {
       setShowProduktForm(false);
       setEditingProdukt(null);
     } else {
-      setFormError("Fehler beim Speichern des Datenprodukts.");
+      setFormError("Fehler beim Speichern des Teams.");
     }
   };
 
@@ -295,20 +295,20 @@ export const DatenproduktVerwaltung = () => {
   if (loading)
     return (
       <div className="flex justify-center py-10">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 dark:border-indigo-400"></div>
       </div>
     );
-  if (error) return <p className="text-center text-red-500 py-8">{error}</p>;
+  if (error) return <p className="text-center text-red-500 dark:text-red-400 py-8">{error}</p>;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-ard-blue-50/30">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-ard-blue-50/30 dark:from-gray-900 dark:to-gray-800">
       <div className="container mx-auto px-6 py-8">
         <div className="flex flex-wrap justify-between items-center mb-8 gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Datenproduktverwaltung
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              Teamverwaltung
             </h1>
-            <p className="text-gray-600">Verwalte deine Datenprodukte und Teams</p>
+            <p className="text-gray-600 dark:text-gray-400">Verwalte deine Teams und Zuordnungen</p>
           </div>
           <div className="flex gap-3">
             <button
@@ -328,7 +328,7 @@ export const DatenproduktVerwaltung = () => {
             <button
               onClick={() => handleOpenProduktForm()}
               className="w-14 h-14 bg-ard-blue-600 hover:bg-white text-white hover:text-ard-blue-600 border-2 border-ard-blue-600 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center group active:scale-95 flex-shrink-0"
-              title="Neues Datenprodukt erstellen"
+              title="Neues Team erstellen"
             >
               <svg
                 className="w-6 h-6 transition-transform duration-200 group-active:scale-110"
@@ -344,27 +344,27 @@ export const DatenproduktVerwaltung = () => {
 
         {showProduktForm && (
           <div
-            className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-40 p-4"
+            className="fixed inset-0 bg-gray-800 bg-opacity-75 dark:bg-black dark:bg-opacity-75 flex justify-center items-center z-40 p-4"
             onClick={() => {
               setShowProduktForm(false);
               setEditingProdukt(null);
             }}
           >
             <div
-              className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6"
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6"
               onClick={(e) => e.stopPropagation()}
             >
               <form onSubmit={handleProduktFormSubmit} className="space-y-4">
-                <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+                <h2 className="text-2xl font-semibold text-gray-700 dark:text-gray-200 mb-4">
                   {editingProdukt
-                    ? "Datenprodukt bearbeiten"
-                    : "Neues Datenprodukt erstellen"}
+                    ? "Team bearbeiten"
+                    : "Neues Team erstellen"}
                 </h2>
                 {formError && (
-                  <p className="text-red-500 text-sm mb-3">{formError}</p>
+                  <p className="text-red-500 dark:text-red-400 text-sm mb-3">{formError}</p>
                 )}
                 <div>
-                  <label htmlFor="dp-form-name" className="block text-sm">
+                  <label htmlFor="dp-form-name" className="block text-sm text-gray-700 dark:text-gray-300">
                     Name
                   </label>
                   <input
@@ -373,11 +373,11 @@ export const DatenproduktVerwaltung = () => {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
-                    className="mt-1 block w-full border rounded-md p-2"
+                    className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   />
                 </div>
                 <div>
-                  <label htmlFor="dp-form-beschreibung" className="block text-sm">
+                  <label htmlFor="dp-form-beschreibung" className="block text-sm text-gray-700 dark:text-gray-300">
                     Beschreibung
                   </label>
                   <textarea
@@ -385,18 +385,18 @@ export const DatenproduktVerwaltung = () => {
                     value={beschreibung}
                     onChange={(e) => setBeschreibung(e.target.value)}
                     rows="3"
-                    className="mt-1 block w-full border rounded-md p-2"
+                    className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   ></textarea>
                 </div>
                 <div>
-                  <label htmlFor="dp-form-status" className="block text-sm">
+                  <label htmlFor="dp-form-status" className="block text-sm text-gray-700 dark:text-gray-300">
                     Status
                   </label>
                   <select
                     id="dp-form-status"
                     value={status}
                     onChange={(e) => setStatus(e.target.value)}
-                    className="mt-1 block w-full border rounded-md p-2"
+                    className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   >
                     {statusOptionen.map((opt) => (
                       <option key={opt} value={opt}>
@@ -412,13 +412,13 @@ export const DatenproduktVerwaltung = () => {
                       setShowProduktForm(false);
                       setEditingProdukt(null);
                     }}
-                    className="px-4 py-2 border rounded-md"
+                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                   >
                     Abbrechen
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-indigo-600 text-white rounded-md"
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md"
                   >
                     {editingProdukt ? "Speichern" : "Erstellen"}
                   </button>
@@ -430,15 +430,15 @@ export const DatenproduktVerwaltung = () => {
 
         <ConfirmModal
           isOpen={showDeleteModal}
-          title="Datenprodukt löschen"
+          title="Team löschen"
           message={`Möchten Sie "${produktToDelete?.name}" wirklich löschen?`}
           onConfirm={confirmDeleteDatenprodukt}
           onCancel={() => setShowDeleteModal(false)}
         />
 
         {datenprodukte.length === 0 && !loading && (
-          <p className="text-center text-gray-500 py-8">
-            Noch keine Datenprodukte erfasst.
+          <p className="text-center text-gray-500 dark:text-gray-400 py-8">
+            Noch keine Teams erfasst.
           </p>
         )}
 
@@ -476,22 +476,22 @@ export const DatenproduktVerwaltung = () => {
 
         {selectedProduktForAssignment && (
           <div
-            className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-50 p-4"
+            className="fixed inset-0 bg-gray-800 bg-opacity-75 dark:bg-black dark:bg-opacity-75 flex justify-center items-center z-50 p-4"
             onClick={() => setSelectedProduktForAssignment(null)}
           >
             <div
-              className="bg-white rounded-lg shadow-xl w-full max-w-md p-6"
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md p-6"
               onClick={(e) => e.stopPropagation()}
             >
-              <h3 className="text-xl font-semibold mb-4">
+              <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
                 Team für "{selectedProduktForAssignment.name}" verwalten
               </h3>
               {assignmentError && (
-                <p className="text-red-500 text-sm mb-3">{assignmentError}</p>
+                <p className="text-red-500 dark:text-red-400 text-sm mb-3">{assignmentError}</p>
               )}
               <form onSubmit={handleAssignRoleSubmit} className="space-y-4">
                 <div>
-                  <label htmlFor="assign-person" className="block text-sm">
+                  <label htmlFor="assign-person" className="block text-sm text-gray-700 dark:text-gray-300">
                     Person
                   </label>
                   <select
@@ -499,7 +499,7 @@ export const DatenproduktVerwaltung = () => {
                     value={assignPersonId}
                     onChange={(e) => setAssignPersonId(e.target.value)}
                     required
-                    className="mt-1 block w-full p-2 border rounded-md"
+                    className="mt-1 block w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   >
                     <option value="">Person auswählen</option>
                     {sortedPersonen.map((p) => (
@@ -510,7 +510,7 @@ export const DatenproduktVerwaltung = () => {
                   </select>
                 </div>
                 <div>
-                  <label htmlFor="assign-role" className="block text-sm">
+                  <label htmlFor="assign-role" className="block text-sm text-gray-700 dark:text-gray-300">
                     Rolle
                   </label>
                   <select
@@ -518,7 +518,7 @@ export const DatenproduktVerwaltung = () => {
                     value={assignRolleId}
                     onChange={(e) => setAssignRolleId(e.target.value)}
                     required
-                    className="mt-1 block w-full p-2 border rounded-md"
+                    className="mt-1 block w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   >
                     <option value="">Rolle auswählen</option>
                     {rollen.map((r) => (
@@ -533,19 +533,19 @@ export const DatenproduktVerwaltung = () => {
                       value={neueRolleName}
                       onChange={(e) => setNeueRolleName(e.target.value)}
                       placeholder="Neue Rolle"
-                      className="flex-grow p-2 border rounded-md"
+                      className="flex-grow p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                     />
                     <button
                       type="button"
                       onClick={handleNeueRolleAnlegen}
-                      className="ml-2 px-3 py-2 bg-indigo-600 text-white rounded-md"
+                      className="ml-2 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md"
                     >
                       Hinzufügen
                     </button>
                   </div>
                 </div>
                 <div>
-                  <label htmlFor="assign-stunden" className="block text-sm">
+                  <label htmlFor="assign-stunden" className="block text-sm text-gray-700 dark:text-gray-300">
                     Stunden pro Woche
                   </label>
                   <input
@@ -557,21 +557,21 @@ export const DatenproduktVerwaltung = () => {
                     value={assignStunden}
                     onChange={(e) => setAssignStunden(e.target.value)}
                     placeholder="z.B. 20"
-                    className="mt-1 block w-full p-2 border rounded-md"
+                    className="mt-1 block w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   />
-                  <p className="mt-1 text-xs text-gray-500">Optional: Wochenstunden für diese Zuweisung</p>
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Optional: Wochenstunden für diese Zuweisung</p>
                 </div>
                 <div className="flex justify-end space-x-3 pt-3">
                   <button
                     type="button"
                     onClick={() => setSelectedProduktForAssignment(null)}
-                    className="px-4 py-2 border rounded-md"
+                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                   >
                     Abbrechen
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-green-600 text-white rounded-md"
+                    className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md"
                   >
                     Zuweisen
                   </button>
@@ -601,28 +601,28 @@ export const DatenproduktVerwaltung = () => {
         {/* Team Planner Modal */}
         {showTeamPlanner && (
           <div
-            className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-50 p-4"
+            className="fixed inset-0 bg-gray-800 bg-opacity-75 dark:bg-black dark:bg-opacity-75 flex justify-center items-center z-50 p-4"
             onClick={handleCloseTeamPlanner}
           >
             <div
-              className="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-y-auto p-6"
+              className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-y-auto p-6"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">
-                    {teamPlanerProdukt 
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {teamPlanerProdukt
                       ? `Team planen für "${teamPlanerProdukt.name}"`
                       : "Neues Team planen"
                     }
                   </h2>
-                  <p className="text-gray-600 mt-1">
+                  <p className="text-gray-600 dark:text-gray-400 mt-1">
                     Wähle die benötigten Rollen und Stunden aus, um Teamvorschläge zu erhalten
                   </p>
                 </div>
                 <button
                   onClick={handleCloseTeamPlanner}
-                  className="text-gray-400 hover:text-gray-600 text-2xl p-2 rounded-full hover:bg-gray-100 transition-colors"
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-2xl p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                   title="Schließen"
                 >
                   ×
@@ -643,10 +643,10 @@ export const DatenproduktVerwaltung = () => {
                 )}
 
                 {roleRequirements.length > 0 && (
-                  <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
+                  <div className="flex justify-end gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
                     <button
                       onClick={handleCloseTeamPlanner}
-                      className="px-6 py-3 text-gray-600 hover:text-gray-800 font-medium rounded-lg transition-colors"
+                      className="px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium rounded-lg transition-colors"
                     >
                       Abbrechen
                     </button>
@@ -667,22 +667,22 @@ export const DatenproduktVerwaltung = () => {
         {/* Team Save Dialog */}
         {showTeamSaveDialog && (
           <div
-            className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-60 p-4"
+            className="fixed inset-0 bg-gray-800 bg-opacity-75 dark:bg-black dark:bg-opacity-75 flex justify-center items-center z-60 p-4"
             onClick={handleCancelTeamSave}
           >
             <div
-              className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6"
+              className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md p-6"
               onClick={(e) => e.stopPropagation()}
             >
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                 Neues Team erstellen
               </h3>
-              <p className="text-gray-600 mb-4">
-                Gib einen Namen für das neue Datenprodukt ein. Das Team wird automatisch zugewiesen.
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                Gib einen Namen für das neue Team ein. Die Mitglieder werden automatisch zugewiesen.
               </p>
               <div className="mb-6">
-                <label htmlFor="team-name" className="block text-sm font-medium text-gray-700 mb-2">
-                  Datenprodukt-Name
+                <label htmlFor="team-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Team-Name
                 </label>
                 <input
                   id="team-name"
@@ -690,16 +690,16 @@ export const DatenproduktVerwaltung = () => {
                   value={newTeamName}
                   onChange={(e) => setNewTeamName(e.target.value)}
                   placeholder="z.B. Marketing Analytics Team"
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-green-500 focus:border-green-500"
                   autoFocus
                   required
                 />
               </div>
-              
+
               {recommendedTeam && (
-                <div className="mb-6 bg-gray-50 p-4 rounded-lg">
-                  <h4 className="font-medium text-gray-800 mb-2">Team-Übersicht</h4>
-                  <div className="text-sm text-gray-600 space-y-1">
+                <div className="mb-6 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                  <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-2">Team-Übersicht</h4>
+                  <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
                     {recommendedTeam.team.map((member, index) => (
                       <div key={index} className="flex justify-between">
                         <span>{member.personName}</span>
@@ -713,7 +713,7 @@ export const DatenproduktVerwaltung = () => {
               <div className="flex justify-end gap-3">
                 <button
                   onClick={handleCancelTeamSave}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium rounded-lg transition-colors"
+                  className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium rounded-lg transition-colors"
                 >
                   Abbrechen
                 </button>
@@ -770,33 +770,33 @@ const DatenproduktDetailsModal = ({
   // Status color helper
   const getStatusColor = (status) => {
     switch (status) {
-      case 'Live': return 'bg-green-100 text-green-700 border-green-200';
-      case 'In Entwicklung': return 'bg-blue-100 text-blue-700 border-blue-200';
-      case 'In Planung': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
-      case 'Archiviert': return 'bg-gray-100 text-gray-700 border-gray-200';
-      case 'On Hold / Pausiert': return 'bg-red-100 text-red-700 border-red-200';
-      default: return 'bg-gray-100 text-gray-700 border-gray-200';
+      case 'Live': return 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800';
+      case 'In Entwicklung': return 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800';
+      case 'In Planung': return 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800';
+      case 'Archiviert': return 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600';
+      case 'On Hold / Pausiert': return 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800';
+      default: return 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600';
     }
   };
 
   return (
     <div
-      className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-50 p-4"
+      className="fixed inset-0 bg-gray-800 bg-opacity-75 dark:bg-black dark:bg-opacity-75 flex justify-center items-center z-50 p-4"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+        className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-4">
           {/* Header */}
           <div className="flex items-start justify-between mb-4">
             <div className="flex-1 min-w-0">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                 {datenprodukt.name}
               </h2>
               {datenprodukt.beschreibung && (
-                <p className="text-gray-600 mb-3">
+                <p className="text-gray-600 dark:text-gray-400 mb-3">
                   {datenprodukt.beschreibung}
                 </p>
               )}
@@ -805,7 +805,7 @@ const DatenproduktDetailsModal = ({
                   {datenprodukt.status}
                 </span>
                 {datenprodukt.notizen && (
-                  <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-ard-blue-100 text-ard-blue-700">
+                  <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-ard-blue-100 dark:bg-ard-blue-900/40 text-ard-blue-700 dark:text-ard-blue-300">
                     📝 Hat Notizen
                   </span>
                 )}
@@ -813,7 +813,7 @@ const DatenproduktDetailsModal = ({
             </div>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors ml-4 flex-shrink-0"
+              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors ml-4 flex-shrink-0"
             >
               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -824,13 +824,13 @@ const DatenproduktDetailsModal = ({
           {/* Team Management Section */}
           <div className="mb-4">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-base font-semibold text-gray-700">Team-Management</h3>
+              <h3 className="text-base font-semibold text-gray-700 dark:text-gray-300">Team-Management</h3>
               <div className="flex gap-2">
                 <button
                   onClick={() => {
                     copyTeamEmailsToClipboard(datenprodukt);
                   }}
-                  className="inline-flex items-center px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                  className="inline-flex items-center px-3 py-1.5 text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
                   title="E-Mail-Adressen kopieren"
                   disabled={teamZuordnungen.length === 0}
                 >
@@ -854,15 +854,15 @@ const DatenproduktDetailsModal = ({
                 {teamZuordnungen.map((zuordnung) => (
                   <div
                     key={zuordnung.id}
-                    className="py-3 px-1 flex items-center justify-between border-b border-gray-100 last:border-b-0"
+                    className="py-3 px-1 flex items-center justify-between border-b border-gray-100 dark:border-gray-700 last:border-b-0"
                   >
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium text-gray-900 text-sm">
+                        <span className="font-medium text-gray-900 dark:text-gray-100 text-sm">
                           {getPersonName(zuordnung.personId)}
                         </span>
-                        <span className="text-gray-600 text-xs">als</span>
-                        <span 
+                        <span className="text-gray-600 dark:text-gray-400 text-xs">als</span>
+                        <span
                           className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium text-white"
                           style={{ backgroundColor: getRoleColor(zuordnung.rolleId) }}
                         >
@@ -878,7 +878,7 @@ const DatenproduktDetailsModal = ({
                         onClick={() => {
                           handleEditAssignment(zuordnung);
                         }}
-                        className="text-ard-blue-500 hover:text-ard-blue-700 p-1.5 hover:bg-ard-blue-50 rounded-md transition-colors"
+                        className="text-ard-blue-500 dark:text-ard-blue-400 hover:text-ard-blue-700 dark:hover:text-ard-blue-300 p-1.5 hover:bg-ard-blue-50 dark:hover:bg-ard-blue-900/30 rounded-md transition-colors"
                         title="Bearbeiten"
                       >
                         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -889,7 +889,7 @@ const DatenproduktDetailsModal = ({
                         onClick={() => {
                           entfernePersonVonDatenproduktRolle(zuordnung.id);
                         }}
-                        className="text-red-500 hover:text-red-700 p-1.5 hover:bg-red-50 rounded-md transition-colors"
+                        className="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 p-1.5 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-md transition-colors"
                         title="Zuweisung entfernen"
                       >
                         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -901,10 +901,10 @@ const DatenproduktDetailsModal = ({
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
                 <div className="text-4xl mb-2">👥</div>
                 <p className="font-medium">Kein Team zugewiesen</p>
-                <p className="text-sm mt-1">Füge Personen zu diesem Datenprodukt hinzu</p>
+                <p className="text-sm mt-1">Füge Personen zu diesem Team hinzu</p>
               </div>
             )}
           </div>
@@ -912,24 +912,24 @@ const DatenproduktDetailsModal = ({
           {/* Notes Section */}
           {datenprodukt.notizen && (
             <div className="mb-4">
-              <h3 className="text-base font-semibold text-gray-700 mb-2">Notizen</h3>
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-                <p className="text-gray-700 text-sm whitespace-pre-wrap">{datenprodukt.notizen}</p>
+              <h3 className="text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">Notizen</h3>
+              <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
+                <p className="text-gray-700 dark:text-gray-300 text-sm whitespace-pre-wrap">{datenprodukt.notizen}</p>
               </div>
             </div>
           )}
 
           {/* Action Buttons */}
-          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
             <button
               onClick={() => {
                 onShowNotes(datenprodukt);
                 onClose();
               }}
               className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-                datenprodukt.notizen 
-                  ? "bg-ard-blue-500 text-white hover:bg-ard-blue-600" 
-                  : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
+                datenprodukt.notizen
+                  ? "bg-ard-blue-500 text-white hover:bg-ard-blue-600"
+                  : "text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
               }`}
             >
               {datenprodukt.notizen ? "Notizen bearbeiten" : "Notizen hinzufügen"}
@@ -939,7 +939,7 @@ const DatenproduktDetailsModal = ({
                 onEdit(datenprodukt);
                 onClose();
               }}
-              className="px-4 py-2 text-ard-blue-600 hover:text-ard-blue-700 hover:bg-ard-blue-50 font-medium rounded-lg transition-all duration-200"
+              className="px-4 py-2 text-ard-blue-600 dark:text-ard-blue-400 hover:text-ard-blue-700 dark:hover:text-ard-blue-300 hover:bg-ard-blue-50 dark:hover:bg-ard-blue-900/30 font-medium rounded-lg transition-all duration-200"
             >
               Bearbeiten
             </button>
@@ -948,7 +948,7 @@ const DatenproduktDetailsModal = ({
                 onDelete(datenprodukt);
                 onClose();
               }}
-              className="px-4 py-2 text-red-500 hover:text-red-600 hover:bg-red-50 font-medium rounded-lg transition-all duration-200"
+              className="px-4 py-2 text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/30 font-medium rounded-lg transition-all duration-200"
             >
               Löschen
             </button>
@@ -959,10 +959,12 @@ const DatenproduktDetailsModal = ({
   );
 };
 
-const DatenproduktKarte = ({ 
-  dp, 
-  zuordnungen, 
-  getPersonName, 
+const DatenproduktKarte = ({
+  dp,
+  zuordnungen,
+  getPersonName,
+  getRolleName,
+  getRoleColor,
   copyTeamEmailsToClipboard,
   setSelectedProduktForAssignment,
   setAssignmentError,
@@ -970,113 +972,204 @@ const DatenproduktKarte = ({
   onShowDetails
 }) => {
   const teamZuordnungen = zuordnungen.filter((z) => z.datenproduktId === dp.id);
-  
-  // Status color helper for compact view
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'Live': return 'bg-green-100 text-green-700 border-green-200';
-      case 'In Entwicklung': return 'bg-blue-100 text-blue-700 border-blue-200';
-      case 'In Planung': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
-      case 'Archiviert': return 'bg-gray-100 text-gray-700 border-gray-200';
-      case 'On Hold / Pausiert': return 'bg-red-100 text-red-700 border-red-200';
-      default: return 'bg-gray-100 text-gray-700 border-gray-200';
-    }
-  };
 
-  const getStatusDotColor = (status) => {
-    switch (status) {
-      case 'Live': return 'bg-green-500';
-      case 'In Entwicklung': return 'bg-blue-500';
-      case 'In Planung': return 'bg-yellow-500';
-      case 'Archiviert': return 'bg-gray-500';
-      case 'On Hold / Pausiert': return 'bg-red-500';
-      default: return 'bg-gray-500';
-    }
+  // Calculate team hours
+  const totalHours = teamZuordnungen.reduce((sum, z) => sum + (z.stunden || 0), 0);
+
+  // Staffing risk
+  const uniquePersons = new Set(teamZuordnungen.map(z => z.personId)).size;
+  const risk = uniquePersons === 0 ? 'critical' : uniquePersons === 1 ? 'high' : uniquePersons === 2 ? 'medium' : 'ok';
+
+  const getRiskBadge = () => {
+    const styles = {
+      critical: 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300',
+      high: 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300',
+      medium: 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300',
+      ok: ''
+    };
+    const labels = {
+      critical: 'Kein Team',
+      high: '1 Person',
+      medium: '2 Personen',
+      ok: null
+    };
+    if (!labels[risk]) return null;
+    return (
+      <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${styles[risk]}`}>
+        {labels[risk]}
+      </span>
+    );
   };
 
   return (
-    <div 
-      className="bg-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg border border-gray-200 hover:border-gray-300 overflow-hidden cursor-pointer"
+    <div
+      className="dashboard-card cursor-pointer group"
       onClick={() => onShowDetails(dp)}
     >
-      <div className="p-4">
-        {/* Name - Header */}
-        <div className="mb-3">
-          <h3 className="font-semibold text-gray-900 text-lg mb-1">{dp.name}</h3>
-          {dp.beschreibung && (
-            <p className="text-sm text-gray-600 line-clamp-2">
-              {dp.beschreibung}
-            </p>
+      <div className="flex-1 min-w-0">
+        {/* Name Row */}
+        <div className="flex items-center gap-2 mb-1">
+          <h3 className="font-semibold text-gray-900 dark:text-white truncate group-hover:text-accent-600 dark:group-hover:text-accent-400 transition-colors">
+            {dp.name}
+          </h3>
+          {dp.notizen && (
+            <span className="text-xs text-ard-blue-600 dark:text-ard-blue-400">📝</span>
           )}
         </div>
 
-        {/* Status and Quick Actions */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <div className={`w-2.5 h-2.5 rounded-full ${getStatusDotColor(dp.status)}`}></div>
-            <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold border ${getStatusColor(dp.status)}`}>
-              {dp.status}
+        {/* Description */}
+        {dp.beschreibung && (
+          <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mb-2">
+            {dp.beschreibung}
+          </p>
+        )}
+
+        {/* Badges */}
+        <div className="flex flex-wrap items-center gap-1.5 mb-3">
+          {getRiskBadge()}
+          {totalHours > 0 && (
+            <span className="dashboard-badge bg-ard-blue-100 dark:bg-ard-blue-900/40 text-ard-blue-700 dark:text-ard-blue-300">
+              {totalHours}h/Woche
             </span>
-            {dp.notizen && (
-              <span className="text-xs text-ard-blue-600">📝</span>
-            )}
-          </div>
-          
-          {/* Quick action buttons */}
-          <div className="flex items-center gap-1">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                copyTeamEmailsToClipboard(dp);
-              }}
-              className="inline-flex items-center justify-center w-7 h-7 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-              title="E-Mail-Adressen kopieren"
-              disabled={teamZuordnungen.length === 0}
-            >
-              <span className="text-sm">📧</span>
-            </button>
-            
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setSelectedProduktForAssignment(dp);
-                setAssignmentError("");
-              }}
-              className="inline-flex items-center justify-center w-7 h-7 text-green-600 hover:bg-green-50 rounded-md transition-colors"
-              title="Team zuweisen"
-            >
-              <span className="text-sm">👥</span>
-            </button>
-          </div>
+          )}
         </div>
 
-        {/* Team Summary */}
+        {/* Team Preview */}
         {teamZuordnungen.length > 0 ? (
-          <div className="text-xs text-gray-500">
-            <span className="font-medium">Team ({teamZuordnungen.length}):</span>{' '}
-            {teamZuordnungen.slice(0, 3).map(z => getPersonName(z.personId)).join(', ')}
-            {teamZuordnungen.length > 3 && ` +${teamZuordnungen.length - 3} weitere`}
+          <div className="space-y-1.5">
+            {teamZuordnungen.slice(0, 3).map((z) => (
+              <div key={z.id} className="flex items-center gap-2 text-xs">
+                <span className="text-gray-700 dark:text-gray-300 font-medium truncate">
+                  {getPersonName(z.personId)}
+                </span>
+                <span
+                  className="px-1.5 py-0.5 rounded text-[10px] font-medium text-white flex-shrink-0"
+                  style={{ backgroundColor: getRoleColor(z.rolleId) }}
+                >
+                  {getRolleName(z.rolleId)}
+                </span>
+              </div>
+            ))}
+            {teamZuordnungen.length > 3 && (
+              <span className="text-[10px] text-gray-400 dark:text-gray-500">
+                +{teamZuordnungen.length - 3} weitere
+              </span>
+            )}
           </div>
         ) : (
-          <div className="text-xs text-gray-400 italic">
+          <div className="text-xs text-gray-400 dark:text-gray-500 italic">
             Kein Team zugewiesen
           </div>
         )}
+
+        {/* Quick Links */}
+        <div className="flex items-center gap-3 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              copyTeamEmailsToClipboard(dp);
+            }}
+            className="text-[10px] text-gray-400 dark:text-gray-500 hover:text-accent-600 dark:hover:text-accent-400 transition-colors"
+            disabled={teamZuordnungen.length === 0}
+          >
+            E-Mails kopieren
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedProduktForAssignment(dp);
+              setAssignmentError("");
+            }}
+            className="text-[10px] text-gray-400 dark:text-gray-500 hover:text-accent-600 dark:hover:text-accent-400 transition-colors"
+          >
+            Team verwalten
+          </button>
+        </div>
       </div>
     </div>
   );
 };
 
+// Status-Konfiguration (wie kreisConfig in PersonenVerwaltung)
+const statusConfig = {
+  'Live': { color: 'from-emerald-500 to-emerald-600', bgColor: 'bg-emerald-50 dark:bg-emerald-900/30', textColor: 'text-emerald-700 dark:text-emerald-300' },
+  'In Entwicklung': { color: 'from-blue-500 to-blue-600', bgColor: 'bg-blue-50 dark:bg-blue-900/30', textColor: 'text-blue-700 dark:text-blue-300' },
+  'In Planung': { color: 'from-amber-500 to-amber-600', bgColor: 'bg-amber-50 dark:bg-amber-900/30', textColor: 'text-amber-700 dark:text-amber-300' },
+  'On Hold / Pausiert': { color: 'from-red-500 to-red-600', bgColor: 'bg-red-50 dark:bg-red-900/30', textColor: 'text-red-700 dark:text-red-300' },
+  'Archiviert': { color: 'from-gray-400 to-gray-500', bgColor: 'bg-gray-50 dark:bg-gray-700', textColor: 'text-gray-600 dark:text-gray-400' },
+};
+
+// Sortier-Optionen
+const sortOptions = [
+  { value: 'name', label: 'Name', icon: '🔤' },
+  { value: 'teamSize', label: 'Teamgröße', icon: '👥' },
+  { value: 'hours', label: 'Stunden', icon: '⏱️' },
+  { value: 'risk', label: 'Risiko', icon: '⚠️' },
+];
+
 const DatenproduktListe = ({
   datenprodukte,
   zuordnungen,
   getPersonName,
+  getRolleName,
+  getRoleColor,
   copyTeamEmailsToClipboard,
   setSelectedProduktForAssignment,
   setAssignmentError,
   copySuccess,
   onShowDetails
 }) => {
+  const [sortBy, setSortBy] = useState('name');
+  const [showSortDropdown, setShowSortDropdown] = useState(false);
+  const [collapsedStatus, setCollapsedStatus] = useState({});
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showSortDropdown && !event.target.closest(".sort-dropdown")) {
+        setShowSortDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showSortDropdown]);
+
+  const toggleStatus = (status) => {
+    setCollapsedStatus(prev => ({ ...prev, [status]: !prev[status] }));
+  };
+
+  // Calculate metrics for sorting
+  const getTeamSize = (dp) => {
+    return new Set(zuordnungen.filter(z => z.datenproduktId === dp.id).map(z => z.personId)).size;
+  };
+
+  const getTotalHours = (dp) => {
+    return zuordnungen.filter(z => z.datenproduktId === dp.id).reduce((sum, z) => sum + (z.stunden || 0), 0);
+  };
+
+  const getRisk = (dp) => {
+    const size = getTeamSize(dp);
+    if (size === 0) return 0; // critical
+    if (size === 1) return 1; // high
+    if (size === 2) return 2; // medium
+    return 3; // ok
+  };
+
+  // Sort function
+  const getSortedProdukte = (produkte) => {
+    switch (sortBy) {
+      case 'teamSize':
+        return [...produkte].sort((a, b) => getTeamSize(b) - getTeamSize(a));
+      case 'hours':
+        return [...produkte].sort((a, b) => getTotalHours(b) - getTotalHours(a));
+      case 'risk':
+        return [...produkte].sort((a, b) => getRisk(a) - getRisk(b));
+      default:
+        return [...produkte].sort((a, b) => a.name.localeCompare(b.name, 'de'));
+    }
+  };
+
   // Group data products by status
   const groupedProdukte = datenprodukte.reduce((groups, dp) => {
     const status = dp.status || 'Unbekannt';
@@ -1087,6 +1180,11 @@ const DatenproduktListe = ({
     return groups;
   }, {});
 
+  // Sort products within each group
+  Object.keys(groupedProdukte).forEach((status) => {
+    groupedProdukte[status] = getSortedProdukte(groupedProdukte[status]);
+  });
+
   // Sort status groups by priority
   const statusOrder = ['Live', 'In Entwicklung', 'In Planung', 'On Hold / Pausiert', 'Archiviert'];
   const sortedStatus = Object.keys(groupedProdukte).sort((a, b) => {
@@ -1095,48 +1193,122 @@ const DatenproduktListe = ({
     return indexA - indexB;
   });
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'Live': return 'text-green-700 bg-green-100 border-green-200';
-      case 'In Entwicklung': return 'text-blue-700 bg-blue-100 border-blue-200';
-      case 'In Planung': return 'text-yellow-700 bg-yellow-100 border-yellow-200';
-      case 'Archiviert': return 'text-gray-700 bg-gray-100 border-gray-200';
-      case 'On Hold / Pausiert': return 'text-red-700 bg-red-100 border-red-200';
-      default: return 'text-gray-700 bg-gray-100 border-gray-200';
-    }
-  };
+  const currentSortOption = sortOptions.find(o => o.value === sortBy);
 
   return (
-    <div className="space-y-8">
-      {sortedStatus.map((status) => (
-        <div key={status} className="space-y-4">
-          {/* Status Header */}
-          <div className="flex items-center gap-3">
-            <h2 className="text-xl font-bold text-gray-900">{status}</h2>
-            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-sm font-medium border ${getStatusColor(status)}`}>
-              {groupedProdukte[status].length} Produkt{groupedProdukte[status].length !== 1 ? 'e' : ''}
-            </span>
-            <div className="flex-1 h-px bg-gray-200"></div>
-          </div>
-          
-          {/* Data Products Grid for this status */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
-            {groupedProdukte[status].map((dp) => (
-              <DatenproduktKarte
-                key={dp.id}
-                dp={dp}
-                zuordnungen={zuordnungen}
-                getPersonName={getPersonName}
-                copyTeamEmailsToClipboard={copyTeamEmailsToClipboard}
-                setSelectedProduktForAssignment={setSelectedProduktForAssignment}
-                setAssignmentError={setAssignmentError}
-                copySuccess={copySuccess}
-                onShowDetails={onShowDetails}
-              />
-            ))}
-          </div>
+    <div className="space-y-6">
+      {/* Globale Sortierung */}
+      <div className="flex items-center justify-between mb-2">
+        <div className="text-sm text-gray-500 dark:text-gray-400">
+          {datenprodukte.length} Team{datenprodukte.length !== 1 ? 's' : ''} in {sortedStatus.length} Status-Gruppe{sortedStatus.length !== 1 ? 'n' : ''}
         </div>
-      ))}
+
+        {/* Sortier-Dropdown */}
+        <div className="relative sort-dropdown">
+          <button
+            onClick={() => setShowSortDropdown(!showSortDropdown)}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
+                       hover:border-accent-300 dark:hover:border-accent-600 rounded-xl shadow-sm transition-all duration-200"
+          >
+            <span className="text-base">{currentSortOption?.icon}</span>
+            <span className="text-gray-700 dark:text-gray-300">{currentSortOption?.label}</span>
+            <svg
+              className={`w-4 h-4 text-gray-400 transition-transform ${showSortDropdown ? "rotate-180" : ""}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          {showSortDropdown && (
+            <div className="absolute top-full right-0 mt-2 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 py-2 z-20 min-w-[180px]">
+              {sortOptions.map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => {
+                    setSortBy(option.value);
+                    setShowSortDropdown(false);
+                  }}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
+                    sortBy === option.value
+                      ? "bg-accent-50 dark:bg-accent-900/30 text-accent-700 dark:text-accent-300"
+                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  }`}
+                >
+                  <span className="text-base">{option.icon}</span>
+                  <span className="font-medium">{option.label}</span>
+                  {sortBy === option.value && (
+                    <span className="ml-auto text-accent-600 dark:text-accent-400">✓</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Status-Gruppen */}
+      {sortedStatus.map((status) => {
+        const config = statusConfig[status] || statusConfig['Archiviert'];
+        const isCollapsed = collapsedStatus[status];
+        const produkte = groupedProdukte[status];
+
+        return (
+          <div key={status} className="space-y-4">
+            {/* Status Header - Einklappbar */}
+            <button
+              onClick={() => toggleStatus(status)}
+              className="w-full flex items-center gap-3 group"
+            >
+              {/* Farbbalken */}
+              <div className={`w-1 h-8 rounded-full bg-gradient-to-b ${config.color} flex-shrink-0`} />
+
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white group-hover:text-accent-600 dark:group-hover:text-accent-400 transition-colors">
+                {status}
+              </h2>
+
+              <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${config.bgColor} ${config.textColor}`}>
+                {produkte.length} Team{produkte.length !== 1 ? 's' : ''}
+              </span>
+
+              <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+
+              {/* Chevron */}
+              <svg
+                className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${isCollapsed ? "" : "rotate-180"}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            {/* Data Products Grid */}
+            {!isCollapsed && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {produkte.map((dp) => (
+                  <DatenproduktKarte
+                    key={dp.id}
+                    dp={dp}
+                    zuordnungen={zuordnungen}
+                    getPersonName={getPersonName}
+                    getRolleName={getRolleName}
+                    getRoleColor={getRoleColor}
+                    copyTeamEmailsToClipboard={copyTeamEmailsToClipboard}
+                    setSelectedProduktForAssignment={setSelectedProduktForAssignment}
+                    setAssignmentError={setAssignmentError}
+                    copySuccess={copySuccess}
+                    onShowDetails={onShowDetails}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 };
@@ -1148,15 +1320,15 @@ const EditAssignmentModal = ({ assignment, rollen, onSave, onClose, getPersonNam
   const handleSubmit = (e) => {
     e.preventDefault();
     const updates = {};
-    
+
     if (Number(stunden) !== (assignment.stunden || 0)) {
       updates.stunden = stunden;
     }
-    
+
     if (rolleId !== assignment.rolleId) {
       updates.rolleId = rolleId;
     }
-    
+
     if (Object.keys(updates).length > 0) {
       onSave(updates);
     } else {
@@ -1166,22 +1338,22 @@ const EditAssignmentModal = ({ assignment, rollen, onSave, onClose, getPersonNam
 
   return (
     <div
-      className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-50 p-4"
+      className="fixed inset-0 bg-gray-800 bg-opacity-75 dark:bg-black dark:bg-opacity-75 flex justify-center items-center z-50 p-4"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-lg shadow-xl w-full max-w-md p-6"
+        className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md p-6"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="text-xl font-semibold mb-4">Zuordnung bearbeiten</h3>
-        <div className="mb-4 p-3 bg-gray-50 rounded-md">
-          <p className="text-sm">
+        <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Zuordnung bearbeiten</h3>
+        <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-md">
+          <p className="text-sm text-gray-900 dark:text-gray-100">
             <strong>{getPersonName(assignment.personId)}</strong>
           </p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="edit-rolle" className="block text-sm font-medium">
+            <label htmlFor="edit-rolle" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Rolle
             </label>
             <select
@@ -1189,7 +1361,7 @@ const EditAssignmentModal = ({ assignment, rollen, onSave, onClose, getPersonNam
               value={rolleId}
               onChange={(e) => setRolleId(e.target.value)}
               required
-              className="mt-1 block w-full p-2 border rounded-md"
+              className="mt-1 block w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             >
               <option value="">Rolle auswählen</option>
               {rollen.map((r) => (
@@ -1200,7 +1372,7 @@ const EditAssignmentModal = ({ assignment, rollen, onSave, onClose, getPersonNam
             </select>
           </div>
           <div>
-            <label htmlFor="edit-stunden" className="block text-sm font-medium">
+            <label htmlFor="edit-stunden" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Stunden pro Woche
             </label>
             <input
@@ -1211,21 +1383,21 @@ const EditAssignmentModal = ({ assignment, rollen, onSave, onClose, getPersonNam
               step="0.5"
               value={stunden}
               onChange={(e) => setStunden(e.target.value)}
-              className="mt-1 block w-full p-2 border rounded-md"
+              className="mt-1 block w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             />
-            <p className="mt-1 text-xs text-gray-500">Optional: Wochenstunden für diese Zuweisung</p>
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Optional: Wochenstunden für diese Zuweisung</p>
           </div>
           <div className="flex justify-end space-x-3 pt-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border rounded-md"
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
             >
               Abbrechen
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 rounded-md"
+              className="px-4 py-2 bg-ard-blue-600 hover:bg-ard-blue-700 text-white rounded-md"
             >
               Speichern
             </button>

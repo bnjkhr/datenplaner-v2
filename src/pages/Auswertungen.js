@@ -35,15 +35,18 @@ export const Auswertungen = () => {
 
   if (loading)
     return (
-      <div className="flex justify-center py-10">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ard-blue-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-ard-blue-50/30 dark:from-gray-900 dark:to-gray-800 flex justify-center items-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent-400 to-purple-accent-500 animate-pulse" />
+          <p className="text-gray-500 dark:text-gray-400 text-sm">Lade Auswertungen...</p>
+        </div>
       </div>
     );
   if (error)
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-ard-blue-50/30">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-ard-blue-50/30 dark:from-gray-900 dark:to-gray-800">
         <div className="container mx-auto px-6 py-8">
-          <div className="bg-gradient-to-r from-red-50 to-red-100 border border-red-200 text-red-800 px-6 py-4 rounded-xl" role="alert">
+          <div className="bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-800/30 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-300 px-6 py-4 rounded-xl" role="alert">
             Fehler beim Laden der Daten: {error}
           </div>
         </div>
@@ -473,8 +476,8 @@ export const Auswertungen = () => {
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white p-2 border border-gray-300 rounded shadow">
-          <p className="text-sm font-medium">{`${label}`}</p>
+        <div className="bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg">
+          <p className="text-sm font-semibold text-gray-900 dark:text-white mb-1">{`${label}`}</p>
           {payload.map((pld, index) => (
             <p key={index} className="text-sm" style={{ color: pld.color }}>
               {`${pld.dataKey}: ${pld.value}`}
@@ -487,16 +490,16 @@ export const Auswertungen = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-ard-blue-50/30">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-ard-blue-50/30 dark:from-gray-900 dark:to-gray-800">
       <div className="container mx-auto px-6 py-8">
         <div className="flex flex-wrap justify-between items-center mb-8 gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Auswertungen</h1>
-            <p className="text-gray-600">Analysiere deine Teams und Datenprodukte</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Auswertungen</h1>
+            <p className="text-gray-600 dark:text-gray-400">Analysiere deine Teams und Zuordnungen</p>
           </div>
           <button
             onClick={handleExportToExcel}
-            className="w-12 h-12 bg-yellow-500 hover:bg-white hover:text-yellow-600 hover:border-2 hover:border-yellow-500 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center flex-shrink-0"
+            className="w-14 h-14 bg-emerald-600 hover:bg-white dark:hover:bg-gray-800 text-white hover:text-emerald-600 border-2 border-emerald-600 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center flex-shrink-0"
             title="Excel-Export"
           >
             <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
@@ -509,8 +512,8 @@ export const Auswertungen = () => {
 
           {/* NEU: Organisationsübersicht als Kreisvisualisierung */}
           <CollapsibleSection title="Organisationsübersicht" defaultOpen={true}>
-            <div className="bg-white rounded-xl p-6 shadow-sm">
-              <p className="text-sm text-gray-600 mb-4">
+            <div className="dashboard-card-no-hover">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                 Visualisierung der Organisationsstruktur mit allen Personen in ihren zugeordneten Kreisen
               </p>
               <CirclePackVisualization
@@ -527,47 +530,47 @@ export const Auswertungen = () => {
           {/* NEU: Kompakte Auslastungsübersicht */}
           <CollapsibleSection title="Auslastungsübersicht" defaultOpen={false}>
             {/* Filter Controls */}
-            <div className="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
-              <h3 className="text-sm font-semibold text-gray-700 mb-3">Filter</h3>
+            <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700">
+              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Filter</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-                
+
                 {/* Kreis Filter */}
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Kreis</label>
+                  <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Kreis</label>
                   <select
                     value={selectedKategorie}
                     onChange={(e) => setSelectedKategorie(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-ard-blue-500 focus:border-ard-blue-500"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-ard-blue-500 focus:border-ard-blue-500"
                   >
                     <option value="alle">Alle</option>
-                    <option value="Plattform">🏗️ Plattform</option>
-                    <option value="Datenprodukt">📊 Datenprodukt</option>
-                    <option value="Governance">⚖️ Governance</option>
-                    <option value="Ohne Kategorie">❓ Ohne Kreis</option>
+                    <option value="Plattform">Plattform</option>
+                    <option value="Datenprodukt">Datenprodukt</option>
+                    <option value="Governance">Governance</option>
+                    <option value="Ohne Kategorie">Ohne Kreis</option>
                   </select>
                 </div>
 
                 {/* M13 Filter */}
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">M13 Status</label>
+                  <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">M13 Status</label>
                   <select
                     value={filterM13}
                     onChange={(e) => setFilterM13(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-ard-blue-500 focus:border-ard-blue-500"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-ard-blue-500 focus:border-ard-blue-500"
                   >
                     <option value="alle">Alle</option>
-                    <option value="m13">✅ Nur M13</option>
-                    <option value="nicht-m13">❌ Nicht M13</option>
+                    <option value="m13">Nur M13</option>
+                    <option value="nicht-m13">Nicht M13</option>
                   </select>
                 </div>
-                
+
                 {/* Auslastung Filter */}
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Auslastung</label>
+                  <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Auslastung</label>
                   <select
                     value={filterAuslastung}
                     onChange={(e) => setFilterAuslastung(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-ard-blue-500 focus:border-ard-blue-500"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-ard-blue-500 focus:border-ard-blue-500"
                   >
                     <option value="alle">Alle</option>
                     <option value="hoch">Hoch (&gt;100%)</option>
@@ -578,11 +581,11 @@ export const Auswertungen = () => {
 
                 {/* Skill Filter */}
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Skill</label>
+                  <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Skill</label>
                   <select
                     value={filterSkill}
                     onChange={(e) => setFilterSkill(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-ard-blue-500 focus:border-ard-blue-500"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-ard-blue-500 focus:border-ard-blue-500"
                   >
                     <option value="">Alle Skills</option>
                     {skills.map(skill => (
@@ -591,15 +594,15 @@ export const Auswertungen = () => {
                   </select>
                 </div>
 
-                {/* Datenprodukt Filter */}
+                {/* Team Filter */}
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Datenprodukt</label>
+                  <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Team</label>
                   <select
                     value={filterDatenprodukt}
                     onChange={(e) => setFilterDatenprodukt(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-ard-blue-500 focus:border-ard-blue-500"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-ard-blue-500 focus:border-ard-blue-500"
                   >
-                    <option value="">Alle Datenprodukte</option>
+                    <option value="">Alle Teams</option>
                     {datenprodukte.map(dp => (
                       <option key={dp.id} value={dp.id}>{dp.name}</option>
                     ))}
@@ -608,11 +611,11 @@ export const Auswertungen = () => {
 
                 {/* Rolle Filter */}
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Rolle</label>
+                  <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Rolle</label>
                   <select
                     value={filterRolle}
                     onChange={(e) => setFilterRolle(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-ard-blue-500 focus:border-ard-blue-500"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-ard-blue-500 focus:border-ard-blue-500"
                   >
                     <option value="">Alle Rollen</option>
                     {rollen.map(rolle => (
@@ -622,7 +625,7 @@ export const Auswertungen = () => {
                 </div>
 
               </div>
-              
+
               {/* Clear filters button */}
               {(selectedKategorie !== "alle" || filterM13 !== "alle" || filterAuslastung !== "alle" || filterSkill || filterDatenprodukt || filterRolle) && (
                 <button
@@ -634,21 +637,21 @@ export const Auswertungen = () => {
                     setFilterDatenprodukt("");
                     setFilterRolle("");
                   }}
-                  className="mt-3 px-3 py-1.5 text-xs text-gray-600 hover:text-gray-800 hover:bg-gray-200 rounded-lg transition-colors"
+                  className="mt-3 px-3 py-1.5 text-xs text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
                 >
                   Filter zurücksetzen
                 </button>
               )}
             </div>
 
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
               Sortiert nach Auslastung (hoch → niedrig) • {filteredWorkloadData.length} von {selectedKategorie === "alle" ? workloadData.length : (groupedWorkloadData[selectedKategorie] || []).length} M13-Personen
               {selectedKategorie !== "alle" && (
-                <span className="ml-2 px-2 py-1 bg-ard-blue-100 text-ard-blue-700 rounded-md text-xs font-medium">
-                  {selectedKategorie === "Plattform" ? "🏗️ Plattform" :
-                   selectedKategorie === "Datenprodukt" ? "📊 Datenprodukt" :
-                   selectedKategorie === "Governance" ? "⚖️ Governance" :
-                   selectedKategorie === "Ohne Kategorie" ? "❓ Ohne Kreis" : selectedKategorie}
+                <span className="ml-2 px-2 py-1 bg-ard-blue-100 dark:bg-ard-blue-900/40 text-ard-blue-700 dark:text-ard-blue-300 rounded-md text-xs font-medium">
+                  {selectedKategorie === "Plattform" ? "Plattform" :
+                   selectedKategorie === "Datenprodukt" ? "Datenprodukt" :
+                   selectedKategorie === "Governance" ? "Governance" :
+                   selectedKategorie === "Ohne Kategorie" ? "Ohne Kreis" : selectedKategorie}
                 </span>
               )}
             </p>
@@ -656,54 +659,54 @@ export const Auswertungen = () => {
             {filteredWorkloadData.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {filteredWorkloadData.map((person, index) => (
-                    <div 
+                    <div
                       key={`${person.id}-${selectedKategorie}-${index}`}
                       className={`p-4 rounded-xl border-2 transition-all hover:shadow-md ${
-                        person.status === 'overbooked' 
-                          ? 'bg-gradient-to-br from-orange-50 to-red-50 border-orange-200' 
+                        person.status === 'overbooked'
+                          ? 'bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 border-orange-200 dark:border-orange-800'
                           : person.status === 'underbooked'
-                            ? 'bg-gradient-to-br from-red-50 to-red-100 border-red-200'
-                            : 'bg-gradient-to-br from-green-50 to-emerald-50 border-emerald-200'
+                            ? 'bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-900/30 border-red-200 dark:border-red-800'
+                            : 'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-emerald-900/20 dark:to-emerald-900/30 border-emerald-200 dark:border-emerald-800'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2 flex-1 min-w-0">
-                          <h3 className="font-semibold text-gray-900 text-sm truncate">{person.name}</h3>
+                          <h3 className="font-semibold text-gray-900 dark:text-white text-sm truncate">{person.name}</h3>
                           {person.isM13 && (
-                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700 border border-green-200 flex-shrink-0">
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800 flex-shrink-0">
                               M13
                             </span>
                           )}
                         </div>
-                        <span 
+                        <span
                           className={`text-xs font-bold px-2 py-1 rounded-full flex-shrink-0 ${
-                            person.status === 'overbooked' 
-                              ? 'bg-orange-200 text-orange-800' 
+                            person.status === 'overbooked'
+                              ? 'bg-orange-200 dark:bg-orange-900/50 text-orange-800 dark:text-orange-300'
                               : person.status === 'underbooked'
-                                ? 'bg-red-200 text-red-800'
-                                : 'bg-emerald-200 text-emerald-800'
+                                ? 'bg-red-200 dark:bg-red-900/50 text-red-800 dark:text-red-300'
+                                : 'bg-emerald-200 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300'
                           }`}
                         >
                           {person.auslastung}%
                         </span>
                       </div>
-                      
+
                       <div className="space-y-2">
-                        <div className="flex justify-between text-xs text-gray-600">
+                        <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400">
                           <span>Gebucht:</span>
                           <span className="font-medium">{person.gebuchteStunden}h</span>
                         </div>
-                        <div className="flex justify-between text-xs text-gray-600">
+                        <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400">
                           <span>Verfügbar:</span>
                           <span className="font-medium">{person.verfügbareStunden}h</span>
                         </div>
-                        
+
                         {/* Progress Bar */}
-                        <div className="w-full bg-white/60 rounded-full h-2 overflow-hidden">
-                          <div 
+                        <div className="w-full bg-white/60 dark:bg-gray-700/60 rounded-full h-2 overflow-hidden">
+                          <div
                             className={`h-full rounded-full transition-all duration-500 ${
-                              person.status === 'overbooked' 
-                                ? 'bg-gradient-to-r from-orange-400 to-red-500' 
+                              person.status === 'overbooked'
+                                ? 'bg-gradient-to-r from-orange-400 to-red-500'
                                 : person.status === 'underbooked'
                                   ? 'bg-gradient-to-r from-red-400 to-red-500'
                                   : 'bg-gradient-to-r from-emerald-400 to-emerald-500'
@@ -711,20 +714,20 @@ export const Auswertungen = () => {
                             style={{ width: `${Math.min(person.auslastung, 100)}%` }}
                           />
                         </div>
-                        
+
                         {person.auslastung > 100 && (
-                          <div className="text-xs text-orange-700 font-medium">
-                            ⚠️ Überbucht um {Math.round(person.auslastung - 100)}%
+                          <div className="text-xs text-orange-700 dark:text-orange-400 font-medium">
+                            Überbucht um {Math.round(person.auslastung - 100)}%
                           </div>
                         )}
                         {person.status === 'underbooked' && person.gebuchteStunden > 0 && (
-                          <div className="text-xs text-red-700 font-medium">
-                            📉 Unterausgelastet
+                          <div className="text-xs text-red-700 dark:text-red-400 font-medium">
+                            Unterausgelastet
                           </div>
                         )}
                         {person.gebuchteStunden === 0 && (
-                          <div className="text-xs text-gray-500 font-medium">
-                            💤 Nicht zugewiesen
+                          <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                            Nicht zugewiesen
                           </div>
                         )}
                       </div>
@@ -732,7 +735,7 @@ export const Auswertungen = () => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-12 text-gray-500">
+                <div className="text-center py-12 text-gray-500 dark:text-gray-400">
                   {workloadData.length === 0 ? "Keine Auslastungsdaten verfügbar." : "Keine Personen entsprechen den Filterkriterien."}
                 </div>
               )}
@@ -741,33 +744,33 @@ export const Auswertungen = () => {
           {/* Tabellarische Übersicht */}
           <CollapsibleSection title="Tabellarische Übersicht der Auslastung" defaultOpen={false}>
             {tableData.length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-100">
-                  <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
+              <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead className="bg-gray-50 dark:bg-gray-800">
                     <tr>
                       <th
                         scope="col"
-                        className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                        className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider"
                       >
                         Name
                       </th>
                       <th
                         scope="col"
-                        className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                        className="px-6 py-4 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider"
                       >
-                        Anzahl Produkte
+                        Anzahl Teams
                       </th>
                       <th
                         scope="col"
-                        className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                        className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider"
                       >
-                        Zugeordnete Datenprodukte (Rollen)
+                        Zugeordnete Teams (Rollen)
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-50">
+                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700">
                     {tableData.map((person, index) => (
-                      <tr key={person.id} className={`hover:bg-gray-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-25'}`}>
+                      <tr key={person.id} className={`hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors ${index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50/50 dark:bg-gray-800/50'}`}>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <div className="flex items-center gap-2">
                             {person["Anzahl Produkte"] > 3 && (
@@ -775,19 +778,19 @@ export const Auswertungen = () => {
                                 className="text-red-500"
                                 title="Hohe Auslastung"
                               >
-                                ❗️
+                                !
                               </span>
                             )}
-                            <span className="text-gray-900">{person.name}</span>
+                            <span className="text-gray-900 dark:text-white">{person.name}</span>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
                           <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold ${
-                            person["Anzahl Produkte"] > 3 
-                              ? 'bg-red-100 text-red-700' 
-                              : person["Anzahl Produkte"] > 1 
-                                ? 'bg-yellow-100 text-yellow-700' 
-                                : 'bg-green-100 text-green-700'
+                            person["Anzahl Produkte"] > 3
+                              ? 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300'
+                              : person["Anzahl Produkte"] > 1
+                                ? 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300'
+                                : 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300'
                           }`}>
                             {person["Anzahl Produkte"]}
                           </span>
@@ -796,14 +799,14 @@ export const Auswertungen = () => {
                           {person.produktDetails.length > 0 ? (
                             <div className="space-y-1">
                               {person.produktDetails.map((pd, idx) => (
-                                <div key={idx} className="text-xs bg-gray-50 px-2 py-1 rounded">
-                                  <span className="font-medium text-gray-900">{pd.name}</span>
-                                  <span className="text-gray-600 ml-1">({pd.rollen})</span>
+                                <div key={idx} className="text-xs bg-gray-50 dark:bg-gray-700 px-2 py-1 rounded">
+                                  <span className="font-medium text-gray-900 dark:text-white">{pd.name}</span>
+                                  <span className="text-gray-600 dark:text-gray-400 ml-1">({pd.rollen})</span>
                                 </div>
                               ))}
                             </div>
                           ) : (
-                            <span className="text-xs italic text-gray-500">
+                            <span className="text-xs italic text-gray-500 dark:text-gray-400">
                               Keinen Produkten zugewiesen
                             </span>
                           )}
@@ -814,7 +817,7 @@ export const Auswertungen = () => {
                 </table>
               </div>
             ) : (
-              <div className="text-center py-12 text-gray-500">
+              <div className="text-center py-12 text-gray-500 dark:text-gray-400">
                 Keine Daten vorhanden.
               </div>
             )}
@@ -824,10 +827,10 @@ export const Auswertungen = () => {
           <CollapsibleSection title="Grafische Auswertungen" defaultOpen={false}>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-700 mb-4">
+                  <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-4">
                     Personen-Auslastung
                   </h3>
-                  <div className="bg-gradient-to-r from-ard-blue-50 to-indigo-50 rounded-2xl p-6 shadow-inner">
+                  <div className="bg-gradient-to-r from-ard-blue-50 to-indigo-50 dark:from-ard-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-6 border border-gray-200 dark:border-gray-700">
                     {chartDataPersonen.length > 0 ? (
                       <ResponsiveContainer width="100%" height={personenChartHeight}>
                         <BarChart
@@ -836,10 +839,10 @@ export const Auswertungen = () => {
                           margin={{ top: 5, right: 30, left: 20, bottom: 20 }}
                           barCategoryGap={10}
                         >
-                          <CartesianGrid strokeDasharray="none" stroke="#e2e8f0" strokeWidth={1} />
-                          <XAxis 
-                            type="number" 
-                            allowDecimals={false} 
+                          <CartesianGrid strokeDasharray="none" stroke="#e2e8f0" strokeWidth={1} className="dark:opacity-20" />
+                          <XAxis
+                            type="number"
+                            allowDecimals={false}
                             axisLine={false}
                             tickLine={false}
                             tick={{ fontSize: 12, fill: '#64748b' }}
@@ -857,39 +860,39 @@ export const Auswertungen = () => {
                             content={<CustomTooltip />}
                             cursor={{ fill: "rgba(59, 130, 246, 0.1)" }}
                           />
-                          <Bar 
-                            dataKey="Anzahl Produkte" 
+                          <Bar
+                            dataKey="Anzahl Produkte"
                             radius={[0, 8, 8, 0]}
                             animationBegin={0}
                             animationDuration={1500}
                             animationEasing="ease-out"
                           >
                             {chartDataPersonen.map((entry, index) => (
-                              <Cell 
-                                key={`cell-${index}`} 
-                                fill={entry.fill === '#ef4444' ? '#f87171' : '#4c84d4'} 
+                              <Cell
+                                key={`cell-${index}`}
+                                fill={entry.fill === '#ef4444' ? '#f87171' : '#4c84d4'}
                               />
                             ))}
                           </Bar>
                         </BarChart>
                       </ResponsiveContainer>
                     ) : (
-                      <p className="text-center text-gray-500 py-10">Keine Daten.</p>
+                      <p className="text-center text-gray-500 dark:text-gray-400 py-10">Keine Daten.</p>
                     )}
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-700 mb-4">
-                    Datenprodukt-Besetzung
+                  <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-4">
+                    Team-Besetzung
                   </h3>
-                  <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl p-6 shadow-inner">
+                  <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-2xl p-6 border border-gray-200 dark:border-gray-700">
                     {produktBesetzungData.length > 0 ? (
                       <ResponsiveContainer width="100%" height={400}>
                         <BarChart
                           data={produktBesetzungData}
                           margin={{ top: 5, right: 30, left: 20, bottom: 20 }}
                         >
-                          <CartesianGrid strokeDasharray="none" stroke="#e2e8f0" strokeWidth={1} />
+                          <CartesianGrid strokeDasharray="none" stroke="#e2e8f0" strokeWidth={1} className="dark:opacity-20" />
                           <XAxis
                             dataKey="name"
                             tick={{ fontSize: 10, angle: -45, textAnchor: "end", fill: '#64748b' }}
@@ -898,8 +901,8 @@ export const Auswertungen = () => {
                             axisLine={false}
                             tickLine={false}
                           />
-                          <YAxis 
-                            allowDecimals={false} 
+                          <YAxis
+                            allowDecimals={false}
                             axisLine={false}
                             tickLine={false}
                             tick={{ fontSize: 12, fill: '#64748b' }}
@@ -908,9 +911,9 @@ export const Auswertungen = () => {
                             content={<CustomTooltip />}
                             cursor={{ fill: "rgba(16, 185, 129, 0.1)" }}
                           />
-                          <Bar 
-                            dataKey="Anzahl Personen" 
-                            fill="#10b981" 
+                          <Bar
+                            dataKey="Anzahl Personen"
+                            fill="#10b981"
                             radius={[8, 8, 0, 0]}
                             animationBegin={200}
                             animationDuration={1500}
@@ -919,7 +922,7 @@ export const Auswertungen = () => {
                         </BarChart>
                       </ResponsiveContainer>
                     ) : (
-                      <p className="text-center text-gray-500 py-10">Keine Daten.</p>
+                      <p className="text-center text-gray-500 dark:text-gray-400 py-10">Keine Daten.</p>
                     )}
                   </div>
                 </div>
@@ -930,48 +933,48 @@ export const Auswertungen = () => {
           <CollapsibleSection title="Skill-Analyse" defaultOpen={false}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
-                <h3 className="text-lg font-semibold text-gray-700 mb-4">
+                <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-4">
                   Häufigkeit der Skills
                 </h3>
-                <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-4 shadow-inner">
+                <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl p-4 border border-gray-200 dark:border-gray-700">
                   {skillUsageCount.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {skillUsageCount.map((skill) => (
                         <div
                           key={skill.name}
-                          className="flex items-center justify-between bg-white/80 backdrop-blur-sm p-2 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
+                          className="flex items-center justify-between bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-2 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
                         >
                           <div className="flex items-center gap-2 min-w-0">
                             <div
                               className="w-3 h-3 rounded-full flex-shrink-0"
                               style={{ backgroundColor: skill.color }}
                             />
-                            <span className="text-sm font-medium text-gray-800 truncate">
+                            <span className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">
                               {skill.name}
                             </span>
                           </div>
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-bold bg-white text-gray-700 shadow-sm ml-2 flex-shrink-0">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-bold bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 shadow-sm ml-2 flex-shrink-0">
                             {skill.Anzahl}
                           </span>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-sm text-gray-500 text-center py-4">Keine Skills zugewiesen.</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">Keine Skills zugewiesen.</p>
                   )}
                 </div>
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-700 mb-4">
+                <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-4">
                   Nicht zugewiesene Skills
                 </h3>
-                <div className="bg-gray-50 rounded-xl p-4">
+                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
                   {unassignedSkills.length > 0 ? (
                     <div className="flex flex-wrap gap-2">
                       {unassignedSkills.map((skill) => (
                         <span
                           key={skill.id}
-                          className="inline-flex items-center px-3 py-1.5 bg-orange-100 text-orange-700 rounded-lg text-xs font-semibold border border-orange-200"
+                          className="inline-flex items-center px-3 py-1.5 bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 rounded-lg text-xs font-semibold border border-orange-200 dark:border-orange-800"
                         >
                           {skill.name}
                         </span>
@@ -979,8 +982,8 @@ export const Auswertungen = () => {
                     </div>
                   ) : (
                     <div className="text-center py-4">
-                      <div className="text-green-600 text-2xl mb-2">✅</div>
-                      <p className="text-sm text-gray-600">
+                      <div className="text-green-600 dark:text-green-400 text-2xl mb-2">✓</div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
                         Alle Skills sind mindestens einer Person zugewiesen.
                       </p>
                     </div>

@@ -46,6 +46,10 @@ const Dashboard = ({ onNavigate }) => {
     vacations,
   } = useData();
 
+  // State für das Aufklappen der "x weitere" Sektionen
+  const [expandedOverbooked, setExpandedOverbooked] = React.useState(false);
+  const [expandedUnderbooked, setExpandedUnderbooked] = React.useState(false);
+
   // Team-Kapazität Berechnungen
   const capacityData = useMemo(() => {
     const m13Personen = personen?.filter(p => p.isM13) || [];
@@ -210,10 +214,10 @@ const Dashboard = ({ onNavigate }) => {
   };
 
   const getUtilizationColor = (util) => {
-    if (util > 100) return 'text-red-600';
-    if (util > 85) return 'text-amber-600';
-    if (util < 50) return 'text-blue-600';
-    return 'text-emerald-600';
+    if (util > 100) return 'text-red-600 dark:text-red-400';
+    if (util > 85) return 'text-amber-600 dark:text-amber-400';
+    if (util < 50) return 'text-blue-600 dark:text-blue-400';
+    return 'text-emerald-600 dark:text-emerald-400';
   };
 
   const getUtilizationBg = (util) => {
@@ -225,10 +229,10 @@ const Dashboard = ({ onNavigate }) => {
 
   const getRiskBadge = (risk) => {
     const styles = {
-      critical: 'bg-red-100 text-red-700',
-      high: 'bg-amber-100 text-amber-700',
-      medium: 'bg-yellow-100 text-yellow-700',
-      ok: 'bg-emerald-100 text-emerald-700'
+      critical: 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300',
+      high: 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300',
+      medium: 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300',
+      ok: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300'
     };
     const labels = {
       critical: 'Kein Team',
@@ -244,12 +248,12 @@ const Dashboard = ({ onNavigate }) => {
   };
 
   return (
-    <div className="min-h-screen bg-dashboard-bg">
+    <div className="min-h-screen bg-dashboard-bg dark:bg-gray-900">
       <div className="container mx-auto px-4 sm:px-6 py-8">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-500 mt-1 text-sm sm:text-base">Team-Übersicht und Kapazitätsplanung</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm sm:text-base">Team-Übersicht und Kapazitätsplanung</p>
         </div>
 
         {/* KPI Grid */}
@@ -270,7 +274,7 @@ const Dashboard = ({ onNavigate }) => {
             color="purple"
           />
           <KPICard
-            title="Aktive Produkte"
+            title="Aktive Teams"
             value={kpis.aktiveDatenprodukte}
             subtitle="Live & In Entwicklung"
             icon={<Icons.ChartBar />}
@@ -291,7 +295,7 @@ const Dashboard = ({ onNavigate }) => {
           {/* Team-Kapazität */}
           <div className="dashboard-card-no-hover">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Team-Kapazität</h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Team-Kapazität</h2>
               <span className={`text-2xl font-bold ${getUtilizationColor(capacityData.utilization)}`}>
                 {capacityData.utilization}%
               </span>
@@ -299,13 +303,13 @@ const Dashboard = ({ onNavigate }) => {
 
             {/* Auslastungsbalken */}
             <div className="mb-6">
-              <div className="h-4 bg-gray-100 rounded-full overflow-hidden">
+              <div className="h-4 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                 <div
                   className={`h-full ${getUtilizationBg(capacityData.utilization)} transition-all duration-500`}
                   style={{ width: `${Math.min(capacityData.utilization, 100)}%` }}
                 />
               </div>
-              <div className="flex justify-between mt-2 text-xs text-gray-500">
+              <div className="flex justify-between mt-2 text-xs text-gray-500 dark:text-gray-400">
                 <span>{capacityData.bookedHours}h gebucht</span>
                 <span>{capacityData.totalCapacity}h verfügbar</span>
               </div>
@@ -315,37 +319,47 @@ const Dashboard = ({ onNavigate }) => {
             {(capacityData.overbooked.length > 0 || capacityData.underbooked.length > 0) && (
               <div className="space-y-3">
                 {capacityData.overbooked.length > 0 && (
-                  <div className="p-3 bg-red-50 rounded-xl">
-                    <div className="flex items-center gap-2 text-red-700 text-sm font-medium mb-2">
+                  <div className="p-3 bg-red-50 dark:bg-red-900/30 rounded-xl">
+                    <div className="flex items-center gap-2 text-red-700 dark:text-red-300 text-sm font-medium mb-2">
                       <Icons.Warning />
                       <span>{capacityData.overbooked.length} überbucht</span>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      {capacityData.overbooked.slice(0, 4).map(p => (
-                        <span key={p.id} className="px-2 py-1 bg-red-100 text-red-800 rounded-lg text-xs">
+                      {(expandedOverbooked ? capacityData.overbooked : capacityData.overbooked.slice(0, 4)).map(p => (
+                        <span key={p.id} className="px-2 py-1 bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-200 rounded-lg text-xs">
                           {p.name?.split(' ')[0]} ({p.auslastung}%)
                         </span>
                       ))}
                       {capacityData.overbooked.length > 4 && (
-                        <span className="text-xs text-red-600">+{capacityData.overbooked.length - 4} weitere</span>
+                        <button
+                          onClick={() => setExpandedOverbooked(!expandedOverbooked)}
+                          className="text-xs text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 font-medium transition-colors cursor-pointer"
+                        >
+                          {expandedOverbooked ? '↑ weniger' : `+${capacityData.overbooked.length - 4} weitere`}
+                        </button>
                       )}
                     </div>
                   </div>
                 )}
                 {capacityData.underbooked.length > 0 && (
-                  <div className="p-3 bg-blue-50 rounded-xl">
-                    <div className="flex items-center gap-2 text-blue-700 text-sm font-medium mb-2">
+                  <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-xl">
+                    <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300 text-sm font-medium mb-2">
                       <span>💡</span>
                       <span>{capacityData.underbooked.length} unter 50% Auslastung</span>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      {capacityData.underbooked.slice(0, 4).map(p => (
-                        <span key={p.id} className="px-2 py-1 bg-blue-100 text-blue-800 rounded-lg text-xs">
+                      {(expandedUnderbooked ? capacityData.underbooked : capacityData.underbooked.slice(0, 4)).map(p => (
+                        <span key={p.id} className="px-2 py-1 bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200 rounded-lg text-xs">
                           {p.name?.split(' ')[0]} ({p.auslastung}%)
                         </span>
                       ))}
                       {capacityData.underbooked.length > 4 && (
-                        <span className="text-xs text-blue-600">+{capacityData.underbooked.length - 4} weitere</span>
+                        <button
+                          onClick={() => setExpandedUnderbooked(!expandedUnderbooked)}
+                          className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors cursor-pointer"
+                        >
+                          {expandedUnderbooked ? '↑ weniger' : `+${capacityData.underbooked.length - 4} weitere`}
+                        </button>
                       )}
                     </div>
                   </div>
@@ -356,12 +370,12 @@ const Dashboard = ({ onNavigate }) => {
 
           {/* Abwesenheiten */}
           <div className="dashboard-card-no-hover">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Abwesenheiten</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Abwesenheiten</h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               {/* Aktuell abwesend */}
               <div>
-                <h3 className="text-sm font-medium text-gray-500 mb-3 flex items-center gap-2">
+                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-red-500"></span>
                   Heute abwesend
                 </h3>
@@ -369,19 +383,19 @@ const Dashboard = ({ onNavigate }) => {
                   <div className="space-y-2">
                     {absenceData.current.map((person, idx) => (
                       <div key={`current-${idx}`} className="flex items-center justify-between gap-2">
-                        <span className="text-sm text-gray-900 truncate flex-1 min-w-0">{person.name?.split(' ')[0]}</span>
-                        <span className="text-xs text-gray-500 flex-shrink-0">bis {formatDate(person.endDate)}</span>
+                        <span className="text-sm text-gray-900 dark:text-white truncate flex-1 min-w-0">{person.name?.split(' ')[0]}</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">bis {formatDate(person.endDate)}</span>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-400">Niemand abwesend</p>
+                  <p className="text-sm text-gray-400 dark:text-gray-500">Niemand abwesend</p>
                 )}
               </div>
 
               {/* Kommende Woche */}
               <div>
-                <h3 className="text-sm font-medium text-gray-500 mb-3 flex items-center gap-2">
+                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-amber-500"></span>
                   Diese Woche
                 </h3>
@@ -389,13 +403,13 @@ const Dashboard = ({ onNavigate }) => {
                   <div className="space-y-2">
                     {absenceData.upcoming.map((person, idx) => (
                       <div key={`upcoming-${idx}`} className="flex items-center justify-between gap-2">
-                        <span className="text-sm text-gray-900 truncate flex-1 min-w-0">{person.name?.split(' ')[0]}</span>
-                        <span className="text-xs text-gray-500 flex-shrink-0">ab {formatDate(person.startDate)}</span>
+                        <span className="text-sm text-gray-900 dark:text-white truncate flex-1 min-w-0">{person.name?.split(' ')[0]}</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">ab {formatDate(person.startDate)}</span>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-400">Keine geplant</p>
+                  <p className="text-sm text-gray-400 dark:text-gray-500">Keine geplant</p>
                 )}
               </div>
             </div>
@@ -404,13 +418,13 @@ const Dashboard = ({ onNavigate }) => {
 
         {/* Untere Sektion */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Produkte mit Staffing-Risiko */}
+          {/* Teams mit Staffing-Risiko */}
           <div className="dashboard-card-no-hover">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Produkt-Staffing</h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Team-Staffing</h2>
               <button
                 onClick={() => handleNavigate('datenprodukte')}
-                className="text-sm text-accent-600 hover:text-accent-700 font-medium"
+                className="text-sm text-accent-600 dark:text-accent-400 hover:text-accent-700 dark:hover:text-accent-300 font-medium"
               >
                 Alle →
               </button>
@@ -419,13 +433,13 @@ const Dashboard = ({ onNavigate }) => {
             {productData.filter(p => p.risk !== 'ok').length > 0 ? (
               <div className="space-y-3">
                 {productData.filter(p => p.risk !== 'ok').slice(0, 6).map(product => (
-                  <div key={product.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                  <div key={product.id} className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700 last:border-0">
                     <div className="flex items-center gap-3 min-w-0">
                       <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
                         product.status === 'Live' ? 'bg-emerald-500' :
                         product.status === 'In Entwicklung' ? 'bg-blue-500' : 'bg-amber-500'
                       }`} />
-                      <span className="text-sm text-gray-900 truncate">{product.name}</span>
+                      <span className="text-sm text-gray-900 dark:text-white truncate">{product.name}</span>
                     </div>
                     {getRiskBadge(product.risk)}
                   </div>
@@ -434,7 +448,7 @@ const Dashboard = ({ onNavigate }) => {
             ) : (
               <div className="text-center py-6">
                 <span className="text-3xl">✅</span>
-                <p className="text-sm text-gray-500 mt-2">Alle Produkte ausreichend besetzt</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Alle Teams ausreichend besetzt</p>
               </div>
             )}
           </div>
@@ -442,24 +456,24 @@ const Dashboard = ({ onNavigate }) => {
           {/* Skill-Risiken */}
           <div className="dashboard-card-no-hover">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Skill-Risiken</h2>
-              <span className="text-xs text-gray-500">Single Point of Failure</span>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Skill-Risiken</h2>
+              <span className="text-xs text-gray-500 dark:text-gray-400">Single Point of Failure</span>
             </div>
 
             {skillRisks.length > 0 ? (
               <div className="space-y-3">
                 {skillRisks.slice(0, 6).map(skill => (
-                  <div key={skill.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                  <div key={skill.id} className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700 last:border-0">
                     <div className="flex items-center gap-3">
                       <div
                         className="w-3 h-3 rounded-full flex-shrink-0"
                         style={{ backgroundColor: skill.color || '#a855f7' }}
                       />
-                      <span className="text-sm text-gray-900">{skill.name}</span>
+                      <span className="text-sm text-gray-900 dark:text-white">{skill.name}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                        skill.count === 1 ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'
+                        skill.count === 1 ? 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300' : 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300'
                       }`}>
                         {skill.count} {skill.count === 1 ? 'Person' : 'Personen'}
                       </span>
@@ -470,7 +484,7 @@ const Dashboard = ({ onNavigate }) => {
             ) : (
               <div className="text-center py-6">
                 <span className="text-3xl">✅</span>
-                <p className="text-sm text-gray-500 mt-2">Keine kritischen Skill-Abhängigkeiten</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Keine kritischen Skill-Abhängigkeiten</p>
               </div>
             )}
           </div>
