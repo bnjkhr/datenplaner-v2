@@ -120,10 +120,10 @@ const Timeline = ({
       {/* Header mit Stundenleiste */}
       <div className="timeline-header">
         <div className="flex items-center">
-          <div className="w-48 flex-shrink-0 text-sm font-medium text-gray-600">
+          <div className="w-48 flex-shrink-0 text-sm font-medium text-gray-600 dark:text-gray-300">
             Mitarbeiter
           </div>
-          <div className="flex-1 flex justify-between text-xs text-gray-400 px-2">
+          <div className="flex-1 flex justify-between text-xs text-gray-500 dark:text-gray-300 px-2">
             <span>0h</span>
             <span>{maxStunden / 4}h</span>
             <span>{maxStunden / 2}h</span>
