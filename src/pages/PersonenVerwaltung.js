@@ -150,7 +150,7 @@ const SimpleSearch = ({
         <input
           ref={inputRef}
           type="text"
-          placeholder="Suche nach Namen, Skills, Datenprodukten..."
+          placeholder="Suche nach Namen, Skills, Teams..."
           value={searchTerm}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
@@ -225,7 +225,7 @@ const SimpleSearch = ({
                           : suggestion.type === "skill"
                             ? "Skill"
                             : suggestion.type === "datenprodukt"
-                              ? "Produkt"
+                              ? "Team"
                               : suggestion.type}
                       </span>
                       {suggestion.details && (
@@ -439,7 +439,7 @@ const PersonEintrag = ({
           })()}
           {sortBy === "datenprodukte" && getDataProductCount() > 0 && (
             <span className="dashboard-badge bg-purple-accent-100 dark:bg-purple-accent-900/50 text-purple-accent-700 dark:text-purple-accent-300">
-              {getDataProductCount()} Produkt{getDataProductCount() !== 1 ? 'e' : ''}
+              {getDataProductCount()} Team{getDataProductCount() !== 1 ? 's' : ''}
             </span>
           )}
           {kategorien && kategorien.length > 0 && (
@@ -1163,7 +1163,7 @@ const sortOptions = [
   { value: 'name', label: 'Name', icon: '🔤' },
   { value: 'auslastung', label: 'Auslastung', icon: '📊' },
   { value: 'abwesenheit', label: 'Abwesenheit', icon: '🏖️' },
-  { value: 'datenprodukte', label: 'Produkte', icon: '📦' },
+  { value: 'datenprodukte', label: 'Teams', icon: '👥' },
 ];
 
 const PersonenListe = ({
@@ -1589,7 +1589,7 @@ const PersonenVerwaltung = () => {
           name: dp.name,
           type: "datenprodukt",
           details: `${teamSize} Teammitglied${teamSize !== 1 ? "er" : ""}`,
-          matchedField: "Datenprodukt",
+          matchedField: "Team",
           data: dp,
         });
       } else if (dp.beschreibung?.toLowerCase().includes(lowerTerm)) {

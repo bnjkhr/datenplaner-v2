@@ -274,7 +274,7 @@ const Dashboard = ({ onNavigate }) => {
             color="purple"
           />
           <KPICard
-            title="Aktive Produkte"
+            title="Aktive Teams"
             value={kpis.aktiveDatenprodukte}
             subtitle="Live & In Entwicklung"
             icon={<Icons.ChartBar />}
@@ -418,10 +418,10 @@ const Dashboard = ({ onNavigate }) => {
 
         {/* Untere Sektion */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Produkte mit Staffing-Risiko */}
+          {/* Teams mit Staffing-Risiko */}
           <div className="dashboard-card-no-hover">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Produkt-Staffing</h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Team-Staffing</h2>
               <button
                 onClick={() => handleNavigate('datenprodukte')}
                 className="text-sm text-accent-600 dark:text-accent-400 hover:text-accent-700 dark:hover:text-accent-300 font-medium"
@@ -448,7 +448,7 @@ const Dashboard = ({ onNavigate }) => {
             ) : (
               <div className="text-center py-6">
                 <span className="text-3xl">✅</span>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Alle Produkte ausreichend besetzt</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Alle Teams ausreichend besetzt</p>
               </div>
             )}
           </div>

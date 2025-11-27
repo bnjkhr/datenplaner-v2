@@ -223,7 +223,7 @@ const AppFooter = ({ user }) => {
                         : "text-gray-700 dark:text-gray-300 hover:bg-accent-50 dark:hover:bg-gray-700 hover:text-accent-600 dark:hover:text-accent-400"
                     }`}
                   >
-                    Datenprodukte
+                    Teams
                   </button>
                   <button
                     onClick={() => handleNavigation("auswertungen")}
@@ -306,7 +306,7 @@ const AppFooter = ({ user }) => {
                 <>
                   <NavLink pageName="dashboard">Dashboard</NavLink>
                   <NavLink pageName="personen">Personen</NavLink>
-                  <NavLink pageName="datenprodukte">Datenprodukte</NavLink>
+                  <NavLink pageName="datenprodukte">Teams</NavLink>
                   <NavLink pageName="auswertungen">Auswertungen</NavLink>
                   <div className="w-px h-6 bg-white/30 mx-2"></div>
                 </>

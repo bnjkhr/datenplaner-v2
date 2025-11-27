@@ -83,7 +83,7 @@ export const DatenproduktVerwaltung = () => {
       setShowProduktForm(false);
       setEditingProdukt(null);
     } else {
-      setFormError("Fehler beim Speichern des Datenprodukts.");
+      setFormError("Fehler beim Speichern des Teams.");
     }
   };
 
@@ -306,9 +306,9 @@ export const DatenproduktVerwaltung = () => {
         <div className="flex flex-wrap justify-between items-center mb-8 gap-4">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Datenproduktverwaltung
+              Teamverwaltung
             </h1>
-            <p className="text-gray-600 dark:text-gray-400">Verwalte deine Datenprodukte und Teams</p>
+            <p className="text-gray-600 dark:text-gray-400">Verwalte deine Teams und Zuordnungen</p>
           </div>
           <div className="flex gap-3">
             <button
@@ -328,7 +328,7 @@ export const DatenproduktVerwaltung = () => {
             <button
               onClick={() => handleOpenProduktForm()}
               className="w-14 h-14 bg-ard-blue-600 hover:bg-white text-white hover:text-ard-blue-600 border-2 border-ard-blue-600 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center group active:scale-95 flex-shrink-0"
-              title="Neues Datenprodukt erstellen"
+              title="Neues Team erstellen"
             >
               <svg
                 className="w-6 h-6 transition-transform duration-200 group-active:scale-110"
@@ -357,8 +357,8 @@ export const DatenproduktVerwaltung = () => {
               <form onSubmit={handleProduktFormSubmit} className="space-y-4">
                 <h2 className="text-2xl font-semibold text-gray-700 dark:text-gray-200 mb-4">
                   {editingProdukt
-                    ? "Datenprodukt bearbeiten"
-                    : "Neues Datenprodukt erstellen"}
+                    ? "Team bearbeiten"
+                    : "Neues Team erstellen"}
                 </h2>
                 {formError && (
                   <p className="text-red-500 dark:text-red-400 text-sm mb-3">{formError}</p>
@@ -430,7 +430,7 @@ export const DatenproduktVerwaltung = () => {
 
         <ConfirmModal
           isOpen={showDeleteModal}
-          title="Datenprodukt löschen"
+          title="Team löschen"
           message={`Möchten Sie "${produktToDelete?.name}" wirklich löschen?`}
           onConfirm={confirmDeleteDatenprodukt}
           onCancel={() => setShowDeleteModal(false)}
@@ -438,7 +438,7 @@ export const DatenproduktVerwaltung = () => {
 
         {datenprodukte.length === 0 && !loading && (
           <p className="text-center text-gray-500 dark:text-gray-400 py-8">
-            Noch keine Datenprodukte erfasst.
+            Noch keine Teams erfasst.
           </p>
         )}
 
@@ -678,11 +678,11 @@ export const DatenproduktVerwaltung = () => {
                 Neues Team erstellen
               </h3>
               <p className="text-gray-600 dark:text-gray-400 mb-4">
-                Gib einen Namen für das neue Datenprodukt ein. Das Team wird automatisch zugewiesen.
+                Gib einen Namen für das neue Team ein. Die Mitglieder werden automatisch zugewiesen.
               </p>
               <div className="mb-6">
                 <label htmlFor="team-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Datenprodukt-Name
+                  Team-Name
                 </label>
                 <input
                   id="team-name"
@@ -904,7 +904,7 @@ const DatenproduktDetailsModal = ({
               <div className="text-center py-8 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
                 <div className="text-4xl mb-2">👥</div>
                 <p className="font-medium">Kein Team zugewiesen</p>
-                <p className="text-sm mt-1">Füge Personen zu diesem Datenprodukt hinzu</p>
+                <p className="text-sm mt-1">Füge Personen zu diesem Team hinzu</p>
               </div>
             )}
           </div>
@@ -1200,7 +1200,7 @@ const DatenproduktListe = ({
       {/* Globale Sortierung */}
       <div className="flex items-center justify-between mb-2">
         <div className="text-sm text-gray-500 dark:text-gray-400">
-          {datenprodukte.length} Produkt{datenprodukte.length !== 1 ? 'e' : ''} in {sortedStatus.length} Status-Gruppe{sortedStatus.length !== 1 ? 'n' : ''}
+          {datenprodukte.length} Team{datenprodukte.length !== 1 ? 's' : ''} in {sortedStatus.length} Status-Gruppe{sortedStatus.length !== 1 ? 'n' : ''}
         </div>
 
         {/* Sortier-Dropdown */}
@@ -1270,7 +1270,7 @@ const DatenproduktListe = ({
               </h2>
 
               <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${config.bgColor} ${config.textColor}`}>
-                {produkte.length} Produkt{produkte.length !== 1 ? 'e' : ''}
+                {produkte.length} Team{produkte.length !== 1 ? 's' : ''}
               </span>
 
               <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />

@@ -355,17 +355,17 @@ const RolleDetailsModal = ({ rolle, isOpen, onClose, onEdit, onDeleteInitiation,
                         )}
                     </div>
 
-                    {/* Used in Data Products */}
+                    {/* Used in Teams */}
                     <div className="mb-6">
                         <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                            Verwendet in Datenprodukten ({usedInProducts.length})
+                            Verwendet in Teams ({usedInProducts.length})
                         </h3>
                         {usedInProducts.length > 0 ? (
                             <div className="space-y-2">
                                 {usedInProducts.map((produktName) => {
                                     const produktAssignments = roleAssignments.filter(a => a.produktName === produktName);
                                     return (
-                                        <div 
+                                        <div
                                             key={produktName}
                                             className="bg-gradient-to-r from-green-50 to-green-100 p-3 rounded-lg border border-green-200"
                                         >
@@ -383,7 +383,7 @@ const RolleDetailsModal = ({ rolle, isOpen, onClose, onEdit, onDeleteInitiation,
                                 })}
                             </div>
                         ) : (
-                            <p className="text-gray-500 italic">In keinen Datenprodukten verwendet</p>
+                            <p className="text-gray-500 italic">In keinen Teams verwendet</p>
                         )}
                     </div>
 
