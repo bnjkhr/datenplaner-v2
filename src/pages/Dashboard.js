@@ -247,9 +247,9 @@ const Dashboard = ({ onNavigate }) => {
     <div className="min-h-screen bg-dashboard-bg">
       <div className="container mx-auto px-4 sm:px-6 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-500 mt-1">Team-Übersicht und Kapazitätsplanung</p>
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-gray-500 mt-1 text-sm sm:text-base">Team-Übersicht und Kapazitätsplanung</p>
         </div>
 
         {/* KPI Grid */}
@@ -358,7 +358,7 @@ const Dashboard = ({ onNavigate }) => {
           <div className="dashboard-card-no-hover">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Abwesenheiten</h2>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               {/* Aktuell abwesend */}
               <div>
                 <h3 className="text-sm font-medium text-gray-500 mb-3 flex items-center gap-2">
@@ -368,9 +368,9 @@ const Dashboard = ({ onNavigate }) => {
                 {absenceData.current.length > 0 ? (
                   <div className="space-y-2">
                     {absenceData.current.map((person, idx) => (
-                      <div key={`current-${idx}`} className="flex items-center justify-between">
-                        <span className="text-sm text-gray-900 truncate">{person.name?.split(' ')[0]}</span>
-                        <span className="text-xs text-gray-500">bis {formatDate(person.endDate)}</span>
+                      <div key={`current-${idx}`} className="flex items-center justify-between gap-2">
+                        <span className="text-sm text-gray-900 truncate flex-1 min-w-0">{person.name?.split(' ')[0]}</span>
+                        <span className="text-xs text-gray-500 flex-shrink-0">bis {formatDate(person.endDate)}</span>
                       </div>
                     ))}
                   </div>
@@ -388,9 +388,9 @@ const Dashboard = ({ onNavigate }) => {
                 {absenceData.upcoming.length > 0 ? (
                   <div className="space-y-2">
                     {absenceData.upcoming.map((person, idx) => (
-                      <div key={`upcoming-${idx}`} className="flex items-center justify-between">
-                        <span className="text-sm text-gray-900 truncate">{person.name?.split(' ')[0]}</span>
-                        <span className="text-xs text-gray-500">ab {formatDate(person.startDate)}</span>
+                      <div key={`upcoming-${idx}`} className="flex items-center justify-between gap-2">
+                        <span className="text-sm text-gray-900 truncate flex-1 min-w-0">{person.name?.split(' ')[0]}</span>
+                        <span className="text-xs text-gray-500 flex-shrink-0">ab {formatDate(person.startDate)}</span>
                       </div>
                     ))}
                   </div>
