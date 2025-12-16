@@ -2170,27 +2170,22 @@ const PersonenVerwaltung = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
             {/* Currently Absent */}
             {currentlyAbsentPeople.length > 0 && (
-              <div className="dashboard-card bg-gradient-to-br from-red-50 to-red-100/50 dark:from-red-900/30 dark:to-red-900/20 border-red-200 dark:border-red-800">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-xl bg-red-500 flex items-center justify-center text-white shadow-lg">
-                    <span className="text-lg">🏖️</span>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-red-900 dark:text-red-200">Heute abwesend</h3>
-                    <p className="text-xs text-red-600 dark:text-red-400">{currentlyAbsentPeople.length} Person{currentlyAbsentPeople.length !== 1 ? 'en' : ''}</p>
-                  </div>
+              <div className="dashboard-card bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                <div className="flex items-center gap-2 mb-3">
+                  <h3 className="font-medium text-gray-700 dark:text-gray-300">Heute abwesend</h3>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">({currentlyAbsentPeople.length})</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {(showAllCurrentAbsent ? currentlyAbsentPeople : currentlyAbsentPeople.slice(0, 6)).map((person) => (
                     <button
                       key={person.id}
                       onClick={() => handleShowDetails(person)}
-                      className="flex items-center gap-2 px-3 py-2 bg-white/80 dark:bg-gray-800/80 rounded-lg border border-red-200 dark:border-red-800
-                                 hover:bg-white dark:hover:bg-gray-800 hover:border-red-300 dark:hover:border-red-700 transition-all text-sm"
+                      className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600
+                                 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-500 transition-all text-sm"
                     >
                       <span className="font-medium text-gray-900 dark:text-white">{person.name}</span>
                       {person.vacationEndDate && (
-                        <span className="text-[10px] text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/50 px-1.5 py-0.5 rounded">
+                        <span className="text-[10px] text-gray-500 dark:text-gray-400">
                           bis {new Date(person.vacationEndDate).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" })}
                         </span>
                       )}
@@ -2199,7 +2194,7 @@ const PersonenVerwaltung = () => {
                   {currentlyAbsentPeople.length > 6 && (
                     <button
                       onClick={() => setShowAllCurrentAbsent(!showAllCurrentAbsent)}
-                      className="px-3 py-2 text-sm text-red-600 dark:text-red-400 font-medium hover:text-red-700 dark:hover:text-red-300 cursor-pointer transition-colors"
+                      className="px-3 py-1.5 text-sm text-gray-500 dark:text-gray-400 font-medium hover:text-gray-700 dark:hover:text-gray-300 cursor-pointer transition-colors"
                       title={showAllCurrentAbsent ? "Weniger anzeigen" : "Alle anzeigen"}
                     >
                       {showAllCurrentAbsent ? "weniger" : `+${currentlyAbsentPeople.length - 6}`}
@@ -2211,27 +2206,22 @@ const PersonenVerwaltung = () => {
 
             {/* Upcoming Absences */}
             {upcomingAbsentPeople.length > 0 && (
-              <div className="dashboard-card bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-900/30 dark:to-amber-900/20 border-amber-200 dark:border-amber-800">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center text-white shadow-lg">
-                    <span className="text-lg">📅</span>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-amber-900 dark:text-amber-200">Diese Woche abwesend</h3>
-                    <p className="text-xs text-amber-600 dark:text-amber-400">{upcomingAbsentPeople.length} Person{upcomingAbsentPeople.length !== 1 ? 'en' : ''}</p>
-                  </div>
+              <div className="dashboard-card bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                <div className="flex items-center gap-2 mb-3">
+                  <h3 className="font-medium text-gray-700 dark:text-gray-300">Diese Woche abwesend</h3>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">({upcomingAbsentPeople.length})</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {(showAllUpcomingAbsent ? upcomingAbsentPeople : upcomingAbsentPeople.slice(0, 6)).map((person) => (
                     <button
                       key={person.id}
                       onClick={() => handleShowDetails(person)}
-                      className="flex items-center gap-2 px-3 py-2 bg-white/80 dark:bg-gray-800/80 rounded-lg border border-amber-200 dark:border-amber-800
-                                 hover:bg-white dark:hover:bg-gray-800 hover:border-amber-300 dark:hover:border-amber-700 transition-all text-sm"
+                      className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600
+                                 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-500 transition-all text-sm"
                     >
                       <span className="font-medium text-gray-900 dark:text-white">{person.name}</span>
                       {person.vacationStartDate && (
-                        <span className="text-[10px] text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/50 px-1.5 py-0.5 rounded">
+                        <span className="text-[10px] text-gray-500 dark:text-gray-400">
                           ab {new Date(person.vacationStartDate).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" })}
                         </span>
                       )}
@@ -2240,7 +2230,7 @@ const PersonenVerwaltung = () => {
                   {upcomingAbsentPeople.length > 6 && (
                     <button
                       onClick={() => setShowAllUpcomingAbsent(!showAllUpcomingAbsent)}
-                      className="px-3 py-2 text-sm text-amber-600 dark:text-amber-400 font-medium hover:text-amber-700 dark:hover:text-amber-300 cursor-pointer transition-colors"
+                      className="px-3 py-1.5 text-sm text-gray-500 dark:text-gray-400 font-medium hover:text-gray-700 dark:hover:text-gray-300 cursor-pointer transition-colors"
                       title={showAllUpcomingAbsent ? "Weniger anzeigen" : "Alle anzeigen"}
                     >
                       {showAllUpcomingAbsent ? "weniger" : `+${upcomingAbsentPeople.length - 6}`}
