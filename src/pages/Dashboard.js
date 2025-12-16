@@ -159,23 +159,29 @@ const Dashboard = ({ onNavigate }) => {
             {(capacityData.overbooked.length > 0 || capacityData.underbooked.length > 0) && (
               <div className="flex flex-wrap gap-4 mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
                 {capacityData.overbooked.length > 0 && (
-                  <div className="flex items-center gap-2 text-sm">
+                  <button
+                    onClick={() => handleNavigate('personen')}
+                    className="flex items-center gap-2 text-sm hover:bg-red-50 dark:hover:bg-red-900/20 -mx-2 px-2 py-1 rounded-lg transition-colors"
+                  >
                     <span className="w-2 h-2 rounded-full bg-red-500" />
-                    <span className="text-gray-600 dark:text-gray-400">
+                    <span className="text-red-600 dark:text-red-400 font-medium">
                       {capacityData.overbooked.length} überbucht
                     </span>
                     <span className="text-gray-400 dark:text-gray-500">
                       ({capacityData.overbooked.slice(0, 3).map(p => p.name?.split(' ')[0]).join(', ')}{capacityData.overbooked.length > 3 && '...'})
                     </span>
-                  </div>
+                  </button>
                 )}
                 {capacityData.underbooked.length > 0 && (
-                  <div className="flex items-center gap-2 text-sm">
+                  <button
+                    onClick={() => handleNavigate('personen')}
+                    className="flex items-center gap-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 -mx-2 px-2 py-1 rounded-lg transition-colors"
+                  >
                     <span className="w-2 h-2 rounded-full bg-gray-400" />
                     <span className="text-gray-600 dark:text-gray-400">
                       {capacityData.underbooked.length} unter 50%
                     </span>
-                  </div>
+                  </button>
                 )}
               </div>
             )}
