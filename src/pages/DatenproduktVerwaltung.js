@@ -763,9 +763,12 @@ const DatenproduktDetailsModal = ({
   copyTeamEmailsToClipboard,
   copySuccess
 }) => {
-  if (!isOpen || !datenprodukt) return null;
+  if (!datenprodukt) return null;
 
   const teamZuordnungen = zuordnungen.filter((z) => z.datenproduktId === datenprodukt.id);
+
+  // Calculate total hours
+  const totalStunden = teamZuordnungen.reduce((sum, z) => sum + (z.stunden || 0), 0);
 
   // Status color helper
   const getStatusColor = (status) => {
@@ -779,183 +782,222 @@ const DatenproduktDetailsModal = ({
     }
   };
 
+  const getStatusGradient = (status) => {
+    switch (status) {
+      case 'Live': return 'from-green-50 to-green-100/50 dark:from-green-900/30 dark:to-green-900/20';
+      case 'In Entwicklung': return 'from-blue-50 to-blue-100/50 dark:from-blue-900/30 dark:to-blue-900/20';
+      case 'In Planung': return 'from-yellow-50 to-yellow-100/50 dark:from-yellow-900/30 dark:to-yellow-900/20';
+      case 'Archiviert': return 'from-gray-50 to-gray-100/50 dark:from-gray-700/30 dark:to-gray-700/20';
+      case 'On Hold / Pausiert': return 'from-red-50 to-red-100/50 dark:from-red-900/30 dark:to-red-900/20';
+      default: return 'from-gray-50 to-gray-100/50 dark:from-gray-700/30 dark:to-gray-700/20';
+    }
+  };
+
   return (
-    <div
-      className="fixed inset-0 bg-gray-800 bg-opacity-75 dark:bg-black dark:bg-opacity-75 flex justify-center items-center z-50 p-4"
-      onClick={onClose}
-    >
+    <>
+      {/* Backdrop */}
       <div
-        className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
+        className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-50 transition-opacity duration-300 ${
+          isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        onClick={onClose}
+      />
+
+      {/* Slide-in Panel */}
+      <div
+        className={`fixed inset-y-0 right-0 w-full sm:w-[520px] bg-white dark:bg-gray-800 shadow-2xl z-50
+                    transform transition-transform duration-300 ease-out ${
+          isOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
       >
-        <div className="p-4">
+        <div className="h-full flex flex-col">
           {/* Header */}
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex-1 min-w-0">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                {datenprodukt.name}
-              </h2>
+          <div className={`flex-shrink-0 bg-gradient-to-br ${getStatusGradient(datenprodukt.status)} border-b border-gray-200 dark:border-gray-700`}>
+            <div className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <button
+                  onClick={onClose}
+                  className="p-2 -ml-2 rounded-xl text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-white/50 dark:hover:bg-gray-600 transition-all"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => { onEdit(datenprodukt); onClose(); }}
+                    className="p-2 rounded-xl text-gray-500 dark:text-gray-400 hover:text-accent-600 dark:hover:text-accent-400 hover:bg-white/50 dark:hover:bg-gray-600 transition-all"
+                    title="Bearbeiten"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => { onDelete(datenprodukt); onClose(); }}
+                    className="p-2 rounded-xl text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-white/50 dark:hover:bg-gray-600 transition-all"
+                    title="Löschen"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              {/* Team Icon & Name */}
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent-400 to-accent-600
+                                flex items-center justify-center text-white font-bold text-2xl shadow-lg">
+                  📊
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-white truncate">{datenprodukt.name}</h2>
+                  <span className={`inline-flex items-center px-2.5 py-1 mt-1 rounded-lg text-xs font-semibold border ${getStatusColor(datenprodukt.status)}`}>
+                    {datenprodukt.status}
+                  </span>
+                </div>
+              </div>
+
+              {/* Description */}
               {datenprodukt.beschreibung && (
-                <p className="text-gray-600 dark:text-gray-400 mb-3">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-4 line-clamp-2">
                   {datenprodukt.beschreibung}
                 </p>
               )}
-              <div className="flex items-center gap-3">
-                <span className={`inline-flex items-center px-3 py-1 rounded-lg text-sm font-semibold border ${getStatusColor(datenprodukt.status)}`}>
-                  {datenprodukt.status}
-                </span>
-                {datenprodukt.notizen && (
-                  <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-ard-blue-100 dark:bg-ard-blue-900/40 text-ard-blue-700 dark:text-ard-blue-300">
-                    📝 Hat Notizen
-                  </span>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="p-6 space-y-6">
+              {/* Quick Stats */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-accent-50 dark:bg-accent-900/30 rounded-xl p-3 text-center">
+                  <div className="text-2xl font-bold text-accent-600 dark:text-accent-400">{teamZuordnungen.length}</div>
+                  <div className="text-xs text-accent-700 dark:text-accent-300">Team-Mitglieder</div>
+                </div>
+                <div className="bg-blue-50 dark:bg-blue-900/30 rounded-xl p-3 text-center">
+                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{totalStunden}h</div>
+                  <div className="text-xs text-blue-700 dark:text-blue-300">Wochenstunden</div>
+                </div>
+              </div>
+
+              {/* Team Management Section */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Team-Mitglieder</h3>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => copyTeamEmailsToClipboard(datenprodukt)}
+                      className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
+                      title="E-Mail-Adressen kopieren"
+                      disabled={teamZuordnungen.length === 0}
+                    >
+                      📧 E-Mails
+                    </button>
+                    <button
+                      onClick={() => {
+                        onShowTeamAssignment(datenprodukt);
+                        setAssignmentError("");
+                        onClose();
+                      }}
+                      className="text-xs bg-green-600 text-white hover:bg-green-700 px-2.5 py-1 rounded-lg transition-colors font-medium"
+                    >
+                      + Person
+                    </button>
+                  </div>
+                </div>
+
+                {teamZuordnungen.length > 0 ? (
+                  <div className="space-y-2">
+                    {teamZuordnungen.map((zuordnung) => (
+                      <div
+                        key={zuordnung.id}
+                        className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-xl"
+                      >
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-gray-400 to-gray-500
+                                          flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
+                            {getPersonName(zuordnung.personId).split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="font-medium text-gray-900 dark:text-white text-sm truncate">
+                              {getPersonName(zuordnung.personId)}
+                            </div>
+                            <span
+                              className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium text-white mt-0.5"
+                              style={{ backgroundColor: getRoleColor(zuordnung.rolleId) }}
+                            >
+                              {getRolleName(zuordnung.rolleId)}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 ml-2 flex-shrink-0">
+                          <span className="bg-accent-500 text-white px-2 py-0.5 rounded text-xs font-medium">
+                            {zuordnung.stunden || 0}h
+                          </span>
+                          <button
+                            onClick={() => handleEditAssignment(zuordnung)}
+                            className="p-1.5 text-gray-400 hover:text-accent-600 dark:hover:text-accent-400 hover:bg-white dark:hover:bg-gray-600 rounded-lg transition-colors"
+                            title="Bearbeiten"
+                          >
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => entfernePersonVonDatenproduktRolle(zuordnung.id)}
+                            className="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-white dark:hover:bg-gray-600 rounded-lg transition-colors"
+                            title="Entfernen"
+                          >
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 rounded-xl">
+                    <div className="text-3xl mb-2">👥</div>
+                    <p className="font-medium text-sm">Kein Team zugewiesen</p>
+                    <p className="text-xs mt-1">Füge Personen zu diesem Team hinzu</p>
+                  </div>
                 )}
               </div>
-            </div>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors ml-4 flex-shrink-0"
-            >
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
-            </button>
-          </div>
 
-          {/* Team Management Section */}
-          <div className="mb-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-base font-semibold text-gray-700 dark:text-gray-300">Team-Management</h3>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => {
-                    copyTeamEmailsToClipboard(datenprodukt);
-                  }}
-                  className="inline-flex items-center px-3 py-1.5 text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
-                  title="E-Mail-Adressen kopieren"
-                  disabled={teamZuordnungen.length === 0}
-                >
-                  📧 E-Mails kopieren
-                </button>
-                <button
-                  onClick={() => {
-                    onShowTeamAssignment(datenprodukt);
-                    setAssignmentError("");
-                    onClose();
-                  }}
-                  className="inline-flex items-center px-3 py-1.5 text-sm bg-green-600 text-white hover:bg-green-700 rounded-lg transition-colors"
-                >
-                  👥 Person hinzufügen
-                </button>
-              </div>
-            </div>
-
-            {teamZuordnungen.length > 0 ? (
-              <div className="space-y-2">
-                {teamZuordnungen.map((zuordnung) => (
-                  <div
-                    key={zuordnung.id}
-                    className="py-3 px-1 flex items-center justify-between border-b border-gray-100 dark:border-gray-700 last:border-b-0"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-gray-900 dark:text-gray-100 text-sm">
-                          {getPersonName(zuordnung.personId)}
-                        </span>
-                        <span className="text-gray-600 dark:text-gray-400 text-xs">als</span>
-                        <span
-                          className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium text-white"
-                          style={{ backgroundColor: getRoleColor(zuordnung.rolleId) }}
-                        >
-                          {getRolleName(zuordnung.rolleId)}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1 ml-3">
-                      <span className="bg-ard-blue-500 text-white px-2 py-0.5 rounded text-xs font-medium whitespace-nowrap">
-                        {zuordnung.stunden || 0}h
-                      </span>
-                      <button
-                        onClick={() => {
-                          handleEditAssignment(zuordnung);
-                        }}
-                        className="text-ard-blue-500 dark:text-ard-blue-400 hover:text-ard-blue-700 dark:hover:text-ard-blue-300 p-1.5 hover:bg-ard-blue-50 dark:hover:bg-ard-blue-900/30 rounded-md transition-colors"
-                        title="Bearbeiten"
-                      >
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                        </svg>
-                      </button>
-                      <button
-                        onClick={() => {
-                          entfernePersonVonDatenproduktRolle(zuordnung.id);
-                        }}
-                        className="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 p-1.5 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-md transition-colors"
-                        title="Zuweisung entfernen"
-                      >
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                        </svg>
-                      </button>
-                    </div>
+              {/* Notes Section */}
+              {datenprodukt.notizen && (
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                    <span>📝</span> Notizen
+                  </h3>
+                  <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
+                    <p className="text-gray-700 dark:text-gray-300 text-sm whitespace-pre-wrap">{datenprodukt.notizen}</p>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
-                <div className="text-4xl mb-2">👥</div>
-                <p className="font-medium">Kein Team zugewiesen</p>
-                <p className="text-sm mt-1">Füge Personen zu diesem Team hinzu</p>
-              </div>
-            )}
-          </div>
+                </div>
+              )}
 
-          {/* Notes Section */}
-          {datenprodukt.notizen && (
-            <div className="mb-4">
-              <h3 className="text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">Notizen</h3>
-              <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
-                <p className="text-gray-700 dark:text-gray-300 text-sm whitespace-pre-wrap">{datenprodukt.notizen}</p>
-              </div>
+              {/* Action Button for Notes */}
+              <button
+                onClick={() => { onShowNotes(datenprodukt); onClose(); }}
+                className={`w-full py-3 rounded-xl text-sm font-medium transition-all ${
+                  datenprodukt.notizen
+                    ? "bg-accent-100 dark:bg-accent-900/30 text-accent-700 dark:text-accent-300 hover:bg-accent-200 dark:hover:bg-accent-900/50"
+                    : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600"
+                }`}
+              >
+                {datenprodukt.notizen ? "📝 Notizen bearbeiten" : "📝 Notizen hinzufügen"}
+              </button>
             </div>
-          )}
-
-          {/* Action Buttons */}
-          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-            <button
-              onClick={() => {
-                onShowNotes(datenprodukt);
-                onClose();
-              }}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-                datenprodukt.notizen
-                  ? "bg-ard-blue-500 text-white hover:bg-ard-blue-600"
-                  : "text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
-              }`}
-            >
-              {datenprodukt.notizen ? "Notizen bearbeiten" : "Notizen hinzufügen"}
-            </button>
-            <button
-              onClick={() => {
-                onEdit(datenprodukt);
-                onClose();
-              }}
-              className="px-4 py-2 text-ard-blue-600 dark:text-ard-blue-400 hover:text-ard-blue-700 dark:hover:text-ard-blue-300 hover:bg-ard-blue-50 dark:hover:bg-ard-blue-900/30 font-medium rounded-lg transition-all duration-200"
-            >
-              Bearbeiten
-            </button>
-            <button
-              onClick={() => {
-                onDelete(datenprodukt);
-                onClose();
-              }}
-              className="px-4 py-2 text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/30 font-medium rounded-lg transition-all duration-200"
-            >
-              Löschen
-            </button>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
