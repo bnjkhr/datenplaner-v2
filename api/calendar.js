@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   const allowedOrigins = [
     'http://localhost:3000',
     'https://datenplaner-app-v3.vercel.app',
-    'https://your-production-domain.com'
+    'https://datenplaner-v2.vercel.app'
   ];
   
   const origin = req.headers.origin;
