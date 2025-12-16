@@ -189,15 +189,15 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
 
   useEffect(() => {
     const loadVacations = async () => {
-      // Use own Vercel proxy in production, direct URL in development
+      // Use CORS proxy in production (Confluence blocks direct requests)
       let url;
 
       if (process.env.NODE_ENV === "development") {
         // Development: use direct URL
         url = confluenceCalendarUrl;
       } else {
-        // Production: use own Vercel API proxy
-        url = calendarProxyUrl;
+        // Production: use CORS proxy (Confluence blocks Vercel)
+        url = `https://corsproxy.io/?${encodeURIComponent(confluenceCalendarUrl)}`;
       }
 
       if (!url) {
