@@ -1476,6 +1476,8 @@ const PersonenVerwaltung = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showExcelModal, setShowExcelModal] = useState(false);
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const [showAllUpcomingAbsent, setShowAllUpcomingAbsent] = useState(false);
+  const [showAllCurrentAbsent, setShowAllCurrentAbsent] = useState(false);
 
   // Debouncing for search
   useEffect(() => {
@@ -1897,7 +1899,7 @@ const PersonenVerwaltung = () => {
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {currentlyAbsentPeople.slice(0, 6).map((person) => (
+                  {(showAllCurrentAbsent ? currentlyAbsentPeople : currentlyAbsentPeople.slice(0, 6)).map((person) => (
                     <button
                       key={person.id}
                       onClick={() => handleShowDetails(person)}
@@ -1913,9 +1915,13 @@ const PersonenVerwaltung = () => {
                     </button>
                   ))}
                   {currentlyAbsentPeople.length > 6 && (
-                    <span className="px-3 py-2 text-sm text-red-600 dark:text-red-400 font-medium">
-                      +{currentlyAbsentPeople.length - 6}
-                    </span>
+                    <button
+                      onClick={() => setShowAllCurrentAbsent(!showAllCurrentAbsent)}
+                      className="px-3 py-2 text-sm text-red-600 dark:text-red-400 font-medium hover:text-red-700 dark:hover:text-red-300 cursor-pointer transition-colors"
+                      title={showAllCurrentAbsent ? "Weniger anzeigen" : "Alle anzeigen"}
+                    >
+                      {showAllCurrentAbsent ? "weniger" : `+${currentlyAbsentPeople.length - 6}`}
+                    </button>
                   )}
                 </div>
               </div>
@@ -1934,7 +1940,7 @@ const PersonenVerwaltung = () => {
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {upcomingAbsentPeople.slice(0, 6).map((person) => (
+                  {(showAllUpcomingAbsent ? upcomingAbsentPeople : upcomingAbsentPeople.slice(0, 6)).map((person) => (
                     <button
                       key={person.id}
                       onClick={() => handleShowDetails(person)}
@@ -1950,9 +1956,13 @@ const PersonenVerwaltung = () => {
                     </button>
                   ))}
                   {upcomingAbsentPeople.length > 6 && (
-                    <span className="px-3 py-2 text-sm text-amber-600 dark:text-amber-400 font-medium">
-                      +{upcomingAbsentPeople.length - 6}
-                    </span>
+                    <button
+                      onClick={() => setShowAllUpcomingAbsent(!showAllUpcomingAbsent)}
+                      className="px-3 py-2 text-sm text-amber-600 dark:text-amber-400 font-medium hover:text-amber-700 dark:hover:text-amber-300 cursor-pointer transition-colors"
+                      title={showAllUpcomingAbsent ? "Weniger anzeigen" : "Alle anzeigen"}
+                    >
+                      {showAllUpcomingAbsent ? "weniger" : `+${upcomingAbsentPeople.length - 6}`}
+                    </button>
                   )}
                 </div>
               </div>
