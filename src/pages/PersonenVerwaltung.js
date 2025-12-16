@@ -872,6 +872,254 @@ const PersonDetailsPanel = ({
   );
 };
 
+// Team/Kreis Details Panel
+const TeamDetailsPanel = ({
+  teamName,
+  teamPersonen,
+  isOpen,
+  onClose,
+  onShowPersonDetails,
+  kreisConfig,
+}) => {
+  const { zuordnungen, datenprodukte, vacations } = useData();
+
+  if (!teamName) return null;
+
+  const config = kreisConfig[teamName] || kreisConfig['Ohne Kreis'];
+
+  // Team-Statistiken berechnen
+  const m13Count = teamPersonen.filter(p => p.isM13).length;
+  const totalWochenstunden = teamPersonen.reduce((sum, p) => sum + (p.wochenstunden || 0), 0);
+  const gebuchteStunden = teamPersonen.reduce((sum, p) => {
+    const personStunden = zuordnungen
+      .filter(z => z.personId === p.id)
+      .reduce((s, z) => s + (z.stunden || 0), 0);
+    return sum + personStunden;
+  }, 0);
+  const auslastungProzent = totalWochenstunden > 0 ? (gebuchteStunden / totalWochenstunden) * 100 : 0;
+
+  // Abwesende Personen im Team
+  const getAbwesendePersonen = () => {
+    const today = new Date();
+    return teamPersonen.filter(person => {
+      const searchKeys = [
+        person.name.toLowerCase(),
+        person.name.toLowerCase().replace(/\s+/g, ""),
+        person.email?.toLowerCase(),
+        person.email?.split("@")[0]?.toLowerCase(),
+      ].filter(Boolean);
+
+      for (const key of searchKeys) {
+        if (vacations[key]) {
+          const isAbsent = vacations[key].some(v => {
+            const start = new Date(v.start);
+            const end = new Date(v.end);
+            return today >= start && today <= end;
+          });
+          if (isAbsent) return true;
+        }
+      }
+      return false;
+    });
+  };
+
+  const abwesendePersonen = getAbwesendePersonen();
+
+  // Datenprodukte in denen Team-Mitglieder arbeiten
+  const getTeamDatenprodukte = () => {
+    const produktIds = new Set();
+    teamPersonen.forEach(p => {
+      zuordnungen
+        .filter(z => z.personId === p.id)
+        .forEach(z => produktIds.add(z.datenproduktId));
+    });
+    return datenprodukte.filter(dp => produktIds.has(dp.id));
+  };
+
+  const teamDatenprodukte = getTeamDatenprodukte();
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div
+        className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-50 transition-opacity duration-300 ${
+          isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        onClick={onClose}
+      />
+
+      {/* Slide-in Panel */}
+      <div
+        className={`fixed inset-y-0 right-0 w-full sm:w-[480px] bg-white dark:bg-gray-800 shadow-2xl z-50
+                    transform transition-transform duration-300 ease-out ${
+          isOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
+        <div className="h-full flex flex-col">
+          {/* Header */}
+          <div className={`flex-shrink-0 bg-gradient-to-r ${config.bgColor} border-b border-gray-200 dark:border-gray-700`}>
+            <div className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <button
+                  onClick={onClose}
+                  className="p-2 -ml-2 rounded-xl text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-white/50 dark:hover:bg-gray-600 transition-all"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Team Icon & Name */}
+              <div className="flex items-center gap-4">
+                <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${config.color}
+                                flex items-center justify-center text-white font-bold text-2xl shadow-lg`}>
+                  👥
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-white">{teamName}</h2>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {teamPersonen.length} Person{teamPersonen.length !== 1 ? 'en' : ''}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="p-6 space-y-6">
+              {/* Quick Stats */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-emerald-50 dark:bg-emerald-900/30 rounded-xl p-3 text-center">
+                  <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{m13Count}</div>
+                  <div className="text-xs text-emerald-700 dark:text-emerald-300">M13</div>
+                </div>
+                <div className="bg-blue-50 dark:bg-blue-900/30 rounded-xl p-3 text-center">
+                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{totalWochenstunden}h</div>
+                  <div className="text-xs text-blue-700 dark:text-blue-300">Wochenstunden</div>
+                </div>
+              </div>
+
+              {/* Team-Auslastung */}
+              {totalWochenstunden > 0 && (
+                <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Team-Auslastung</span>
+                    <span className={`text-sm font-bold ${
+                      auslastungProzent < 20 ? 'text-red-600 dark:text-red-400' :
+                      auslastungProzent > 100 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'
+                    }`}>
+                      {gebuchteStunden}h / {totalWochenstunden}h ({Math.round(auslastungProzent)}%)
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2.5 overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ${
+                        auslastungProzent < 20
+                          ? 'bg-gradient-to-r from-red-400 to-red-500'
+                          : auslastungProzent > 100
+                            ? 'bg-gradient-to-r from-amber-400 to-orange-500'
+                            : 'bg-gradient-to-r from-emerald-400 to-emerald-500'
+                      }`}
+                      style={{ width: `${Math.min(auslastungProzent, 100)}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Aktuell Abwesend */}
+              {abwesendePersonen.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                    <span>🏖️</span> Aktuell abwesend ({abwesendePersonen.length})
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {abwesendePersonen.map(person => (
+                      <button
+                        key={person.id}
+                        onClick={() => onShowPersonDetails(person)}
+                        className="px-3 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg text-sm font-medium
+                                   hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
+                      >
+                        {person.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Team-Mitglieder */}
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Team-Mitglieder</h3>
+                <div className="space-y-2">
+                  {teamPersonen.map(person => {
+                    const personStunden = zuordnungen
+                      .filter(z => z.personId === person.id)
+                      .reduce((s, z) => s + (z.stunden || 0), 0);
+                    const personAuslastung = person.wochenstunden > 0
+                      ? Math.round((personStunden / person.wochenstunden) * 100)
+                      : 0;
+
+                    return (
+                      <button
+                        key={person.id}
+                        onClick={() => onShowPersonDetails(person)}
+                        className="w-full flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-xl
+                                   hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors text-left"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={`w-10 h-10 rounded-xl bg-gradient-to-br from-gray-400 to-gray-500
+                                          flex items-center justify-center text-white font-bold text-sm`}>
+                            {person.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
+                          </div>
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white text-sm">{person.name}</div>
+                            <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                              {person.isM13 && <span className="text-emerald-600 dark:text-emerald-400">M13</span>}
+                              {person.wochenstunden && <span>{person.wochenstunden}h/Wo</span>}
+                            </div>
+                          </div>
+                        </div>
+                        {person.isM13 && person.wochenstunden > 0 && (
+                          <span className={`text-xs font-semibold px-2 py-1 rounded-lg ${
+                            personAuslastung < 20 ? 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300' :
+                            personAuslastung > 100 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300' :
+                            'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300'
+                          }`}>
+                            {personAuslastung}%
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Datenprodukte */}
+              {teamDatenprodukte.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Arbeitet an ({teamDatenprodukte.length})</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {teamDatenprodukte.map(dp => (
+                      <span
+                        key={dp.id}
+                        className="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium"
+                      >
+                        {dp.name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
 const PersonFormular = ({ personToEdit, onFormClose }) => {
   const {
     fuegePersonHinzu,
@@ -1154,6 +1402,8 @@ const PersonenListe = ({
   const [sortBy, setSortBy] = useState("name");
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [collapsedKreise, setCollapsedKreise] = useState({});
+  const [showTeamDetails, setShowTeamDetails] = useState(false);
+  const [teamToShowDetails, setTeamToShowDetails] = useState(null);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -1169,6 +1419,16 @@ const PersonenListe = ({
 
   const toggleKreis = (kreis) => {
     setCollapsedKreise(prev => ({ ...prev, [kreis]: !prev[kreis] }));
+  };
+
+  const handleShowTeamDetails = (kreis, personen) => {
+    setTeamToShowDetails({ name: kreis, personen });
+    setShowTeamDetails(true);
+  };
+
+  const handleCloseTeamDetails = () => {
+    setShowTeamDetails(false);
+    setTeamToShowDetails(null);
   };
 
   // Funktion um Auslastung zu berechnen
@@ -1408,28 +1668,37 @@ const PersonenListe = ({
         return (
           <div key={kreis} className="dashboard-card-no-hover overflow-hidden">
             {/* Kreis-Header */}
-            <button
-              onClick={() => toggleKreis(kreis)}
-              className="w-full flex items-center gap-4 p-4 sm:p-5 hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors"
-            >
-              {/* Color Bar */}
-              <div className={`flex-shrink-0 w-1.5 h-12 rounded-full bg-gradient-to-b ${config.color}`} />
+            <div className="flex items-center gap-4 p-4 sm:p-5">
+              {/* Color Bar - klickbar für Details */}
+              <button
+                onClick={() => handleShowTeamDetails(kreis, groupedPersonen[kreis])}
+                className={`flex-shrink-0 w-1.5 h-12 rounded-full bg-gradient-to-b ${config.color} hover:scale-110 transition-transform cursor-pointer`}
+                title={`${kreis} Details anzeigen`}
+              />
 
-              {/* Title & Count */}
-              <div className="flex-1 text-left">
+              {/* Title & Count - klickbar für Details */}
+              <button
+                onClick={() => handleShowTeamDetails(kreis, groupedPersonen[kreis])}
+                className="flex-1 text-left hover:opacity-80 transition-opacity"
+                title={`${kreis} Details anzeigen`}
+              >
                 <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">{kreis}</h2>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   {personCount} Person{personCount !== 1 ? 'en' : ''}
                 </p>
-              </div>
+              </button>
 
-              {/* Collapse Icon */}
-              <div className={`text-gray-400 dark:text-gray-500 transition-transform duration-300 ${isCollapsed ? '' : 'rotate-180'}`}>
+              {/* Collapse Icon - klickbar für Ein-/Ausklappen */}
+              <button
+                onClick={() => toggleKreis(kreis)}
+                className={`p-2 rounded-lg text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 ${isCollapsed ? '' : 'rotate-180'}`}
+                title={isCollapsed ? 'Ausklappen' : 'Einklappen'}
+              >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
-              </div>
-            </button>
+              </button>
+            </div>
 
             {/* Personen-Grid */}
             {!isCollapsed && (
@@ -1453,6 +1722,19 @@ const PersonenListe = ({
           </div>
         );
       })}
+
+      {/* Team Details Panel */}
+      <TeamDetailsPanel
+        teamName={teamToShowDetails?.name}
+        teamPersonen={teamToShowDetails?.personen || []}
+        isOpen={showTeamDetails}
+        onClose={handleCloseTeamDetails}
+        onShowPersonDetails={(person) => {
+          handleCloseTeamDetails();
+          onShowDetails(person);
+        }}
+        kreisConfig={kreisConfig}
+      />
     </div>
   );
 };
