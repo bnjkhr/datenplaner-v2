@@ -10,6 +10,7 @@ const Dashboard = ({ onNavigate }) => {
   } = useData();
 
   const [expandedSection, setExpandedSection] = useState(null);
+  const [expandedAbsence, setExpandedAbsence] = useState({ current: false, upcoming: false });
 
   // Team-Kapazität Berechnungen
   const capacityData = useMemo(() => {
@@ -88,8 +89,8 @@ const Dashboard = ({ onNavigate }) => {
     };
   }, [datenprodukte, zuordnungen]);
 
-  const handleNavigate = (page) => {
-    if (onNavigate) onNavigate(page);
+  const handleNavigate = (page, productId = null) => {
+    if (onNavigate) onNavigate(page, productId);
   };
 
   const formatDate = (date) => new Date(date).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
@@ -205,13 +206,17 @@ const Dashboard = ({ onNavigate }) => {
                 </div>
                 <div className="divide-y divide-gray-50 dark:divide-gray-700/50">
                   {productData.live.slice(0, 5).map(product => (
-                    <div key={product.id} className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                    <button
+                      key={product.id}
+                      onClick={() => handleNavigate('datenprodukte', product.id)}
+                      className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors text-left"
+                    >
                       <span className="text-sm text-gray-900 dark:text-white">{product.name}</span>
                       <div className="flex items-center gap-4 text-xs text-gray-400 dark:text-gray-500">
                         <span>{product.teamSize} {product.teamSize === 1 ? 'Person' : 'Personen'}</span>
                         <span>{product.totalHours}h/Wo</span>
                       </div>
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -229,7 +234,11 @@ const Dashboard = ({ onNavigate }) => {
                 </div>
                 <div className="divide-y divide-gray-50 dark:divide-gray-700/50">
                   {productData.inDev.slice(0, 5).map(product => (
-                    <div key={product.id} className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                    <button
+                      key={product.id}
+                      onClick={() => handleNavigate('datenprodukte', product.id)}
+                      className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors text-left"
+                    >
                       <div className="flex items-center gap-3">
                         <span className="text-sm text-gray-900 dark:text-white">{product.name}</span>
                         {product.teamSize === 0 && (
@@ -242,7 +251,7 @@ const Dashboard = ({ onNavigate }) => {
                         <span>{product.teamSize} {product.teamSize === 1 ? 'Person' : 'Personen'}</span>
                         <span>{product.totalHours}h/Wo</span>
                       </div>
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -270,12 +279,16 @@ const Dashboard = ({ onNavigate }) => {
                 {expandedSection === 'planned' && (
                   <div className="divide-y divide-gray-50 dark:divide-gray-700/50 border-t border-gray-100 dark:border-gray-700">
                     {productData.planned.map(product => (
-                      <div key={product.id} className="flex items-center justify-between px-4 py-3">
+                      <button
+                        key={product.id}
+                        onClick={() => handleNavigate('datenprodukte', product.id)}
+                        className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors text-left"
+                      >
                         <span className="text-sm text-gray-900 dark:text-white">{product.name}</span>
                         <span className="text-xs text-gray-400 dark:text-gray-500">
                           {product.teamSize} {product.teamSize === 1 ? 'Person' : 'Personen'}
                         </span>
-                      </div>
+                      </button>
                     ))}
                   </div>
                 )}
@@ -298,14 +311,19 @@ const Dashboard = ({ onNavigate }) => {
               <div className="p-4">
                 {absenceData.current.length > 0 ? (
                   <div className="space-y-2">
-                    {absenceData.current.slice(0, 6).map((person, idx) => (
+                    {(expandedAbsence.current ? absenceData.current : absenceData.current.slice(0, 4)).map((person, idx) => (
                       <div key={idx} className="flex items-center justify-between">
                         <span className="text-sm text-gray-700 dark:text-gray-300">{person.name}</span>
                         <span className="text-xs text-gray-400 dark:text-gray-500">bis {formatDate(person.endDate)}</span>
                       </div>
                     ))}
-                    {absenceData.current.length > 6 && (
-                      <span className="text-xs text-gray-400">+{absenceData.current.length - 6} weitere</span>
+                    {absenceData.current.length > 4 && (
+                      <button
+                        onClick={() => setExpandedAbsence(prev => ({ ...prev, current: !prev.current }))}
+                        className="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-medium mt-1"
+                      >
+                        {expandedAbsence.current ? '↑ weniger' : `+${absenceData.current.length - 4} weitere`}
+                      </button>
                     )}
                   </div>
                 ) : (
@@ -324,12 +342,20 @@ const Dashboard = ({ onNavigate }) => {
                 </div>
                 <div className="p-4">
                   <div className="space-y-2">
-                    {absenceData.upcoming.slice(0, 4).map((person, idx) => (
+                    {(expandedAbsence.upcoming ? absenceData.upcoming : absenceData.upcoming.slice(0, 4)).map((person, idx) => (
                       <div key={idx} className="flex items-center justify-between">
                         <span className="text-sm text-gray-700 dark:text-gray-300">{person.name}</span>
                         <span className="text-xs text-gray-400 dark:text-gray-500">ab {formatDate(person.startDate)}</span>
                       </div>
                     ))}
+                    {absenceData.upcoming.length > 4 && (
+                      <button
+                        onClick={() => setExpandedAbsence(prev => ({ ...prev, upcoming: !prev.upcoming }))}
+                        className="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-medium mt-1"
+                      >
+                        {expandedAbsence.upcoming ? '↑ weniger' : `+${absenceData.upcoming.length - 4} weitere`}
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
