@@ -94,7 +94,7 @@ export default async function handler(req, res) {
     try {
       requestingUser = await admin.auth().verifyIdToken(idToken);
     } catch (error) {
-      console.error('Token verification failed:', error);
+      console.error('Token verification failed:', error.message || error.code || 'Unknown error');
       return res.status(401).json({ error: 'Invalid token' });
     }
 
