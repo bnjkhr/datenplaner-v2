@@ -21,7 +21,7 @@ if (!admin.apps.length) {
         'Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY:',
         parseError.message,
         `| Key length: ${keyLength}`,
-        `| Starts with: ${keyPreview.replace(/[a-zA-Z0-9]/g, '*')}`
+        `| Starts with: ${keyPreview.replace(/[\s\S]/g, '*')}`
       );
       initializationError = 'Firebase Admin SDK configuration error: Invalid service account JSON';
     }
