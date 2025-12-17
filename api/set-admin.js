@@ -153,10 +153,11 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Error in set-admin:', error);
+    // Log full error server-side (including stack trace)
+    console.error('Error in set-admin:', error.message, error.stack);
+    // Return generic error to client (no implementation details)
     return res.status(500).json({
-      error: 'Fehler beim Setzen der Admin-Rechte',
-      details: error.message
+      error: 'Fehler beim Setzen der Admin-Rechte'
     });
   }
 }
