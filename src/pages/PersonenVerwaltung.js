@@ -2118,7 +2118,7 @@ const PersonenVerwaltung = () => {
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 lg:gap-6">
             {/* Title */}
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white font-display">
                 Team
               </h1>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">

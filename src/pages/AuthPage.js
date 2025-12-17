@@ -105,7 +105,7 @@ const AuthPage = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
     <div className="w-full max-w-md p-6 sm:p-8 bg-white rounded-2xl shadow-lg">
-        <h2 className="text-2xl font-bold mb-6 text-center">{resetMode ? 'Passwort vergessen' : 'Login'}</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center font-display">{resetMode ? 'Passwort vergessen' : 'Login'}</h2>
 
         <input
           type="email"

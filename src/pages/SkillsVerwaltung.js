@@ -64,7 +64,7 @@ export const SkillsVerwaltung = () => {
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-ard-blue-50/30">
             <div className="container mx-auto px-6 py-6">
                 <div className="mb-6">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-1">Skill-Verwaltung</h1>
+                    <h1 className="text-3xl font-bold text-gray-900 mb-1 font-display">Skill-Verwaltung</h1>
                     <p className="text-gray-600">Verwalte Skills und deren Zuweisungen</p>
                 </div>
 
