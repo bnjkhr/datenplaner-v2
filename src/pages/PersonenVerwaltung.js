@@ -313,7 +313,7 @@ const PersonEintrag = ({
   getNextAbsenceInfo,
 }) => {
   const { name, email, msTeamsLink, wochenstunden, kategorien, skillIds } = person;
-  const { vacations, zuordnungen, skills: allSkills } = useData();
+  const { vacations, zuordnungen, skills: allSkills, canEditPerson } = useData();
 
   // Anzahl Datenprodukte berechnen
   const getDataProductCount = () => {
@@ -520,7 +520,12 @@ const PersonDetailsPanel = ({
     rollen,
     skills: allSkills,
     vacations,
+    canEditPerson,
+    isAdmin: currentUserIsAdmin,
+    setAdminStatus,
   } = useData();
+
+  const [adminLoading, setAdminLoading] = React.useState(false);
 
   if (!person) return null;
 
@@ -532,7 +537,18 @@ const PersonDetailsPanel = ({
     wochenstunden,
     isM13,
     kategorien,
+    isAdmin: personIsAdmin,
   } = person;
+
+  const handleAdminToggle = async () => {
+    if (!email) return;
+    setAdminLoading(true);
+    try {
+      await setAdminStatus(person.id, email, !personIsAdmin);
+    } finally {
+      setAdminLoading(false);
+    }
+  };
 
   // Avatar-Farbe basierend auf Name
   const getAvatarColor = () => {
@@ -649,28 +665,30 @@ const PersonDetailsPanel = ({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => { onEdit(person); onClose(); }}
-                    className="p-2 rounded-xl text-gray-500 dark:text-gray-400 hover:text-accent-600 dark:hover:text-accent-400 hover:bg-white dark:hover:bg-gray-600 transition-all"
-                    title="Bearbeiten"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                  </button>
-                  <button
-                    onClick={() => { onDeleteInitiation(person); onClose(); }}
-                    className="p-2 rounded-xl text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-white dark:hover:bg-gray-600 transition-all"
-                    title="Löschen"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
-                </div>
+                {canEditPerson(person.id) && (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => { onEdit(person); onClose(); }}
+                      className="p-2 rounded-xl text-gray-500 dark:text-gray-400 hover:text-accent-600 dark:hover:text-accent-400 hover:bg-white dark:hover:bg-gray-600 transition-all"
+                      title="Bearbeiten"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => { onDeleteInitiation(person); onClose(); }}
+                      className="p-2 rounded-xl text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-white dark:hover:bg-gray-600 transition-all"
+                      title="Löschen"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Profile */}
@@ -727,6 +745,11 @@ const PersonDetailsPanel = ({
                     M13
                   </span>
                 )}
+                {personIsAdmin && (
+                  <span className="px-3 py-1.5 rounded-lg text-sm font-semibold bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300">
+                    Admin
+                  </span>
+                )}
                 {wochenstunden && (
                   <span className="px-3 py-1.5 rounded-lg text-sm font-semibold bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300">
                     {wochenstunden}h/Woche
@@ -743,6 +766,33 @@ const PersonDetailsPanel = ({
                   </button>
                 ))}
               </div>
+
+              {/* Admin-Verwaltung (nur für Admins sichtbar) */}
+              {currentUserIsAdmin && email && (
+                <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-4 border border-purple-200 dark:border-purple-800">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-sm font-semibold text-purple-900 dark:text-purple-100">Admin-Rechte</h4>
+                      <p className="text-xs text-purple-600 dark:text-purple-400 mt-0.5">
+                        {personIsAdmin ? 'Hat Administrator-Zugriff' : 'Kein Administrator-Zugriff'}
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleAdminToggle}
+                      disabled={adminLoading}
+                      className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent
+                                  transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2
+                                  ${personIsAdmin ? 'bg-purple-600' : 'bg-gray-300 dark:bg-gray-600'}
+                                  ${adminLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                      <span
+                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0
+                                    transition duration-200 ease-in-out ${personIsAdmin ? 'translate-x-5' : 'translate-x-0'}`}
+                      />
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Auslastung für M13 */}
               {isM13 && auslastung && (
@@ -1069,10 +1119,18 @@ const TeamDetailsPanel = ({
                                    hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors text-left"
                       >
                         <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-xl bg-gradient-to-br from-gray-400 to-gray-500
-                                          flex items-center justify-center text-white font-bold text-sm`}>
-                            {person.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
-                          </div>
+                          {person.avatarUrl ? (
+                            <img
+                              src={person.avatarUrl}
+                              alt={person.name}
+                              className="w-10 h-10 rounded-xl object-cover"
+                            />
+                          ) : (
+                            <div className={`w-10 h-10 rounded-xl bg-gradient-to-br from-gray-400 to-gray-500
+                                            flex items-center justify-center text-white font-bold text-sm`}>
+                              {person.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
+                            </div>
+                          )}
                           <div>
                             <div className="font-medium text-gray-900 dark:text-white text-sm">{person.name}</div>
                             <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
@@ -1398,7 +1456,7 @@ const PersonenListe = ({
   onSkillClick,
   onShowDetails,
 }) => {
-  const { loading, error, zuordnungen, vacations } = useData();
+  const { loading, error, zuordnungen, vacations, canEditPerson, canEditData } = useData();
   const [sortBy, setSortBy] = useState("name");
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [collapsedKreise, setCollapsedKreise] = useState({});
@@ -1754,6 +1812,8 @@ const PersonenVerwaltung = ({ initialSelectedId, onSelectedClear }) => {
     rollen,
     loeschePerson,
     vacations,
+    canEditPerson,
+    canEditData,
   } = useData();
 
   // Open details modal when navigating with a specific person ID
@@ -2150,28 +2210,32 @@ const PersonenVerwaltung = ({ initialSelectedId, onSelectedClear }) => {
               </div>
 
               <div className="flex items-center gap-2">
-                <button
-                  onClick={handleAddNewPerson}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-accent-500 to-purple-accent-500
-                             text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02]"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                  </svg>
-                  <span className="hidden sm:inline">Person</span>
-                </button>
+                {canEditData() && (
+                  <>
+                    <button
+                      onClick={handleAddNewPerson}
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-accent-500 to-purple-accent-500
+                                 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02]"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      </svg>
+                      <span className="hidden sm:inline">Person</span>
+                    </button>
 
-                <button
-                  onClick={() => setShowExcelModal(true)}
-                  className="p-2.5 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400
-                             hover:border-emerald-300 dark:hover:border-emerald-600 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all duration-200"
-                  title="Excel Upload"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                  </svg>
-                </button>
+                    <button
+                      onClick={() => setShowExcelModal(true)}
+                      className="p-2.5 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400
+                                 hover:border-emerald-300 dark:hover:border-emerald-600 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all duration-200"
+                      title="Excel Upload"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                      </svg>
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>

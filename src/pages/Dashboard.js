@@ -109,7 +109,16 @@ const Gauge = ({ value, size = 140 }) => {
 };
 
 const Dashboard = ({ onNavigate }) => {
-  const { personen, datenprodukte, zuordnungen, vacations, skills, rollen } = useData();
+  const { personen, datenprodukte, zuordnungen, vacations, skills, rollen, currentPerson } = useData();
+
+  // Begrüßung basierend auf Tageszeit
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    const name = currentPerson?.name?.split(' ')[0] || '';
+    if (hour < 11) return `Guten Morgen${name ? ', ' + name : ''}.`;
+    if (hour < 18) return `Hallo${name ? ', ' + name : ''}.`;
+    return `Guten Abend${name ? ', ' + name : ''}.`;
+  };
   const [expandedSection, setExpandedSection] = useState(null);
   const [showWarnings, setShowWarnings] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -292,10 +301,10 @@ const Dashboard = ({ onNavigate }) => {
         {/* Header */}
         <div className="flex items-center justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white font-display">Dashboard</h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               {new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
             </p>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{getGreeting()}</h1>
           </div>
 
           {/* Universal Search */}

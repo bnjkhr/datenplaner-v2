@@ -30,12 +30,27 @@ export const PersonDetailsModal = ({ person, skills, datenprodukte, zuordnungen,
         {/* Header */}
         <div className="sticky top-0 bg-gradient-to-r from-ard-blue-600 to-ard-blue-700 text-white px-6 py-4 rounded-t-xl flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <h2 className="text-2xl font-bold">{person.name}</h2>
-            {person.isM13 && (
-              <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-sm font-semibold bg-green-500 text-white">
-                M13
-              </span>
+            {person.avatarUrl ? (
+              <img
+                src={person.avatarUrl}
+                alt={person.name}
+                className="w-12 h-12 rounded-full object-cover border-2 border-white/30"
+              />
+            ) : (
+              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                <span className="text-xl font-bold">
+                  {person.name?.split(' ').map(n => n[0]).join('').substring(0, 2)}
+                </span>
+              </div>
             )}
+            <div>
+              <h2 className="text-2xl font-bold">{person.name}</h2>
+              {person.isM13 && (
+                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-green-500 text-white mt-1">
+                  M13
+                </span>
+              )}
+            </div>
           </div>
           <button
             onClick={onClose}
@@ -173,12 +188,12 @@ export const PersonDetailsModal = ({ person, skills, datenprodukte, zuordnungen,
           )}
 
           {/* Terminbuchungslink */}
-          {person.terminbuchungslink && (
+          {person.terminbuchungsLink && (
             <div>
               <h3 className="text-sm font-semibold text-gray-700 mb-2">Terminbuchung</h3>
               <div className="bg-gray-50 rounded-lg p-3">
                 <a
-                  href={person.terminbuchungslink}
+                  href={person.terminbuchungsLink}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-ard-blue-600 hover:underline flex items-center gap-2"

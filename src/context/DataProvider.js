@@ -4,9 +4,12 @@ import React, {
   useContext,
   useEffect,
   useCallback,
+  useMemo,
 } from "react";
+import { useUserClaims } from "../hooks/useUserClaims";
 import {
   db,
+  auth,
   appId,
   defaultTenantId,
   confluenceCalendarUrl,
@@ -126,17 +129,62 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
   const [vacations, setVacations] = useState({});
   const [calendarError, setCalendarError] = useState(false);
 
+  // User Claims und Admin-Status
+  const { isAdmin, claims: userClaims, loading: claimsLoading } = useUserClaims(user);
+
+  // Eigene Person finden (Email-Matching)
+  const currentPerson = useMemo(() => {
+    if (!user?.email || !personen?.length) return null;
+    const userEmail = user.email.toLowerCase();
+    return personen.find(p => p.email?.toLowerCase() === userEmail) || null;
+  }, [user?.email, personen]);
+
+  // User Self-Service Feature Check
+  const isUserSelfServiceEnabled = isFeatureEnabled(FEATURE_FLAGS.USER_SELF_SERVICE);
+
+  // Berechtigungsprüfungen
+  const canEditPerson = useCallback((personId) => {
+    // Feature nicht aktiv = alle können alles (Rückwärtskompatibilität)
+    if (!isUserSelfServiceEnabled) return true;
+    // Admin kann alles
+    if (isAdmin) return true;
+    // User kann eigene Person bearbeiten
+    if (currentPerson && currentPerson.id === personId) return true;
+    // Sonst: keine Berechtigung
+    return false;
+  }, [isUserSelfServiceEnabled, isAdmin, currentPerson]);
+
+  const canEditData = useCallback(() => {
+    // Feature nicht aktiv = alle können alles (Rückwärtskompatibilität)
+    if (!isUserSelfServiceEnabled) return true;
+    // Nur Admins können Stammdaten bearbeiten
+    return isAdmin;
+  }, [isUserSelfServiceEnabled, isAdmin]);
+
+  // Prüft ob User eine Zuordnung bearbeiten darf (basierend auf personId der Zuordnung)
+  const canEditZuordnung = useCallback((personIdOfZuordnung) => {
+    // Feature nicht aktiv = alle können alles (Rückwärtskompatibilität)
+    if (!isUserSelfServiceEnabled) return true;
+    // Admin kann alles
+    if (isAdmin) return true;
+    // User kann eigene Zuordnungen bearbeiten
+    if (currentPerson && currentPerson.id === personIdOfZuordnung) return true;
+    // Sonst: keine Berechtigung
+    return false;
+  }, [isUserSelfServiceEnabled, isAdmin, currentPerson]);
+
   // Multi-Tenancy: Wähle entsprechenden Tenant oder fallback zu appId
   const currentTenantId =
     tenantId ||
     (isFeatureEnabled(FEATURE_FLAGS.MULTI_TENANCY) ? defaultTenantId : appId);
   const isMultiTenancy = isFeatureEnabled(FEATURE_FLAGS.MULTI_TENANCY);
 
-  const lastChangeRef = doc(
-    db,
+  // Memoize the path to prevent unnecessary re-renders
+  const lastChangePath = useMemo(() =>
     isMultiTenancy
       ? `tenants/${currentTenantId}`
       : `artifacts/${appId}/public/meta`,
+    [isMultiTenancy, currentTenantId]
   );
 
   const recordLastChange = async (description) => {
@@ -147,13 +195,8 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
     };
     setLastChange(change);
     try {
-      if (isMultiTenancy) {
-        // Für Multi-Tenancy: Speichere als Field im Tenant-Dokument
-        await setDoc(lastChangeRef, { lastChange: change }, { merge: true });
-      } else {
-        // Legacy-Pfad: Nutze die alte Struktur
-        await setDoc(lastChangeRef, { lastChange: change }, { merge: true });
-      }
+      const docRef = doc(db, lastChangePath);
+      await setDoc(docRef, { lastChange: change }, { merge: true });
       // Use secure logging instead of direct fetch
       secureLog({
         type: 'data_change',
@@ -177,15 +220,18 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
   );
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(lastChangeRef, (snapshot) => {
+    const docRef = doc(db, lastChangePath);
+    const unsubscribe = onSnapshot(docRef, (snapshot) => {
       if (snapshot.exists()) {
         setLastChange(snapshot.data().lastChange || null);
       } else {
         setLastChange(null);
       }
+    }, (err) => {
+      console.error("Error listening to lastChange:", err);
     });
     return () => unsubscribe();
-  }, [lastChangeRef]);
+  }, [lastChangePath]);
 
   useEffect(() => {
     const loadVacations = async () => {
@@ -346,6 +392,11 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
     };
 
   const fuegePersonHinzu = preventWriteActions(async (personDaten) => {
+    // Berechtigungsprüfung - nur Admins können Personen anlegen
+    if (!canEditData()) {
+      setError("Keine Berechtigung: Nur Administratoren können neue Personen anlegen.");
+      return null;
+    }
     try {
       const docRef = await addDoc(
         collection(db, getCollectionPath("personen")),
@@ -407,6 +458,11 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
 
   const aktualisierePerson = preventWriteActions(
     async (personId, neueDaten) => {
+      // Berechtigungsprüfung
+      if (!canEditPerson(personId)) {
+        setError("Keine Berechtigung: Du kannst nur dein eigenes Profil bearbeiten.");
+        return false;
+      }
       try {
         await updateDoc(doc(db, getCollectionPath("personen"), personId), {
           ...neueDaten,
@@ -422,6 +478,11 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
     },
   );
   const loeschePerson = preventWriteActions(async (personId) => {
+    // Berechtigungsprüfung - nur Admins können Personen löschen
+    if (!canEditData()) {
+      setError("Keine Berechtigung: Nur Administratoren können Personen löschen.");
+      return false;
+    }
     try {
       const batch = writeBatch(db);
       const assignmentsQuery = query(
@@ -441,6 +502,11 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
     }
   });
   const erstelleDatenprodukt = preventWriteActions(async (produktDaten) => {
+    // Berechtigungsprüfung
+    if (!canEditData()) {
+      setError("Keine Berechtigung: Nur Administratoren können Datenprodukte erstellen.");
+      return null;
+    }
     try {
       const docRef = await addDoc(
         collection(db, getCollectionPath("datenprodukte")),
@@ -460,6 +526,11 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
   });
   const aktualisiereDatenprodukt = preventWriteActions(
     async (produktId, neueDaten) => {
+      // Berechtigungsprüfung
+      if (!canEditData()) {
+        setError("Keine Berechtigung: Nur Administratoren können Datenprodukte bearbeiten.");
+        return false;
+      }
       try {
         await updateDoc(
           doc(db, getCollectionPath("datenprodukte"), produktId),
@@ -478,6 +549,11 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
     },
   );
   const loescheDatenprodukt = preventWriteActions(async (produktId) => {
+    // Berechtigungsprüfung
+    if (!canEditData()) {
+      setError("Keine Berechtigung: Nur Administratoren können Datenprodukte löschen.");
+      return false;
+    }
     try {
       const batch = writeBatch(db);
       const q = query(
@@ -498,6 +574,11 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
   });
   const weisePersonDatenproduktRolleZu = preventWriteActions(
     async (personId, produktId, rolleId, stunden = 0) => {
+      // Berechtigungsprüfung
+      if (!canEditZuordnung(personId)) {
+        setError("Keine Berechtigung: Du kannst nur deine eigenen Zuordnungen bearbeiten.");
+        return null;
+      }
       const existing = zuordnungen.find(
         (z) =>
           z.personId === personId &&
@@ -531,6 +612,17 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
   );
   const entfernePersonVonDatenproduktRolle = preventWriteActions(
     async (zuordnungId) => {
+      // Finde Zuordnung um personId zu prüfen
+      const zuordnung = zuordnungen.find(z => z.id === zuordnungId);
+      if (!zuordnung) {
+        setError("Zuordnung nicht gefunden.");
+        return false;
+      }
+      // Berechtigungsprüfung
+      if (!canEditZuordnung(zuordnung.personId)) {
+        setError("Keine Berechtigung: Du kannst nur deine eigenen Zuordnungen entfernen.");
+        return false;
+      }
       try {
         await deleteDoc(doc(db, getCollectionPath("zuordnungen"), zuordnungId));
         recordLastChange("Rolle entfernt");
@@ -545,6 +637,17 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
 
   const aktualisiereZuordnungStunden = preventWriteActions(
     async (zuordnungId, stunden) => {
+      // Finde Zuordnung um personId zu prüfen
+      const zuordnung = zuordnungen.find(z => z.id === zuordnungId);
+      if (!zuordnung) {
+        setError("Zuordnung nicht gefunden.");
+        return false;
+      }
+      // Berechtigungsprüfung
+      if (!canEditZuordnung(zuordnung.personId)) {
+        setError("Keine Berechtigung: Du kannst nur deine eigenen Stunden bearbeiten.");
+        return false;
+      }
       try {
         await updateDoc(
           doc(db, getCollectionPath("zuordnungen"), zuordnungId),
@@ -564,6 +667,17 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
 
   const aktualisiereZuordnung = preventWriteActions(
     async (zuordnungId, updates) => {
+      // Finde Zuordnung um personId zu prüfen
+      const zuordnung = zuordnungen.find(z => z.id === zuordnungId);
+      if (!zuordnung) {
+        setError("Zuordnung nicht gefunden.");
+        return false;
+      }
+      // Berechtigungsprüfung
+      if (!canEditZuordnung(zuordnung.personId)) {
+        setError("Keine Berechtigung: Du kannst nur deine eigenen Zuordnungen bearbeiten.");
+        return false;
+      }
       try {
         const updateData = {};
         if (updates.stunden !== undefined) {
@@ -587,6 +701,11 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
     },
   );
   const fuegeRolleHinzu = preventWriteActions(async (rollenName) => {
+    // Berechtigungsprüfung
+    if (!canEditData()) {
+      setError("Keine Berechtigung: Nur Administratoren können Rollen erstellen.");
+      return null;
+    }
     if (!rollenName?.trim()) return null;
     try {
       const existingColors = rollen.map((r) => r.color).filter(Boolean);
@@ -607,6 +726,11 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
 
   const aktualisiereRolle = preventWriteActions(
     async (rolleId, rollenName, color = null) => {
+      // Berechtigungsprüfung
+      if (!canEditData()) {
+        setError("Keine Berechtigung: Nur Administratoren können Rollen bearbeiten.");
+        return false;
+      }
       if (!rollenName?.trim()) return false;
       try {
         const updateData = { name: rollenName.trim() };
@@ -628,6 +752,11 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
     },
   );
   const loescheRolle = preventWriteActions(async (rolleId) => {
+    // Berechtigungsprüfung
+    if (!canEditData()) {
+      setError("Keine Berechtigung: Nur Administratoren können Rollen löschen.");
+      return false;
+    }
     const isRoleInUse = zuordnungen.some((z) => z.rolleId === rolleId);
     if (isRoleInUse) {
       setError("Diese Rolle wird noch verwendet.");
@@ -708,6 +837,11 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
   });
 
   const fuegeSkillHinzu = preventWriteActions(async (skillName, color) => {
+    // Berechtigungsprüfung
+    if (!canEditData()) {
+      setError("Keine Berechtigung: Nur Administratoren können Skills erstellen.");
+      return null;
+    }
     if (!skillName?.trim()) return null;
     const colorToUse = color || getRandomColor();
     try {
@@ -725,6 +859,11 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
   });
   const aktualisiereSkill = preventWriteActions(
     async (skillId, skillName, color) => {
+      // Berechtigungsprüfung
+      if (!canEditData()) {
+        setError("Keine Berechtigung: Nur Administratoren können Skills bearbeiten.");
+        return false;
+      }
       if (!skillName?.trim()) return false;
       try {
         await updateDoc(doc(db, getCollectionPath("skills"), skillId), {
@@ -741,6 +880,11 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
     },
   );
   const loescheSkill = preventWriteActions(async (skillId) => {
+    // Berechtigungsprüfung
+    if (!canEditData()) {
+      setError("Keine Berechtigung: Nur Administratoren können Skills löschen.");
+      return false;
+    }
     const isSkillInUse = personen.some(
       (p) => p.skillIds && p.skillIds.includes(skillId),
     );
@@ -759,6 +903,67 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
       return false;
     }
   });
+
+  // Admin-Status verwalten
+  const setAdminStatus = async (personId, targetEmail, makeAdmin) => {
+    // Nur Admins können Admin-Rechte vergeben
+    if (!isAdmin) {
+      setError("Keine Berechtigung: Nur Administratoren können Admin-Rechte vergeben.");
+      return false;
+    }
+
+    if (!targetEmail) {
+      setError("Diese Person hat keine E-Mail-Adresse hinterlegt.");
+      return false;
+    }
+
+    try {
+      // ID-Token des aktuellen Users holen
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        setError("Nicht angemeldet.");
+        return false;
+      }
+
+      const idToken = await currentUser.getIdToken();
+
+      // API aufrufen
+      const response = await fetch('/api/set-admin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        },
+        body: JSON.stringify({
+          targetEmail,
+          isAdmin: makeAdmin
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Fehler beim Setzen der Admin-Rechte');
+        return false;
+      }
+
+      // Erfolgreich - jetzt Firestore-Dokument aktualisieren
+      const person = personen.find(p => p.id === personId);
+      if (person) {
+        await updateDoc(doc(db, getCollectionPath("personen"), personId), {
+          isAdmin: makeAdmin,
+          letzteAenderung: new Date().toISOString(),
+        });
+        recordLastChange(makeAdmin ? "Admin-Rechte vergeben" : "Admin-Rechte entzogen");
+      }
+
+      return true;
+    } catch (e) {
+      console.error("Error setting admin status:", e);
+      setError(`Fehler beim Setzen der Admin-Rechte: ${e.message}`);
+      return false;
+    }
+  };
 
   return (
     <DataContext.Provider
@@ -779,6 +984,9 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
         loescheDatenprodukt,
         weisePersonDatenproduktRolleZu,
         entfernePersonVonDatenproduktRolle,
+        // Aliase für MeinProfilModal
+        fuegeZuordnungHinzu: weisePersonDatenproduktRolleZu,
+        loescheZuordnung: entfernePersonVonDatenproduktRolle,
         aktualisiereZuordnungStunden,
         aktualisiereZuordnung,
         fuegeRolleHinzu,
@@ -796,6 +1004,17 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
         // Multi-Tenancy Informationen
         currentTenantId,
         isMultiTenancy,
+        // User Self-Service Informationen
+        isAdmin,
+        currentPerson,
+        userClaims,
+        claimsLoading,
+        // Berechtigungsfunktionen
+        canEditPerson,
+        canEditData,
+        isUserSelfServiceEnabled,
+        // Admin-Verwaltung
+        setAdminStatus,
       }}
     >
       {" "}
