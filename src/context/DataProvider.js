@@ -143,7 +143,11 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
   const isUserSelfServiceEnabled = isFeatureEnabled(FEATURE_FLAGS.USER_SELF_SERVICE);
 
   // Berechtigungsprüfungen
+  // Note: Return false while loading to prevent race conditions where
+  // isAdmin is false before claims are loaded, incorrectly denying access
   const canEditPerson = useCallback((personId) => {
+    // Wait for claims and data to load before making permission decisions
+    if (claimsLoading || loading) return false;
     // Feature nicht aktiv = alle können alles (Rückwärtskompatibilität)
     if (!isUserSelfServiceEnabled) return true;
     // Admin kann alles
@@ -152,17 +156,21 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
     if (currentPerson && currentPerson.id === personId) return true;
     // Sonst: keine Berechtigung
     return false;
-  }, [isUserSelfServiceEnabled, isAdmin, currentPerson]);
+  }, [isUserSelfServiceEnabled, isAdmin, currentPerson, claimsLoading, loading]);
 
   const canEditData = useCallback(() => {
+    // Wait for claims to load before making permission decisions
+    if (claimsLoading) return false;
     // Feature nicht aktiv = alle können alles (Rückwärtskompatibilität)
     if (!isUserSelfServiceEnabled) return true;
     // Nur Admins können Stammdaten bearbeiten
     return isAdmin;
-  }, [isUserSelfServiceEnabled, isAdmin]);
+  }, [isUserSelfServiceEnabled, isAdmin, claimsLoading]);
 
   // Prüft ob User eine Zuordnung bearbeiten darf (basierend auf personId der Zuordnung)
   const canEditZuordnung = useCallback((personIdOfZuordnung) => {
+    // Wait for claims and data to load before making permission decisions
+    if (claimsLoading || loading) return false;
     // Feature nicht aktiv = alle können alles (Rückwärtskompatibilität)
     if (!isUserSelfServiceEnabled) return true;
     // Admin kann alles
@@ -171,7 +179,7 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
     if (currentPerson && currentPerson.id === personIdOfZuordnung) return true;
     // Sonst: keine Berechtigung
     return false;
-  }, [isUserSelfServiceEnabled, isAdmin, currentPerson]);
+  }, [isUserSelfServiceEnabled, isAdmin, currentPerson, claimsLoading, loading]);
 
   // Multi-Tenancy: Wähle entsprechenden Tenant oder fallback zu appId
   const currentTenantId =
