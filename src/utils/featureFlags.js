@@ -8,7 +8,8 @@ export const FEATURE_FLAGS = {
   MULTI_TENANCY: 'multi_tenancy',
   TENANT_MANAGEMENT: 'tenant_management',
   TENANT_INVITATION: 'tenant_invitation',
-  TENANT_SWITCHING: 'tenant_switching'
+  TENANT_SWITCHING: 'tenant_switching',
+  USER_SELF_SERVICE: 'user_self_service'
 };
 
 // Feature Flag Status
@@ -84,6 +85,11 @@ export const getFeatureConfig = () => {
       description: 'Mandantenwechsel',
       rolloutPercentage: 0,
       dependsOn: [FEATURE_FLAGS.MULTI_TENANCY]
+    },
+    [FEATURE_FLAGS.USER_SELF_SERVICE]: {
+      status: FEATURE_STATUS.DISABLED,
+      description: 'Benutzer können eigene Daten bearbeiten',
+      rolloutPercentage: 0
     }
   };
 
@@ -100,6 +106,9 @@ export const getFeatureConfig = () => {
     },
     [FEATURE_FLAGS.TENANT_SWITCHING]: {
       status: process.env.REACT_APP_TENANT_SWITCHING_STATUS || baseConfig[FEATURE_FLAGS.TENANT_SWITCHING].status
+    },
+    [FEATURE_FLAGS.USER_SELF_SERVICE]: {
+      status: process.env.REACT_APP_USER_SELF_SERVICE_STATUS || baseConfig[FEATURE_FLAGS.USER_SELF_SERVICE].status
     }
   };
 

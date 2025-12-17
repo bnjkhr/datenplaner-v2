@@ -4,6 +4,8 @@ import { signOut } from "firebase/auth";
 import { auth, waitForAnalytics } from "./firebase/config";
 import { logEvent } from "firebase/analytics";
 import { ChangePasswordModal } from "./components/auth/ChangePasswordModal";
+import { MeinProfilModal } from "./components/auth/MeinProfilModal";
+import { isFeatureEnabled, FEATURE_FLAGS } from "./utils/featureFlags";
 import PersonenVerwaltung from "./pages/PersonenVerwaltung";
 import { DatenproduktVerwaltung } from "./pages/DatenproduktVerwaltung";
 import { Auswertungen } from "./pages/Auswertungen";
@@ -49,6 +51,7 @@ const AppFooter = ({ user }) => {
   const [currentPage, setCurrentPage] = useState("dashboard");
   const [selectedItemId, setSelectedItemId] = useState(null);
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+  const [showMeinProfilModal, setShowMeinProfilModal] = useState(false);
   const [showReleaseNotesModal, setShowReleaseNotesModal] = useState(false);
   const [showBurgerMenu, setShowBurgerMenu] = useState(false);
   const { calendarError, personen } = useData();
@@ -266,6 +269,17 @@ const AppFooter = ({ user }) => {
                 Skills
               </button>
               <div className="border-t border-gray-200 dark:border-gray-600 my-2 mx-4"></div>
+              {isFeatureEnabled(FEATURE_FLAGS.USER_SELF_SERVICE) && (
+                <button
+                  onClick={() => {
+                    setShowMeinProfilModal(true);
+                    setShowBurgerMenu(false);
+                  }}
+                  className="w-full px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-accent-50 dark:hover:bg-gray-700 hover:text-accent-600 dark:hover:text-accent-400 transition-all duration-200"
+                >
+                  Mein Profil
+                </button>
+              )}
               <button
                 onClick={() => {
                   setShowChangePasswordModal(true);
@@ -357,6 +371,10 @@ const AppFooter = ({ user }) => {
       <ChangePasswordModal
         isOpen={showChangePasswordModal}
         onClose={() => setShowChangePasswordModal(false)}
+      />
+      <MeinProfilModal
+        isOpen={showMeinProfilModal}
+        onClose={() => setShowMeinProfilModal(false)}
       />
       <ReleaseNotesModal
         isOpen={showReleaseNotesModal}

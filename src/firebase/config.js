@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 import { getAnalytics, isSupported, setUserId } from "firebase/analytics";
 import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
 
@@ -63,6 +64,7 @@ if (process.env.REACT_APP_RECAPTCHA_SITE_KEY && process.env.NODE_ENV === 'produc
 
 const auth = getAuth(app);
 const db = getFirestore(app);
+const storage = getStorage(app);
 
 export let analytics = null;
 
@@ -97,4 +99,4 @@ export const setAnalyticsUserId = async (userId) => {
   }
 };
 
-export { auth, db };
+export { auth, db, storage };
