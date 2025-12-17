@@ -275,6 +275,12 @@ export const MeinProfilModal = ({ isOpen, onClose }) => {
 
     try {
       const user = auth.currentUser;
+      // Null check for user and email before proceeding
+      if (!user || !user.email) {
+        setError('Nicht angemeldet. Bitte melde dich erneut an.');
+        setSaving(false);
+        return;
+      }
       const credential = EmailAuthProvider.credential(user.email, passwordData.currentPassword);
       await reauthenticateWithCredential(user, credential);
       await updatePassword(user, passwordData.newPassword);
