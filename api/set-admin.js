@@ -140,7 +140,8 @@ export default async function handler(req, res) {
 
     await admin.auth().setCustomUserClaims(targetUser.uid, newClaims);
 
-    console.log(`Admin status for ${targetEmail} set to ${isAdmin} by ${requestingUser.email}`);
+    // Log with user IDs only (no PII/emails)
+    console.log(`Admin status for user ${targetUser.uid} set to ${isAdmin} by user ${requestingUser.uid}`);
 
     return res.status(200).json({
       success: true,
