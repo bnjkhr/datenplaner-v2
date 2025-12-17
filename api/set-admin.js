@@ -1,20 +1,49 @@
 // api/set-admin.js - Vercel Serverless Function für Admin-Verwaltung
 import admin from 'firebase-admin';
 
+// Track initialization errors for controlled error responses
+let initializationError = null;
+
 // Firebase Admin initialisieren (nur einmal)
 if (!admin.apps.length) {
   // Service Account aus Environment Variable laden
-  const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT_KEY
-    ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY)
-    : null;
+  let serviceAccount = null;
+  const envKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+
+  if (envKey) {
+    try {
+      serviceAccount = JSON.parse(envKey);
+    } catch (parseError) {
+      // Log error with safe context (key length only, no secrets)
+      const keyLength = envKey ? envKey.length : 0;
+      const keyPreview = envKey ? `${envKey.substring(0, 10)}...` : 'empty';
+      console.error(
+        'Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY:',
+        parseError.message,
+        `| Key length: ${keyLength}`,
+        `| Starts with: ${keyPreview.replace(/[a-zA-Z0-9]/g, '*')}`
+      );
+      initializationError = 'Firebase Admin SDK configuration error: Invalid service account JSON';
+    }
+  }
 
   if (serviceAccount) {
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-    });
-  } else {
+    try {
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+      });
+    } catch (initError) {
+      console.error('Failed to initialize Firebase Admin:', initError.message);
+      initializationError = 'Firebase Admin SDK initialization failed';
+    }
+  } else if (!initializationError) {
     // Fallback für lokale Entwicklung mit GOOGLE_APPLICATION_CREDENTIALS
-    admin.initializeApp();
+    try {
+      admin.initializeApp();
+    } catch (initError) {
+      console.error('Failed to initialize Firebase Admin (fallback):', initError.message);
+      initializationError = 'Firebase Admin SDK initialization failed (no credentials)';
+    }
   }
 }
 
@@ -40,6 +69,15 @@ export default async function handler(req, res) {
 
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  // Check for initialization errors
+  if (initializationError) {
+    console.error('Request rejected due to initialization error:', initializationError);
+    return res.status(500).json({
+      error: 'Server configuration error',
+      details: 'Firebase Admin SDK not properly configured'
+    });
   }
 
   try {
