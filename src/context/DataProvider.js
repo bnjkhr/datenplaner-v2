@@ -935,7 +935,10 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
 
       const idToken = await currentUser.getIdToken();
 
-      // API aufrufen
+      // API aufrufen mit Timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
       const response = await fetch('/api/set-admin', {
         method: 'POST',
         headers: {
@@ -945,8 +948,10 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
         body: JSON.stringify({
           targetEmail,
           isAdmin: makeAdmin
-        })
+        }),
+        signal: controller.signal
       });
+      clearTimeout(timeoutId);
 
       const data = await response.json();
 
@@ -958,17 +963,27 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
       // Erfolgreich - jetzt Firestore-Dokument aktualisieren
       const person = personen.find(p => p.id === personId);
       if (person) {
-        await updateDoc(doc(db, getCollectionPath("personen"), personId), {
-          isAdmin: makeAdmin,
-          letzteAenderung: new Date().toISOString(),
-        });
-        recordLastChange(makeAdmin ? "Admin-Rechte vergeben" : "Admin-Rechte entzogen");
+        try {
+          await updateDoc(doc(db, getCollectionPath("personen"), personId), {
+            isAdmin: makeAdmin,
+            letzteAenderung: new Date().toISOString(),
+          });
+          recordLastChange(makeAdmin ? "Admin-Rechte vergeben" : "Admin-Rechte entzogen");
+        } catch (firestoreError) {
+          console.error("Firestore update failed after successful API call:", firestoreError);
+          setError("Admin-Rechte gesetzt, aber Profil-Update fehlgeschlagen. Bitte Seite neu laden.");
+          return false;
+        }
       }
 
       return true;
     } catch (e) {
-      console.error("Error setting admin status:", e);
-      setError(`Fehler beim Setzen der Admin-Rechte: ${e.message}`);
+      if (e.name === 'AbortError') {
+        setError('Anfrage hat zu lange gedauert. Bitte erneut versuchen.');
+      } else {
+        console.error("Error setting admin status:", e);
+        setError(`Fehler beim Setzen der Admin-Rechte: ${e.message}`);
+      }
       return false;
     }
   };
