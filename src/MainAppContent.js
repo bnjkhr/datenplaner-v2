@@ -47,11 +47,18 @@ const AppFooter = ({ user }) => {
 
   export const MainAppContent = ({ user }) => {
   const [currentPage, setCurrentPage] = useState("dashboard");
+  const [selectedItemId, setSelectedItemId] = useState(null);
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const [showReleaseNotesModal, setShowReleaseNotesModal] = useState(false);
   const [showBurgerMenu, setShowBurgerMenu] = useState(false);
   const { calendarError, personen } = useData();
   const { isDarkMode, toggleDarkMode } = useTheme();
+
+  // Navigation handler that supports opening specific items
+  const handleNavigate = (page, itemId = null) => {
+    setCurrentPage(page);
+    setSelectedItemId(itemId);
+  };
 
   // Check for mobile screen size
   const [isMobile, setIsMobile] = useState(false);
@@ -294,7 +301,7 @@ const AppFooter = ({ user }) => {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 font-sans flex flex-col transition-colors duration-200">
       <header className="bg-ard-blue-600 dark:bg-gray-800 sticky top-0 z-30 shadow-lg">
-        <nav className="container mx-auto px-4 py-4 max-w-[1600px]">
+        <nav className="container mx-auto px-6 py-4 max-w-[1600px]">
           <div className="flex justify-between items-center gap-4">
               <div className="flex items-center gap-2 sm:gap-3 min-w-0">
               <div className="flex items-baseline gap-1">
@@ -338,12 +345,12 @@ const AppFooter = ({ user }) => {
         </nav>
       </header>
       <CalendarWarningBanner show={calendarError} />
-      <main className={`flex-grow ${currentPage === 'dashboard' ? '' : 'py-4'}`}>
-        {currentPage === "dashboard" && <Dashboard onNavigate={setCurrentPage} />}
-        {currentPage === "personen" && <PersonenVerwaltung />}
-        {currentPage === "datenprodukte" && <DatenproduktVerwaltung />}
-        {currentPage === "rollen" && <RollenVerwaltung />}
-        {currentPage === "skills" && <SkillsVerwaltung />}
+      <main className="flex-grow py-4">
+        {currentPage === "dashboard" && <Dashboard onNavigate={handleNavigate} />}
+        {currentPage === "personen" && <PersonenVerwaltung initialSelectedId={selectedItemId} onSelectedClear={() => setSelectedItemId(null)} />}
+        {currentPage === "datenprodukte" && <DatenproduktVerwaltung initialSelectedId={selectedItemId} onSelectedClear={() => setSelectedItemId(null)} />}
+        {currentPage === "rollen" && <RollenVerwaltung initialSelectedId={selectedItemId} onSelectedClear={() => setSelectedItemId(null)} />}
+        {currentPage === "skills" && <SkillsVerwaltung initialSelectedId={selectedItemId} onSelectedClear={() => setSelectedItemId(null)} />}
         {currentPage === "auswertungen" && <Auswertungen />}
       </main>
       <AppFooter user={user} />

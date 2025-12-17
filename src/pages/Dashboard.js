@@ -112,6 +112,9 @@ const Dashboard = ({ onNavigate }) => {
   const { personen, datenprodukte, zuordnungen, vacations, skills, rollen } = useData();
   const [expandedSection, setExpandedSection] = useState(null);
   const [showWarnings, setShowWarnings] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearch, setShowSearch] = useState(false);
+  const searchRef = useRef(null);
 
   // Berechnungen
   const stats = useMemo(() => {
@@ -220,6 +223,61 @@ const Dashboard = ({ onNavigate }) => {
   const handleNavigate = (page, id = null) => onNavigate?.(page, id);
   const formatDate = (date) => new Date(date).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
 
+  // Universal Search
+  const searchResults = useMemo(() => {
+    if (!searchQuery.trim() || searchQuery.length < 2) return null;
+
+    const q = searchQuery.toLowerCase();
+    const results = { personen: [], teams: [], skills: [], rollen: [] };
+
+    // Personen durchsuchen
+    personen?.forEach(p => {
+      if (p.name?.toLowerCase().includes(q) || p.email?.toLowerCase().includes(q)) {
+        const pz = zuordnungen?.filter(z => z.personId === p.id) || [];
+        const stunden = pz.reduce((h, z) => h + (z.stunden || 0), 0);
+        results.personen.push({ ...p, stunden });
+      }
+    });
+
+    // Teams/Datenprodukte durchsuchen
+    datenprodukte?.forEach(dp => {
+      if (dp.name?.toLowerCase().includes(q)) {
+        const teamSize = new Set(zuordnungen?.filter(z => z.datenproduktId === dp.id).map(z => z.personId)).size;
+        results.teams.push({ ...dp, teamSize });
+      }
+    });
+
+    // Skills durchsuchen
+    skills?.forEach(s => {
+      if (s.name?.toLowerCase().includes(q)) {
+        const count = personen?.filter(p => p.skillIds?.includes(s.id)).length || 0;
+        results.skills.push({ ...s, count });
+      }
+    });
+
+    // Rollen durchsuchen
+    rollen?.forEach(r => {
+      if (r.name?.toLowerCase().includes(q)) {
+        const count = zuordnungen?.filter(z => z.rolleId === r.id).length || 0;
+        results.rollen.push({ ...r, count });
+      }
+    });
+
+    const total = results.personen.length + results.teams.length + results.skills.length + results.rollen.length;
+    return total > 0 ? results : null;
+  }, [searchQuery, personen, datenprodukte, zuordnungen, skills, rollen]);
+
+  // Click outside to close search
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setShowSearch(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const animatedUtil = useAnimatedNumber(stats.utilization);
   const animatedBooked = useAnimatedNumber(stats.bookedHours);
 
@@ -228,16 +286,141 @@ const Dashboard = ({ onNavigate }) => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-4 py-6 max-w-[1600px]">
+      <div className="container mx-auto px-6 py-8 max-w-[1600px]">
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white font-display">Dashboard</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white font-display">Dashboard</h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               {new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
             </p>
           </div>
+
+          {/* Universal Search */}
+          <div className="flex-1 max-w-md relative" ref={searchRef}>
+            <div className="relative">
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Suche nach Personen, Teams, Skills..."
+                value={searchQuery}
+                onChange={(e) => { setSearchQuery(e.target.value); setShowSearch(true); }}
+                onFocus={() => setShowSearch(true)}
+                className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => { setSearchQuery(''); setShowSearch(false); }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
+
+            {/* Search Results Dropdown */}
+            {showSearch && searchResults && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xl z-30 overflow-hidden max-h-96 overflow-y-auto">
+                {/* Personen */}
+                {searchResults.personen.length > 0 && (
+                  <div className="p-2 border-b border-gray-100 dark:border-gray-700">
+                    <div className="px-2 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Personen</div>
+                    {searchResults.personen.slice(0, 5).map(p => (
+                      <button
+                        key={p.id}
+                        onClick={() => { handleNavigate('personen', p.id); setShowSearch(false); setSearchQuery(''); }}
+                        className="w-full flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                      >
+                        <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-xs font-medium text-blue-600 dark:text-blue-400">
+                          {p.name?.split(' ').map(n => n[0]).join('').substring(0, 2)}
+                        </div>
+                        <div className="flex-1 text-left">
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">{p.name}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">{p.stunden}h/Wo</div>
+                        </div>
+                        {p.isM13 && <span className="px-1.5 py-0.5 text-[10px] font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded">M13</span>}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Teams */}
+                {searchResults.teams.length > 0 && (
+                  <div className="p-2 border-b border-gray-100 dark:border-gray-700">
+                    <div className="px-2 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Teams</div>
+                    {searchResults.teams.slice(0, 5).map(t => (
+                      <button
+                        key={t.id}
+                        onClick={() => { handleNavigate('datenprodukte', t.id); setShowSearch(false); setSearchQuery(''); }}
+                        className="w-full flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-xs font-medium text-purple-600 dark:text-purple-400">
+                          {t.name?.substring(0, 2).toUpperCase()}
+                        </div>
+                        <div className="flex-1 text-left">
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">{t.name}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">{t.teamSize} Personen · {t.status}</div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Skills */}
+                {searchResults.skills.length > 0 && (
+                  <div className="p-2 border-b border-gray-100 dark:border-gray-700">
+                    <div className="px-2 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Skills</div>
+                    {searchResults.skills.slice(0, 5).map(s => (
+                      <button
+                        key={s.id}
+                        onClick={() => { handleNavigate('skills', s.id); setShowSearch(false); setSearchQuery(''); }}
+                        className="w-full flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                      >
+                        <span className="w-3 h-3 rounded-full" style={{ backgroundColor: s.color || '#6b7280' }} />
+                        <div className="flex-1 text-left">
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">{s.name}</div>
+                        </div>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">{s.count} Personen</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Rollen */}
+                {searchResults.rollen.length > 0 && (
+                  <div className="p-2">
+                    <div className="px-2 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Rollen</div>
+                    {searchResults.rollen.slice(0, 5).map(r => (
+                      <button
+                        key={r.id}
+                        onClick={() => { handleNavigate('rollen', r.id); setShowSearch(false); setSearchQuery(''); }}
+                        className="w-full flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                      >
+                        <span className="w-3 h-3 rounded-full" style={{ backgroundColor: r.color || '#6b7280' }} />
+                        <div className="flex-1 text-left">
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">{r.name}</div>
+                        </div>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">{r.count}× verwendet</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* No Results */}
+            {showSearch && searchQuery.length >= 2 && !searchResults && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xl z-30 p-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                Keine Ergebnisse für "{searchQuery}"
+              </div>
+            )}
+          </div>
+
           {warningCount > 0 && (
             <div className="relative">
               <button

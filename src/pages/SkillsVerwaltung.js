@@ -1,15 +1,29 @@
 // src/pages/SkillsVerwaltung.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useData } from '../context/DataProvider';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 
-export const SkillsVerwaltung = () => {
+export const SkillsVerwaltung = ({ initialSelectedId, onSelectedClear }) => {
     const { skills, personen, fuegeSkillHinzu, aktualisiereSkill, loescheSkill, loading, error, setError } = useData();
-    
+
     const [neuerSkillName, setNeuerSkillName] = useState('');
     const [neueSkillFarbe, setNeueSkillFarbe] = useState('#4c84d4'); // Modern blue
-    const [editingSkill, setEditingSkill] = useState(null); 
+    const [editingSkill, setEditingSkill] = useState(null);
     const [skillToDelete, setSkillToDelete] = useState(null);
+    const [highlightedSkillId, setHighlightedSkillId] = useState(null);
+
+    // Highlight skill when navigating with a specific skill ID
+    useEffect(() => {
+        if (initialSelectedId && skills?.length > 0) {
+            const skill = skills.find(s => s.id === initialSelectedId);
+            if (skill) {
+                setHighlightedSkillId(initialSelectedId);
+                onSelectedClear?.();
+                // Remove highlight after 3 seconds
+                setTimeout(() => setHighlightedSkillId(null), 3000);
+            }
+        }
+    }, [initialSelectedId, skills, onSelectedClear]);
 
     const handleAddSkill = async (e) => {
         e.preventDefault();
@@ -62,7 +76,7 @@ export const SkillsVerwaltung = () => {
     
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-ard-blue-50/30">
-            <div className="container mx-auto px-6 py-6">
+            <div className="container mx-auto px-6 py-8 max-w-[1600px]">
                 <div className="mb-6">
                     <h1 className="text-3xl font-bold text-gray-900 mb-1 font-display">Skill-Verwaltung</h1>
                     <p className="text-gray-600">Verwalte Skills und deren Zuweisungen</p>
@@ -100,7 +114,7 @@ export const SkillsVerwaltung = () => {
                                         const skillPersons = getSkillPersons(skill.id);
 
                                         return (
-                                            <tr key={skill.id} className="hover:bg-gray-25 transition-colors">
+                                            <tr key={skill.id} className={`hover:bg-gray-25 transition-all duration-500 ${highlightedSkillId === skill.id ? 'bg-ard-blue-100 ring-2 ring-ard-blue-400 ring-inset' : ''}`}>
                                                 <td className="px-4 py-3">
                                                     {editingSkill?.id === skill.id ? (
                                                         <input

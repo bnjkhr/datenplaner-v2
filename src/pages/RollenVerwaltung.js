@@ -1,9 +1,9 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useData } from '../context/DataProvider';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 import { ColorPicker } from '../components/ui/ColorPicker';
 
-export const RollenVerwaltung = () => {
+export const RollenVerwaltung = ({ initialSelectedId, onSelectedClear }) => {
     const { rollen, personen, zuordnungen, fuegeRolleHinzu, aktualisiereRolle, loescheRolle, fixDuplicateRoleColors, loading, error, setError } = useData();
     const [neueRolleName, setNeueRolleName] = useState('');
     const [editingRolle, setEditingRolle] = useState(null);
@@ -12,6 +12,18 @@ export const RollenVerwaltung = () => {
     const [rolleToShowDetails, setRolleToShowDetails] = useState(null);
     const [isFixingColors, setIsFixingColors] = useState(false);
     const [fixColorMessage, setFixColorMessage] = useState('');
+
+    // Open details when navigating with a specific role ID
+    useEffect(() => {
+        if (initialSelectedId && rollen?.length > 0) {
+            const rolle = rollen.find(r => r.id === initialSelectedId);
+            if (rolle) {
+                setRolleToShowDetails(rolle);
+                setShowDetailsModal(true);
+                onSelectedClear?.();
+            }
+        }
+    }, [initialSelectedId, rollen, onSelectedClear]);
 
     const handleAddRolle = async (e) => {
         e.preventDefault();
@@ -93,7 +105,7 @@ export const RollenVerwaltung = () => {
     
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-ard-blue-50/30">
-            <div className="container mx-auto px-6 py-6">
+            <div className="container mx-auto px-6 py-8 max-w-[1600px]">
                 <div className="mb-6">
                     <h1 className="text-3xl font-bold text-gray-900 mb-1 font-display">Rollenverwaltung</h1>
                     <p className="text-gray-600">Verwalte Rollen und deren Zuweisungen</p>

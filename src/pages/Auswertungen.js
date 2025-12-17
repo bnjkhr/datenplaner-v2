@@ -45,7 +45,7 @@ export const Auswertungen = () => {
   if (error)
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-ard-blue-50/30 dark:from-gray-900 dark:to-gray-800">
-        <div className="container mx-auto px-6 py-8">
+        <div className="container mx-auto px-6 py-8 max-w-[1600px]">
           <div className="bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-800/30 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-300 px-6 py-4 rounded-xl" role="alert">
             Fehler beim Laden der Daten: {error}
           </div>
@@ -491,7 +491,7 @@ export const Auswertungen = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-ard-blue-50/30 dark:from-gray-900 dark:to-gray-800">
-      <div className="container mx-auto px-6 py-8">
+      <div className="container mx-auto px-6 py-8 max-w-[1600px]">
         <div className="flex flex-wrap justify-between items-center mb-8 gap-4">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 font-display">Auswertungen</h1>

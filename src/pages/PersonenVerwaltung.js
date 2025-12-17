@@ -1739,7 +1739,7 @@ const PersonenListe = ({
   );
 };
 
-const PersonenVerwaltung = () => {
+const PersonenVerwaltung = ({ initialSelectedId, onSelectedClear }) => {
   const [showForm, setShowForm] = useState(false);
   const [editingPerson, setEditingPerson] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -1755,6 +1755,18 @@ const PersonenVerwaltung = () => {
     loeschePerson,
     vacations,
   } = useData();
+
+  // Open details modal when navigating with a specific person ID
+  useEffect(() => {
+    if (initialSelectedId && personen?.length > 0) {
+      const person = personen.find(p => p.id === initialSelectedId);
+      if (person) {
+        setPersonToShowDetails(person);
+        setShowDetailsModal(true);
+        onSelectedClear?.();
+      }
+    }
+  }, [initialSelectedId, personen, onSelectedClear]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showExcelModal, setShowExcelModal] = useState(false);
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
@@ -2112,14 +2124,14 @@ const PersonenVerwaltung = () => {
 
   return (
     <div className="min-h-screen bg-gray-50/30 dark:bg-gray-900">
-      <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
+      <div className="container mx-auto px-6 py-8 max-w-[1600px]">
         {/* Header */}
         <div className="mb-6">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 lg:gap-6">
             {/* Title */}
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white font-display">
-                Team
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white font-display">
+                Personen
               </h1>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                 {personen.length} Personen · {personen.filter(p => p.isM13).length} M13

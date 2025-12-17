@@ -6,7 +6,7 @@ import { NotesModal } from "../components/ui/NotesModal";
 import { RoleRequirementsInput, TeamRecommendationResults } from "../components/TeamRecommendation";
 import { generateOptimalTeam } from "../utils/teamRecommendation";
 
-export const DatenproduktVerwaltung = () => {
+export const DatenproduktVerwaltung = ({ initialSelectedId, onSelectedClear }) => {
   const {
     datenprodukte,
     erstelleDatenprodukt,
@@ -48,6 +48,17 @@ export const DatenproduktVerwaltung = () => {
   const [showTeamSaveDialog, setShowTeamSaveDialog] = useState(false);
   const [newTeamName, setNewTeamName] = useState("");
   const [selectedProduktForDetails, setSelectedProduktForDetails] = useState(null);
+
+  // Open details when navigating with a specific product ID
+  useEffect(() => {
+    if (initialSelectedId && datenprodukte?.length > 0) {
+      const produkt = datenprodukte.find(p => p.id === initialSelectedId);
+      if (produkt) {
+        setSelectedProduktForDetails(produkt);
+        onSelectedClear?.();
+      }
+    }
+  }, [initialSelectedId, datenprodukte, onSelectedClear]);
 
   useEffect(() => {
     if (editingProdukt) {
@@ -302,7 +313,7 @@ export const DatenproduktVerwaltung = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-ard-blue-50/30 dark:from-gray-900 dark:to-gray-800">
-      <div className="container mx-auto px-6 py-8">
+      <div className="container mx-auto px-6 py-8 max-w-[1600px]">
         <div className="flex flex-wrap justify-between items-center mb-8 gap-4">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 font-display">
