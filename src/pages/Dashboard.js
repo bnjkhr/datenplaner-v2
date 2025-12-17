@@ -114,6 +114,7 @@ const Dashboard = ({ onNavigate }) => {
   const [showWarnings, setShowWarnings] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
+  const [expandedAbsences, setExpandedAbsences] = useState({ current: false, upcoming: false });
   const searchRef = useRef(null);
 
   // Berechnungen
@@ -726,21 +727,34 @@ const Dashboard = ({ onNavigate }) => {
 
               {/* Heute */}
               <div className="mb-3">
-                <div className="flex items-center gap-2 mb-2">
+                <button
+                  onClick={() => absences.current.length > 4 && setExpandedAbsences(prev => ({ ...prev, current: !prev.current }))}
+                  className={`flex items-center gap-2 mb-2 w-full text-left ${absences.current.length > 4 ? 'cursor-pointer hover:opacity-80' : 'cursor-default'}`}
+                >
                   <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
                   <span className="text-xs font-medium text-gray-600 dark:text-gray-300">Heute</span>
                   <span className="text-xs text-gray-400">{absences.current.length}</span>
-                </div>
+                  {absences.current.length > 4 && (
+                    <svg className={`w-3 h-3 text-gray-400 ml-auto transition-transform ${expandedAbsences.current ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  )}
+                </button>
                 {absences.current.length > 0 ? (
                   <div className="space-y-1 pl-3">
-                    {absences.current.slice(0, 4).map((p, i) => (
+                    {(expandedAbsences.current ? absences.current : absences.current.slice(0, 4)).map((p, i) => (
                       <div key={i} className="flex items-center justify-between text-sm">
                         <span className="text-gray-700 dark:text-gray-300 truncate">{p.name?.split(' ')[0]}</span>
                         <span className="text-xs text-gray-400">bis {formatDate(p.endDate)}</span>
                       </div>
                     ))}
-                    {absences.current.length > 4 && (
-                      <span className="text-xs text-gray-400">+{absences.current.length - 4} weitere</span>
+                    {!expandedAbsences.current && absences.current.length > 4 && (
+                      <button
+                        onClick={() => setExpandedAbsences(prev => ({ ...prev, current: true }))}
+                        className="text-xs text-ard-blue-600 hover:text-ard-blue-700 dark:text-ard-blue-400"
+                      >
+                        +{absences.current.length - 4} weitere anzeigen
+                      </button>
                     )}
                   </div>
                 ) : (
@@ -751,18 +765,34 @@ const Dashboard = ({ onNavigate }) => {
               {/* Diese Woche */}
               {absences.upcoming.length > 0 && (
                 <div>
-                  <div className="flex items-center gap-2 mb-2">
+                  <button
+                    onClick={() => absences.upcoming.length > 3 && setExpandedAbsences(prev => ({ ...prev, upcoming: !prev.upcoming }))}
+                    className={`flex items-center gap-2 mb-2 w-full text-left ${absences.upcoming.length > 3 ? 'cursor-pointer hover:opacity-80' : 'cursor-default'}`}
+                  >
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
                     <span className="text-xs font-medium text-gray-600 dark:text-gray-300">Diese Woche</span>
                     <span className="text-xs text-gray-400">{absences.upcoming.length}</span>
-                  </div>
+                    {absences.upcoming.length > 3 && (
+                      <svg className={`w-3 h-3 text-gray-400 ml-auto transition-transform ${expandedAbsences.upcoming ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    )}
+                  </button>
                   <div className="space-y-1 pl-3">
-                    {absences.upcoming.slice(0, 3).map((p, i) => (
+                    {(expandedAbsences.upcoming ? absences.upcoming : absences.upcoming.slice(0, 3)).map((p, i) => (
                       <div key={i} className="flex items-center justify-between text-sm">
                         <span className="text-gray-700 dark:text-gray-300 truncate">{p.name?.split(' ')[0]}</span>
                         <span className="text-xs text-gray-400">ab {formatDate(p.startDate)}</span>
                       </div>
                     ))}
+                    {!expandedAbsences.upcoming && absences.upcoming.length > 3 && (
+                      <button
+                        onClick={() => setExpandedAbsences(prev => ({ ...prev, upcoming: true }))}
+                        className="text-xs text-ard-blue-600 hover:text-ard-blue-700 dark:text-ard-blue-400"
+                      >
+                        +{absences.upcoming.length - 3} weitere anzeigen
+                      </button>
+                    )}
                   </div>
                 </div>
               )}
