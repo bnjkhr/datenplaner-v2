@@ -294,11 +294,16 @@ const AppFooter = ({ user }) => {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 font-sans flex flex-col transition-colors duration-200">
       <header className="bg-ard-blue-600 dark:bg-gray-800 sticky top-0 z-30 shadow-lg">
-        <nav className="container mx-auto px-4 sm:px-6 py-4">
+        <nav className="container mx-auto px-4 py-4 max-w-[1600px]">
           <div className="flex justify-between items-center gap-4">
               <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-              <div className="text-3xl sm:text-4xl font-black text-white drop-shadow-md">
-                DP Planer
+              <div className="flex items-baseline gap-1">
+                <span className="text-2xl sm:text-3xl font-extrabold text-white font-display tracking-tight">
+                  DP
+                </span>
+                <span className="text-2xl sm:text-3xl font-bold text-white/80 font-display tracking-tight">
+                  Planer
+                </span>
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-1 sm:gap-2">
