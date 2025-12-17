@@ -526,6 +526,7 @@ const PersonDetailsPanel = ({
   } = useData();
 
   const [adminLoading, setAdminLoading] = React.useState(false);
+  const [adminSuccess, setAdminSuccess] = React.useState('');
 
   if (!person) return null;
 
@@ -543,8 +544,17 @@ const PersonDetailsPanel = ({
   const handleAdminToggle = async () => {
     if (!email) return;
     setAdminLoading(true);
+    setAdminSuccess('');
     try {
-      await setAdminStatus(person.id, email, !personIsAdmin);
+      const success = await setAdminStatus(person.id, email, !personIsAdmin);
+      if (success) {
+        const message = !personIsAdmin
+          ? 'Admin-Rechte erfolgreich vergeben'
+          : 'Admin-Rechte erfolgreich entzogen';
+        setAdminSuccess(message);
+        setTimeout(() => setAdminSuccess(''), 3000);
+      }
+      // On failure, setAdminStatus already calls setError which triggers global error UI
     } finally {
       setAdminLoading(false);
     }
@@ -791,6 +801,12 @@ const PersonDetailsPanel = ({
                       />
                     </button>
                   </div>
+                  {/* Success notification */}
+                  {adminSuccess && (
+                    <div className="mt-3 p-2 bg-green-100 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg">
+                      <p className="text-xs text-green-700 dark:text-green-300 font-medium">{adminSuccess}</p>
+                    </div>
+                  )}
                 </div>
               )}
 
