@@ -54,6 +54,84 @@ const MiniBar = ({ value, max = 100, color = 'blue', showValue = true }) => {
   );
 };
 
+// Farben für Segmente
+const SEGMENT_COLORS = [
+  '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
+  '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#6366f1'
+];
+
+// Personal Gauge Component (segmentiert)
+const PersonalGauge = ({ segments, totalPercent, size = 140 }) => {
+  const strokeWidth = 10;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = radius * Math.PI; // Halbkreis
+  const [animated, setAnimated] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setAnimated(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const getColor = (v) => {
+    if (v > 100) return '#ef4444';
+    if (v > 85) return '#f59e0b';
+    if (v < 50) return '#6b7280';
+    return '#10b981';
+  };
+
+  // Segmente berechnen - von links nach rechts
+  let startPosition = 0;
+  const segmentPaths = segments.map((seg, idx) => {
+    const segmentLength = (seg.percent / 100) * circumference;
+    const offset = -startPosition; // Negativer Offset verschiebt nach rechts
+    startPosition += segmentLength;
+    return {
+      ...seg,
+      offset,
+      length: segmentLength,
+      color: SEGMENT_COLORS[idx % SEGMENT_COLORS.length]
+    };
+  });
+
+  return (
+    <div className="relative" style={{ width: size, height: size / 2 + 20 }}>
+      <svg width={size} height={size / 2 + 10} className="overflow-visible">
+        {/* Hintergrund */}
+        <path
+          d={`M ${strokeWidth / 2} ${size / 2} A ${radius} ${radius} 0 0 1 ${size - strokeWidth / 2} ${size / 2}`}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={strokeWidth}
+          className="text-gray-200 dark:text-gray-700"
+        />
+        {/* Segmente */}
+        {segmentPaths.map((seg, idx) => (
+          <path
+            key={idx}
+            d={`M ${strokeWidth / 2} ${size / 2} A ${radius} ${radius} 0 0 1 ${size - strokeWidth / 2} ${size / 2}`}
+            fill="none"
+            stroke={seg.color}
+            strokeWidth={strokeWidth}
+            strokeDasharray={`${seg.length} ${circumference}`}
+            strokeDashoffset={animated ? seg.offset : circumference}
+            style={{
+              transition: 'stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
+              transitionDelay: `${idx * 100}ms`,
+              filter: `drop-shadow(0 0 3px ${seg.color}40)`,
+            }}
+          >
+            <title>{seg.name}: {seg.hours}h ({Math.round(seg.percent)}%)</title>
+          </path>
+        ))}
+      </svg>
+      <div className="absolute inset-x-0 bottom-0 text-center">
+        <span className="text-3xl font-bold" style={{ color: getColor(totalPercent) }}>{totalPercent}</span>
+        <span className="text-lg text-gray-400">%</span>
+      </div>
+    </div>
+  );
+};
+
 // Gauge Component
 const Gauge = ({ value, size = 140 }) => {
   const strokeWidth = 10;
@@ -193,6 +271,30 @@ const Dashboard = ({ onNavigate }) => {
       return { ...rolle, count };
     }).sort((a, b) => b.count - a.count);
   }, [rollen, zuordnungen]);
+
+  // Persönliche Auslastung
+  const personalStats = useMemo(() => {
+    if (!currentPerson || !zuordnungen || !datenprodukte) return null;
+
+    const myAssignments = zuordnungen.filter(z => z.personId === currentPerson.id);
+    if (myAssignments.length === 0) return null;
+
+    const wochenstunden = currentPerson.wochenstunden || 31;
+    const totalHours = myAssignments.reduce((sum, z) => sum + (z.stunden || 0), 0);
+    const utilization = Math.round((totalHours / wochenstunden) * 100);
+
+    // Segmente pro Datenprodukt
+    const segments = myAssignments.map(z => {
+      const dp = datenprodukte.find(d => d.id === z.datenproduktId);
+      return {
+        name: dp?.name || 'Unbekannt',
+        hours: z.stunden || 0,
+        percent: ((z.stunden || 0) / wochenstunden) * 100
+      };
+    }).filter(s => s.hours > 0).sort((a, b) => b.hours - a.hours);
+
+    return { segments, totalHours, wochenstunden, utilization };
+  }, [currentPerson, zuordnungen, datenprodukte]);
 
   // Abwesenheiten
   const absences = useMemo(() => {
@@ -538,6 +640,43 @@ const Dashboard = ({ onNavigate }) => {
 
           {/* Left Column - Auslastung */}
           <div className="col-span-12 lg:col-span-3 space-y-4">
+
+            {/* Persönliche Auslastung */}
+            {personalStats && (
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2 font-display">
+                  Meine Auslastung
+                </div>
+                <div className="flex justify-center">
+                  <PersonalGauge
+                    segments={personalStats.segments}
+                    totalPercent={personalStats.utilization}
+                  />
+                </div>
+                <div className="text-center text-sm text-gray-600 dark:text-gray-300 mt-2">
+                  <span className="font-semibold">{personalStats.totalHours}h</span>
+                  <span className="text-gray-400"> / {personalStats.wochenstunden}h</span>
+                </div>
+                {/* Legende */}
+                <div className="mt-3 space-y-1">
+                  {personalStats.segments.slice(0, 5).map((seg, idx) => (
+                    <div key={idx} className="flex items-center gap-2 text-xs">
+                      <span
+                        className="w-2 h-2 rounded-full flex-shrink-0"
+                        style={{ backgroundColor: SEGMENT_COLORS[idx % SEGMENT_COLORS.length] }}
+                      />
+                      <span className="text-gray-600 dark:text-gray-400 truncate flex-1">{seg.name}</span>
+                      <span className="text-gray-500 dark:text-gray-500">{seg.hours}h</span>
+                    </div>
+                  ))}
+                  {personalStats.segments.length > 5 && (
+                    <div className="text-xs text-gray-400 pl-4">
+                      +{personalStats.segments.length - 5} weitere
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Gauge Card */}
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
