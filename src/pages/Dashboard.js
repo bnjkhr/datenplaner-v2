@@ -654,7 +654,7 @@ const Dashboard = ({ onNavigate }) => {
                   <span className="text-sm font-medium text-gray-900 dark:text-white">Live</span>
                   <span className="text-xs text-gray-400">{products.live.length}</span>
                 </div>
-                <div className="p-2 max-h-48 overflow-y-auto">
+                <div className="p-2">
                   {products.live.slice(0, 6).map(p => (
                     <button
                       key={p.id}
@@ -675,7 +675,7 @@ const Dashboard = ({ onNavigate }) => {
                   <span className="text-sm font-medium text-gray-900 dark:text-white">In Entwicklung</span>
                   <span className="text-xs text-gray-400">{products.inDev.length}</span>
                 </div>
-                <div className="p-2 max-h-48 overflow-y-auto">
+                <div className="p-2">
                   {products.inDev.slice(0, 6).map(p => (
                     <button
                       key={p.id}
