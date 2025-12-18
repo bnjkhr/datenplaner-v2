@@ -20,6 +20,7 @@ yarn-error.log*
 .env.production.local
 datenprodukt-planer-app-firebase-adminsdk-*.json
 service-account-key.json
+service-account.json
 
 # Deployment
 .vercel
