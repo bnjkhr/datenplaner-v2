@@ -214,10 +214,11 @@ export const displaySecurityValidation = () => {
   console.groupEnd();
 };
 
-export default {
+const envValidation = {
   validateEnvironment,
   getSecurityRecommendations,
   validateFirebaseConfig,
   runSecurityValidation,
   displaySecurityValidation
 };
+export default envValidation;

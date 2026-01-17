@@ -219,6 +219,7 @@ export const CirclePackVisualization = ({ data, personen, skills, datenprodukte,
 
         // Insert modern gradient tag background
         const extraPadding = 8;
+        // eslint-disable-next-line no-unused-vars
         const tagBg = tagGroup.insert('rect', 'text')
           .attr('x', -(bgWidth + extraPadding) / 2)
           .attr('y', -(bgHeight + extraPadding) / 2)

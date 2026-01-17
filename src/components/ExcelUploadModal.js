@@ -22,8 +22,6 @@ const { fuegePersonenImBatchHinzu, fuegeSkillHinzu, skills: allSkills, personen,
     const reader = new FileReader();
     
     reader.onload = async (event) => {
-    const existingEmails = new Set(personen.map(p => p.email.toLowerCase()));  
-      
       try {
         const data = new Uint8Array(event.target.result);
         const workbook = XLSX.read(data, { type: 'array' });

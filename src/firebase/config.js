@@ -50,6 +50,7 @@ export const tenantRegistrationEnabled =
 const app = initializeApp(firebaseConfig);
 
 // Initialize App Check for additional security (optional, can be enabled later)
+/* eslint-disable no-unused-vars */
 let appCheck = null;
 if (process.env.REACT_APP_RECAPTCHA_SITE_KEY && process.env.NODE_ENV === 'production') {
   try {
@@ -61,6 +62,7 @@ if (process.env.REACT_APP_RECAPTCHA_SITE_KEY && process.env.NODE_ENV === 'produc
     console.warn('App Check initialization failed:', error);
   }
 }
+/* eslint-enable no-unused-vars */
 
 const auth = getAuth(app);
 const db = getFirestore(app);

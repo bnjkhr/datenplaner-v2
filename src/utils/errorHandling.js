@@ -177,7 +177,7 @@ export const createErrorHandler = (setError, options = {}) => {
   };
 };
 
-export default {
+const errorHandling = {
   getUserErrorMessage,
   logDetailedError,
   handleSecureError,
@@ -186,3 +186,4 @@ export default {
   createErrorHandler,
   FIREBASE_ERROR_MESSAGES
 };
+export default errorHandling;

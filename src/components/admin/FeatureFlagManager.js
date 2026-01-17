@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  getAllFeatureFlags, 
-  isFeatureEnabled, 
-  debugFeatureFlags, 
-  FEATURE_FLAGS, 
-  FEATURE_STATUS 
+import {
+  getAllFeatureFlags,
+  debugFeatureFlags,
+  FEATURE_STATUS
 } from '../../utils/featureFlags';
 
 /**
@@ -33,7 +31,8 @@ export const FeatureFlagManager = () => {
 
     const info = debugFeatureFlags();
     setDebugInfo(info);
-  }, [showDebugInfo, flags, debugFeatureFlags]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showDebugInfo, flags]);
 
   useEffect(() => {
     if (!isVisible) {

@@ -165,7 +165,7 @@ const AppFooter = ({ user }) => {
   const BurgerMenu = () => {
     const menuRef = useRef(null);
 
-    useEffect(() => {
+useEffect(() => {
       const handleClickOutside = (event) => {
         if (menuRef.current && !menuRef.current.contains(event.target)) {
           setShowBurgerMenu(false);
@@ -181,6 +181,7 @@ const AppFooter = ({ user }) => {
         document.removeEventListener('mousedown', handleClickOutside);
         document.removeEventListener('touchstart', handleClickOutside);
       };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [showBurgerMenu]);
 
     const handleNavigation = (pageName) => {

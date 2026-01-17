@@ -151,9 +151,10 @@ export const logError = (error, context = {}) => {
   }, 'error');
 };
 
-export default {
+const secureLogging = {
   secureLog,
   logUserAction,
   logSecurityEvent,
   logError
 };
+export default secureLogging;

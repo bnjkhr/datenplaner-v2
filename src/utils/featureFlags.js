@@ -178,7 +178,7 @@ export const debugFeatureFlags = (flagName = null) => {
 };
 
 // Export für einfache Verwendung
-export default {
+const featureFlags = {
   isFeatureEnabled,
   isFeatureBeta,
   getFeatureConfig,
@@ -187,3 +187,4 @@ export default {
   FEATURE_FLAGS,
   FEATURE_STATUS
 };
+export default featureFlags;

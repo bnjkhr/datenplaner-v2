@@ -49,7 +49,7 @@ export const cleanupRateLimit = () => {
   const now = Date.now();
   const oneHourAgo = now - 3600000;
   
-  for (const [key, timestamp] of rateLimitStore.entries()) {
+  for (const [key] of rateLimitStore.entries()) {
     const keyTimestamp = parseInt(key.split(':')[1]) * 60000;
     if (keyTimestamp < oneHourAgo) {
       rateLimitStore.delete(key);
@@ -111,7 +111,7 @@ export const validatePassword = (password) => {
   };
 };
 
-export default {
+const security = {
   checkRateLimit,
   getRemainingAttempts,
   cleanupRateLimit,
@@ -119,3 +119,4 @@ export default {
   sanitizeInput,
   validatePassword
 };
+export default security;

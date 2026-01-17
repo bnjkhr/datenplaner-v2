@@ -250,6 +250,7 @@ const SimpleSearch = ({
   );
 };
 
+// eslint-disable-next-line no-unused-vars
 const WorkloadIndicator = ({ person, zuordnungen }) => {
   const verfügbareStunden = person.wochenstunden || 31;
   const gebuchteStunden = zuordnungen
@@ -313,7 +314,7 @@ const PersonEintrag = ({
   getNextAbsenceInfo,
 }) => {
   const { name, email, msTeamsLink, wochenstunden, kategorien, skillIds } = person;
-  const { vacations, zuordnungen, skills: allSkills, canEditPerson } = useData();
+  const { vacations, zuordnungen, skills: allSkills } = useData();
 
   // Anzahl Datenprodukte berechnen
   const getDataProductCount = () => {
@@ -1472,7 +1473,7 @@ const PersonenListe = ({
   onSkillClick,
   onShowDetails,
 }) => {
-  const { loading, error, zuordnungen, vacations, canEditPerson, canEditData } = useData();
+  const { loading, error, zuordnungen, vacations } = useData();
   const [sortBy, setSortBy] = useState("name");
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [collapsedKreise, setCollapsedKreise] = useState({});
@@ -1828,7 +1829,6 @@ const PersonenVerwaltung = ({ initialSelectedId, onSelectedClear }) => {
     rollen,
     loeschePerson,
     vacations,
-    canEditPerson,
     canEditData,
   } = useData();
 
@@ -2130,7 +2130,6 @@ const PersonenVerwaltung = ({ initialSelectedId, onSelectedClear }) => {
         // Find upcoming vacation within the next week (but not current)
         const upcomingVacation = uniqueVacations.find((vacation) => {
           const start = new Date(vacation.start);
-          const end = new Date(vacation.end);
           // Vacation starts after today and within the next week
           return start > today && start <= nextWeek;
         });

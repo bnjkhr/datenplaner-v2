@@ -13,8 +13,6 @@ import {
   appId,
   defaultTenantId,
   confluenceCalendarUrl,
-  calendarProxyUrl,
-  logServerUrl,
 } from "../firebase/config";
 import { isFeatureEnabled, FEATURE_FLAGS } from "../utils/featureFlags";
 import { fetchCalendarEvents } from "../api/calendar";
@@ -300,7 +298,8 @@ export const DataProvider = ({ children, isReadOnly, user, tenantId }) => {
       }
     };
     loadVacations();
-  }, [calendarProxyUrl, confluenceCalendarUrl]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     setLoading(true);
