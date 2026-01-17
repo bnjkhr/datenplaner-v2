@@ -6,6 +6,16 @@ import { NotesModal } from "../components/ui/NotesModal";
 import { RoleRequirementsInput, TeamRecommendationResults } from "../components/TeamRecommendation";
 import { generateOptimalTeam } from "../utils/teamRecommendation";
 
+// Parst Stunden-Eingabe: "20" → 20, "50%" → 50% der Kapazität
+const parseStundenInput = (input, kapazitaet = 31) => {
+  if (!input) return { value: input, error: null };
+  const str = String(input);
+  if (!str.includes("%")) return { value: input, error: null };
+  const prozent = parseFloat(str.replace("%", "").trim());
+  if (isNaN(prozent)) return { value: null, error: "Ungültiger Prozentwert." };
+  return { value: (kapazitaet * prozent) / 100, error: null };
+};
+
 export const DatenproduktVerwaltung = ({ initialSelectedId, onSelectedClear }) => {
   const {
     datenprodukte,
@@ -144,17 +154,11 @@ export const DatenproduktVerwaltung = ({ initialSelectedId, onSelectedClear }) =
       return;
     }
 
-    // Berechne Stunden: direkte Eingabe oder Prozent der Kapazität
-    let stundenWert = assignStunden;
-    if (assignStunden && assignStunden.includes("%")) {
-      const prozent = parseFloat(assignStunden.replace("%", "").trim());
-      if (isNaN(prozent)) {
-        setAssignmentError("Ungültiger Prozentwert.");
-        return;
-      }
-      const person = personen.find(p => p.id === assignPersonId);
-      const kapazitaet = person?.wochenstunden || 31;
-      stundenWert = (kapazitaet * prozent) / 100;
+    const person = personen.find(p => p.id === assignPersonId);
+    const { value: stundenWert, error } = parseStundenInput(assignStunden, person?.wochenstunden);
+    if (error) {
+      setAssignmentError(error);
+      return;
     }
 
     const resultId = await weisePersonDatenproduktRolleZu(
@@ -1386,16 +1390,8 @@ const EditAssignmentModal = ({ assignment, rollen, personen, onSave, onClose, ge
     e.preventDefault();
     const updates = {};
 
-    // Berechne Stunden: direkte Eingabe oder Prozent der Kapazität
-    let stundenWert = stunden;
-    if (stunden && String(stunden).includes("%")) {
-      const prozent = parseFloat(String(stunden).replace("%", "").trim());
-      if (!isNaN(prozent)) {
-        const person = personen.find(p => p.id === assignment.personId);
-        const kapazitaet = person?.wochenstunden || 31;
-        stundenWert = (kapazitaet * prozent) / 100;
-      }
-    }
+    const person = personen.find(p => p.id === assignment.personId);
+    const { value: stundenWert } = parseStundenInput(stunden, person?.wochenstunden);
 
     if (Number(stundenWert) !== (assignment.stunden || 0)) {
       updates.stunden = stundenWert;
