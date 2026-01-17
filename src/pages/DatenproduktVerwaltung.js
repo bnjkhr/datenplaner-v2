@@ -143,11 +143,25 @@ export const DatenproduktVerwaltung = ({ initialSelectedId, onSelectedClear }) =
       setAssignmentError("Bitte Person und Rolle auswählen.");
       return;
     }
+
+    // Berechne Stunden: direkte Eingabe oder Prozent der Kapazität
+    let stundenWert = assignStunden;
+    if (assignStunden && assignStunden.includes("%")) {
+      const prozent = parseFloat(assignStunden.replace("%", "").trim());
+      if (isNaN(prozent)) {
+        setAssignmentError("Ungültiger Prozentwert.");
+        return;
+      }
+      const person = personen.find(p => p.id === assignPersonId);
+      const kapazitaet = person?.wochenstunden || 31;
+      stundenWert = (kapazitaet * prozent) / 100;
+    }
+
     const resultId = await weisePersonDatenproduktRolleZu(
       assignPersonId,
       selectedProduktForAssignment.id,
       assignRolleId,
-      assignStunden
+      stundenWert
     );
     if (resultId) {
       setAssignPersonId("");
@@ -561,16 +575,13 @@ export const DatenproduktVerwaltung = ({ initialSelectedId, onSelectedClear }) =
                   </label>
                   <input
                     id="assign-stunden"
-                    type="number"
-                    min="0"
-                    max="80"
-                    step="0.5"
+                    type="text"
                     value={assignStunden}
                     onChange={(e) => setAssignStunden(e.target.value)}
-                    placeholder="z.B. 20"
+                    placeholder="z.B. 20 oder 50%"
                     className="mt-1 block w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   />
-                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Optional: Wochenstunden für diese Zuweisung</p>
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Optional: Stunden direkt oder Prozent der Kapazität (z.B. 50%)</p>
                 </div>
                 <div className="flex justify-end space-x-3 pt-3">
                   <button
@@ -603,6 +614,7 @@ export const DatenproduktVerwaltung = ({ initialSelectedId, onSelectedClear }) =
           <EditAssignmentModal
             assignment={editingAssignment}
             rollen={rollen}
+            personen={personen}
             onSave={handleUpdateAssignment}
             onClose={() => setEditingAssignment(null)}
             getPersonName={getPersonName}
@@ -1366,7 +1378,7 @@ const DatenproduktListe = ({
   );
 };
 
-const EditAssignmentModal = ({ assignment, rollen, onSave, onClose, getPersonName }) => {
+const EditAssignmentModal = ({ assignment, rollen, personen, onSave, onClose, getPersonName }) => {
   const [stunden, setStunden] = useState(assignment.stunden || 0);
   const [rolleId, setRolleId] = useState(assignment.rolleId || "");
 
@@ -1374,8 +1386,19 @@ const EditAssignmentModal = ({ assignment, rollen, onSave, onClose, getPersonNam
     e.preventDefault();
     const updates = {};
 
-    if (Number(stunden) !== (assignment.stunden || 0)) {
-      updates.stunden = stunden;
+    // Berechne Stunden: direkte Eingabe oder Prozent der Kapazität
+    let stundenWert = stunden;
+    if (stunden && String(stunden).includes("%")) {
+      const prozent = parseFloat(String(stunden).replace("%", "").trim());
+      if (!isNaN(prozent)) {
+        const person = personen.find(p => p.id === assignment.personId);
+        const kapazitaet = person?.wochenstunden || 31;
+        stundenWert = (kapazitaet * prozent) / 100;
+      }
+    }
+
+    if (Number(stundenWert) !== (assignment.stunden || 0)) {
+      updates.stunden = stundenWert;
     }
 
     if (rolleId !== assignment.rolleId) {
@@ -1430,15 +1453,13 @@ const EditAssignmentModal = ({ assignment, rollen, onSave, onClose, getPersonNam
             </label>
             <input
               id="edit-stunden"
-              type="number"
-              min="0"
-              max="80"
-              step="0.5"
+              type="text"
               value={stunden}
               onChange={(e) => setStunden(e.target.value)}
+              placeholder="z.B. 20 oder 50%"
               className="mt-1 block w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             />
-            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Optional: Wochenstunden für diese Zuweisung</p>
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Stunden direkt oder Prozent der Kapazität (z.B. 50%)</p>
           </div>
           <div className="flex justify-end space-x-3 pt-3">
             <button
